@@ -8,7 +8,6 @@ import { generateHRData, Employee } from "./data/mockData";
 import FilterBar, { FilterState } from "./components/FilterBar";
 import ExecutiveOverview from "./components/ExecutiveOverview";
 import OrganizationStructure from "./components/OrganizationStructure";
-import WorkforceRisk from "./components/WorkforceRisk";
 import TurnoverAnalysis from "./components/TurnoverAnalysis";
 import { LayoutDashboard, Network, ShieldAlert, LogOut, X, User, Phone, Mail, Award, MapPin, Briefcase, Sparkles } from "lucide-react";
 
@@ -29,7 +28,7 @@ export default function App() {
   });
 
   // Selected Tab State
-  const [activeTab, setActiveTab] = useState<"overview" | "org" | "risk" | "turnover">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "org" | "turnover">("overview");
 
   // Selected Employee Detail Modal/Sidebar State
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -252,18 +251,6 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveTab("risk")}
-            className={`flex items-center gap-2 px-6 py-3 text-xs font-medium rounded-xl transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === "risk"
-                ? "bg-white text-[#2F6FE4] shadow-sm font-medium border border-slate-100"
-                : "text-[#5B6B7F] hover:text-[#2F6FE4] hover:bg-white/50"
-            }`}
-          >
-            <ShieldAlert size={14} className={activeTab === "risk" ? "text-[#2F6FE4]" : "text-[#5B6B7F]"} /> 
-            <span>ความเสี่ยงบุคลากร (Workforce Risk)</span>
-          </button>
-
-          <button
             onClick={() => setActiveTab("turnover")}
             className={`flex items-center gap-2 px-6 py-3 text-xs font-medium rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "turnover"
@@ -288,10 +275,6 @@ export default function App() {
 
           {activeTab === "org" && (
             <OrganizationStructure employees={filteredEmployees} />
-          )}
-
-          {activeTab === "risk" && (
-            <WorkforceRisk employees={filteredEmployees} />
           )}
 
           {activeTab === "turnover" && (

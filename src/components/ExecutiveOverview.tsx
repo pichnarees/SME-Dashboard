@@ -37,7 +37,8 @@ import {
   YAxis, 
   Tooltip, 
   Legend,
-  CartesianGrid
+  CartesianGrid,
+  LabelList
 } from "recharts";
 
 interface ExecutiveOverviewProps {
@@ -538,7 +539,7 @@ export default function ExecutiveOverview({
               </div>
 
               <div className="mt-2.5">
-                <div className="text-xl font-light text-[#1F2D3D] leading-none tracking-normal">
+                <div className="text-xl font-medium text-[#1F2D3D] leading-none tracking-normal">
                   {kpi.value}
                 </div>
                 <div className="flex items-center gap-1.5 mt-2">
@@ -607,480 +608,206 @@ export default function ExecutiveOverview({
       {/* SECTION C & D: Grouped Charts for High-End Design */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Section C: Organization / Level / Management */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        {/* Card 1: Level Distribution */}
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
               <div>
-                <h3 className="text-sm font-medium text-[#1F2D3D]">โครงสร้างระดับและการกำกับดูแล (Section C: Hierarchy & Span of Control)</h3>
+                <h3 className="text-sm font-semibold text-[#1F2D3D]">จำนวนบุคลากรจำแนกตามระดับตำแหน่งงาน (Level Distribution)</h3>
                 <p className="text-[11px] text-[#5B6B7F] mt-0.5">การจัดโครงสร้างผู้บริหาร สัดส่วนพนักงานปฏิบัติงาน และระดับลำดับชั้นตำแหน่ง</p>
               </div>
             </div>
 
-            <div className="space-y-6">
-              {/* Chart 1: Level Distribution */}
-              <div className="border border-[#DCE6F2] rounded-xl p-4">
-                <span className="text-xs font-medium text-[#1F2D3D] block mb-0.5">จำนวนบุคลากรจำแนกตามระดับตำแหน่งงาน (Level Distribution)</span>
-                <p className="text-[10px] text-[#5B6B7F] mb-3">การกระจายตัวตั้งแต่พนักงานบริการชั้นต้นสู่ระดับฝ่ายอำนวยการจัดการสูงสุด</p>
-                <div className="h-56 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={levelDistribution}
-                      layout="vertical"
-                      margin={{ top: 5, right: 15, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid horizontal={false} stroke="#E2ECF5" strokeDasharray="3 3" />
-                      <XAxis type="number" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
-                      <YAxis dataKey="name" type="category" stroke="#1F2D3D" fontSize={9} tickLine={false} axisLine={false} width={110} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
-                        formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
-                      />
-                      <Bar dataKey="จำนวนคน" radius={[0, 4, 4, 0]} barSize={8}>
-                        {levelDistribution.map((entry, index) => {
-                          const isManager = entry.name.includes("13") || entry.name.includes("12") || entry.name.includes("11") || entry.name.includes("10");
-                          return <Cell key={`cell-${index}`} fill={isManager ? "#2F6FE4" : "#4C8DFF"} />;
-                        })}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Management Ratio & Span of Control Gauge */}
-              <div className="border border-[#DCE6F2] rounded-xl p-4 bg-[#F6F9FC]/40 space-y-4">
-                <div>
-                  <span className="text-xs font-medium text-[#1F2D3D] block mb-0.5">สัดส่วนผู้บริหารและอัตราการกำกับดูแล (Management & Span of Control)</span>
-                  <p className="text-[10px] text-[#5B6B7F]">ความเหมาะสมในการดูแลกำกับตนเองเทียบกับหัวหน้าทีมสูงสุด</p>
-                </div>
-
-                <div className="space-y-2.5">
-                  <div className="flex justify-between items-center text-xs font-normal">
-                    <span className="text-[#5B6B7F] flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#2F6FE4] inline-block" />
-                      ระดับจัดการ (Manager+) : {managementData.managers.toLocaleString()} คน
-                    </span>
-                    <span className="text-[#5B6B7F] flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#4C8DFF] inline-block" />
-                      กลุ่มพนักงาน (Staff) : {managementData.staff.toLocaleString()} คน
-                    </span>
-                  </div>
-
-                  {/* Horizontal Segmented Bar */}
-                  {(() => {
-                    const managerPct = totalCount > 0 ? (managementData.managers / totalCount) * 100 : 0;
-                    const staffPct = totalCount > 0 ? (managementData.staff / totalCount) * 100 : 0;
-                    return (
-                      <div>
-                        <div className="w-full bg-slate-200/60 h-2.5 rounded-full overflow-hidden flex">
-                          <div style={{ width: `${managerPct}%` }} className="bg-[#2F6FE4] h-full transition-all duration-500" />
-                          <div style={{ width: `${staffPct}%` }} className="bg-[#4C8DFF] h-full transition-all duration-500" />
-                        </div>
-                        <div className="flex justify-between text-[10px] text-[#5B6B7F] mt-1.5 font-light">
-                          <span>สัดส่วนจัดการ: {Math.round(managerPct)}%</span>
-                          <span>สัดส่วนทีมปฏิบัติ: {Math.round(staffPct)}%</span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Gauge visualization of Span of control ratio */}
-                <div className="bg-white border border-[#DCE6F2]/70 rounded-lg p-3 flex justify-between items-center gap-4">
-                  <div className="space-y-0.5">
-                    <span className="text-[11px] font-medium text-[#1F2D3D] block">Span of Control ปัจจุบัน</span>
-                    <p className="text-[10px] text-[#5B6B7F] font-light">ผู้บริหาร 1 ท่าน ต่อผู้ปฏิบัติงาน</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xl font-medium text-[#2F6FE4]">1 : {managementData.spanOfControl}</span>
-                    <span className="text-[9px] text-[#5B6B7F] block">ท่านในการดูแล</span>
-                  </div>
-                </div>
-              </div>
+            <div className="h-[340px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={levelDistribution}
+                  layout="vertical"
+                  margin={{ top: 5, right: 35, left: 10, bottom: 5 }}
+                >
+                  <CartesianGrid horizontal={false} stroke="#F1F5F9" strokeDasharray="3 3" />
+                  <XAxis type="number" stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke="#1F2D3D" fontSize={9} tickLine={false} axisLine={false} width={115} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                    formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                  />
+                  <Bar dataKey="จำนวนคน" radius={[0, 4, 4, 0]} barSize={14}>
+                    {levelDistribution.map((entry, index) => {
+                      const isManager = entry.name.includes("13") || entry.name.includes("12") || entry.name.includes("11") || entry.name.includes("10");
+                      return <Cell key={`cell-${index}`} fill={isManager ? "#2F6FE4" : "#4C8DFF"} />;
+                    })}
+                    <LabelList dataKey="จำนวนคน" position="right" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 600 }} offset={8} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
 
-        {/* Section D: Talent / Performance & Retirement Risk */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        {/* Card 2: Performance Distribution */}
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
+              <div className="w-1 h-5 bg-[#2DBE7F] rounded-full" />
               <div>
-                <h3 className="text-sm font-medium text-[#1F2D3D]">ศักยภาพและความเสี่ยงเกษียณ (Section D: Talent & Succession Forecast)</h3>
-                <p className="text-[11px] text-[#5B6B7F] mt-0.5">การวิเคราะห์กลุ่มประเมินผลงานควบคู่ไปกับการพยากรณ์ความเสี่ยงเกษียณอายุการทำงาน</p>
+                <h3 className="text-sm font-semibold text-[#1F2D3D]">การประเมินสัดส่วนผลงานพนักงาน (Performance Distribution)</h3>
+                <p className="text-[11px] text-[#5B6B7F] mt-0.5">สัดส่วนระหว่างกลุ่มดาวเด่นพนักงานศักยภาพสูง กลุ่มผลงานมาตรฐาน และผู้ที่ต้องการการเรียนรู้เสริมแรง</p>
               </div>
             </div>
 
-            <div className="space-y-6">
-              {/* Performance Distribution Donut Card */}
-              <div className="border border-[#DCE6F2] rounded-xl p-4">
-                <span className="text-xs font-medium text-[#1F2D3D] block mb-0.5">การประเมินสัดส่วนผลงานพนักงาน (Performance Distribution)</span>
-                <p className="text-[10px] text-[#5B6B7F] mb-3">เปรียบเทียบสัดส่วนระหว่างกลุ่มดาวเด่น กลุ่มงานปกติ และส่วนต้องการดูแลเสริมแรง</p>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-6 mt-4">
-                  <div className="h-32 w-32 shrink-0 relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={performanceDonutData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={36}
-                          outerRadius={50}
-                          paddingAngle={3}
-                          dataKey="value"
-                        >
-                          {performanceDonutData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
-                          formatter={(value) => [`${value} คน`, "จำนวน"]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="space-y-2 w-full">
-                    {performanceDonutData.map((p, idx) => {
-                      const pct = totalCount > 0 ? Math.round((p.value / totalCount) * 100) : 0;
-                      return (
-                        <div key={idx} className="flex justify-between items-center text-xs">
-                          <span className="flex items-center gap-2 text-[#5B6B7F]">
-                            <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: p.color }} />
-                            {p.name}
-                          </span>
-                          <span className="font-medium text-[#1F2D3D]">
-                            {p.value.toLocaleString()} คน ({pct}%)
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Retirement Horizon Forecast Chart */}
-              <div className="border border-[#DCE6F2] rounded-xl p-4">
-                <span className="text-xs font-medium text-[#1F2D3D] block mb-0.5">พยากรณ์ความเสี่ยงจากการเกษียณอายุสะสม (Retirement Forecast Horizon)</span>
-                <p className="text-[10px] text-[#5B6B7F] mb-3">จำนวนพนักงานที่มีอายุ 55-59 ปี ซึ่งเตรียมก้าวสู่การพ้นกำหนดวาระในอนาคตอันใกล้</p>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={retirementBarData}
-                      margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+            <div className="flex flex-col sm:flex-row items-center justify-around gap-6 h-[340px] px-2">
+              <div className="h-48 w-48 shrink-0 relative flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={performanceDonutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={58}
+                      outerRadius={78}
+                      paddingAngle={4}
+                      dataKey="value"
                     >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2ECF5" />
-                      <XAxis dataKey="name" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
-                        formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
-                      />
-                      <Bar dataKey="จำนวนพนักงาน" radius={[4, 4, 0, 0]} barSize={26}>
-                        {retirementBarData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                      {performanceDonutData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "12px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                      formatter={(value) => [`${value} คน`, "จำนวน"]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Text centered inside the Donut Chart */}
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-[#1F2D3D] tracking-tight leading-none">
+                    {totalCount.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-[#5B6B7F] font-semibold tracking-wider uppercase mt-1.5">พนักงานรวม</span>
                 </div>
               </div>
 
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION E: Executive Insights */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm" id="executive-insights-panel">
-        <div className="flex items-center gap-2.5 mb-2">
-          <div className="w-1 h-5 bg-[#2F6FE4] rounded-full animate-pulse" />
-          <div>
-            <h3 className="text-sm font-medium text-[#1F2D3D]">สรุปรายงานประเด็นพิจารณาผู้บริหาร (Executive Insights & Highlights)</h3>
-            <p className="text-[11px] text-[#5B6B7F] mt-0.5">สรุปผลพยากรณ์โครงสร้างบุคลากร ดัชนีความเสี่ยง โอกาสขับเคลื่อนยุทธศาสตร์ และคำแนะนำทางปฏิบัติการ</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5 pt-3">
-          {/* Column 1: Risks */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-[#F36B6B]/15">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F36B6B]" />
-              <h4 className="text-xs font-medium text-[#F36B6B]">ความเสี่ยงกำลังพล (Workforce Risks)</h4>
-            </div>
-            <div className="space-y-3.5">
-              {executiveHighlights.risks.length > 0 ? (
-                executiveHighlights.risks.map((item, idx) => (
-                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} flex gap-3.5 items-start hover:shadow-xs transition-all duration-300`}>
-                    <div className="p-1.5 rounded-lg bg-white shadow-3xs text-slate-700 mt-0.5 shrink-0">
-                      {item.icon}
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-medium text-[#1F2D3D] block">{item.title}</span>
-                      <p className="text-[10px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center text-[10px] text-[#5B6B7F]">
-                  ไม่พบตัวชี้วัดดัชนีความเสี่ยงสูงในข้อมูลปัจจุบัน
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Column 2: Opportunities */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-[#2DBE7F]/15">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#2DBE7F]" />
-              <h4 className="text-xs font-medium text-[#2DBE7F]">โอกาสในการพัฒนา (Opportunities)</h4>
-            </div>
-            <div className="space-y-3.5">
-              {executiveHighlights.opportunities.length > 0 ? (
-                executiveHighlights.opportunities.map((item, idx) => (
-                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} flex gap-3.5 items-start hover:shadow-xs transition-all duration-300`}>
-                    <div className="p-1.5 rounded-lg bg-white shadow-3xs text-slate-700 mt-0.5 shrink-0">
-                      {item.icon}
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-medium text-[#1F2D3D] block">{item.title}</span>
-                      <p className="text-[10px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center text-[10px] text-[#5B6B7F]">
-                  ไม่พบโอกาสพัฒนาโครงสร้างสำคัญเด่นชัดในเกณฑ์นี้
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Column 3: Recommendations */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-[#2F6FE4]/15">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#2F6FE4]" />
-              <h4 className="text-xs font-medium text-[#2F6FE4]">ข้อเสนอแนะเชิงยุทธศาสตร์ (Recommendations)</h4>
-            </div>
-            <div className="space-y-3.5">
-              {executiveHighlights.recommendations.length > 0 ? (
-                executiveHighlights.recommendations.map((item, idx) => (
-                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} flex gap-3.5 items-start hover:shadow-xs transition-all duration-300`}>
-                    <div className="p-1.5 rounded-lg bg-white shadow-3xs text-slate-700 mt-0.5 shrink-0">
-                      {item.icon}
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-medium text-[#1F2D3D] block">{item.title}</span>
-                      <p className="text-[10px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center text-[10px] text-[#5B6B7F]">
-                  คงการดำเนินนโยบายตามกรอบมาตรฐานงานปกติ
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION F: Employee Explorer Table */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl shadow-sm p-6" id="employee-explorer-section">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-[#DCE6F2]/40">
-          <div>
-            <span className="text-xs font-medium text-[#1F2D3D] block">ฐานรายชื่อผู้ปฏิบัติการเชิงลึก (Employee Explorer Table)</span>
-            <p className="text-[10px] text-[#5B6B7F] mt-0.5">ใช้ค้นหาและเจาะลึกข้อมูลรายบุคคล ตรวจเช็คเกณฑ์ประเมิน สายสังกัดภูมิภาค และรายละเอียดสัญญา</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Search Input Filter */}
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-[#5B6B7F]" size={13} />
-              <input
-                type="text"
-                placeholder="ค้นหารายชื่อ, รหัสพนักงาน, ตำแหน่ง..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8.5 pr-4 py-1.5 text-xs rounded-lg border border-[#DCE6F2] bg-white focus:outline-hidden text-[#1F2D3D] w-full sm:w-56 placeholder:text-[#5B6B7F]/60"
-              />
-            </div>
-
-            {/* Quick Filter Chips (Pill capsule format) */}
-            <div className="flex bg-[#F6F9FC] border border-[#DCE6F2] rounded-lg p-0.5 text-[11px]">
-              <button
-                onClick={() => setTypeFilter("All")}
-                className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${typeFilter === "All" ? "bg-white text-[#2F6FE4] font-medium shadow-3xs" : "text-[#5B6B7F] hover:text-[#1F2D3D]"}`}
-              >
-                ทั้งหมด
-              </button>
-              <button
-                onClick={() => setTypeFilter("พนักงานประจำ")}
-                className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${typeFilter === "พนักงานประจำ" ? "bg-white text-[#2F6FE4] font-medium shadow-3xs" : "text-[#5B6B7F] hover:text-[#1F2D3D]"}`}
-              >
-                ประจำ
-              </button>
-              <button
-                onClick={() => setTypeFilter("พนักงานสัญญาจ้าง")}
-                className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${typeFilter === "พนักงานสัญญาจ้าง" ? "bg-white text-[#2F6FE4] font-medium shadow-3xs" : "text-[#5B6B7F] hover:text-[#1F2D3D]"}`}
-              >
-                สัญญาจ้าง
-              </button>
-            </div>
-
-            {/* Performance Select Filter */}
-            <select
-              value={perfFilter}
-              onChange={(e) => setPerfFilter(e.target.value as any)}
-              className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#DCE6F2] bg-white focus:outline-hidden text-[#1F2D3D] cursor-pointer hover:border-[#2F6FE4]/40 transition-colors"
-            >
-              <option value="All">ทุกผลประเมิน</option>
-              <option value="High">High Performer</option>
-              <option value="Meets">Meets Standard</option>
-              <option value="Needs">Needs Support</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Beautiful Zebra/Subtle Table */}
-        <div className="overflow-x-auto border border-[#DCE6F2] rounded-xl">
-          <table className="w-full text-left border-collapse" id="active-employees-detail-table">
-            <thead>
-              <tr className="border-b border-[#DCE6F2] bg-[#F6F9FC] text-[10px] text-[#1F2D3D] font-medium uppercase tracking-wider">
-                <th className="py-3 px-4">รหัสพนักงาน</th>
-                <th className="py-3 px-4">ชื่อ - นามสกุล</th>
-                <th className="py-3 px-3 text-center">ประเภทสัญญา</th>
-                <th className="py-3 px-4">สายงานหลัก</th>
-                <th className="py-3 px-4">ฝ่ายงานสังกัด</th>
-                <th className="py-3 px-4">ตำแหน่งงาน</th>
-                <th className="py-3 px-3 text-center">ระดับ</th>
-                <th className="py-3 px-2 text-center">อายุตัว</th>
-                <th className="py-3 px-2 text-center">อายุงาน</th>
-                <th className="py-3 px-3 text-center">ผลงาน</th>
-                <th className="py-3 px-3 text-center">ทำเลสังกัด</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#DCE6F2]/60 text-[11px]">
-              {paginatedTableData.length > 0 ? (
-                paginatedTableData.map((emp, idx) => (
-                  <tr
-                    key={emp.empId}
-                    onClick={() => onSelectEmployee(emp)}
-                    className={`${idx % 2 === 1 ? "bg-[#F6F9FC]/30" : "bg-white"} hover:bg-[#2F6FE4]/5 cursor-pointer transition-colors`}
-                  >
-                    {/* ID */}
-                    <td className="py-3.5 px-4 font-medium text-[#2F6FE4] font-mono whitespace-nowrap">{emp.empId}</td>
-                    
-                    {/* Name */}
-                    <td className="py-3.5 px-4 text-[#1F2D3D] whitespace-nowrap">
-                      <div>
-                        <div className="font-medium text-[#1F2D3D]">{emp.name}</div>
-                        <div className="text-[10px] text-[#5B6B7F] font-light">{emp.nameEn}</div>
+              <div className="space-y-3 w-full max-w-[240px]">
+                {performanceDonutData.map((p, idx) => {
+                  const pct = totalCount > 0 ? Math.round((p.value / totalCount) * 100) : 0;
+                  return (
+                    <div key={idx} className="flex flex-col gap-2 p-3 rounded-xl border border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm transition-all duration-300">
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2 text-[11px] font-semibold text-[#344054]">
+                          <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: p.color }} />
+                          {p.name}
+                        </span>
+                        <span className="text-[11px] font-bold text-[#1F2D3D]">
+                          {pct}% <span className="text-[10px] font-medium text-[#5B6B7F] ml-1">({p.value.toLocaleString()} คน)</span>
+                        </span>
                       </div>
-                    </td>
-
-                    {/* Contract Badge - strictly no-wrap */}
-                    <td className="py-3.5 px-3 text-center">
-                      <span className={`inline-flex items-center justify-center whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-medium leading-none border ${
-                        emp.contractType === "พนักงานประจำ" 
-                          ? "bg-[#2F6FE4]/5 text-[#2F6FE4] border-[#2F6FE4]/15" 
-                          : "bg-purple-50 text-purple-700 border-purple-100"
-                      }`}>
-                        {emp.contractType}
-                      </span>
-                    </td>
-
-                    {/* Business Line */}
-                    <td className="py-3.5 px-4 text-[#5B6B7F] whitespace-nowrap font-light">{emp.businessLine}</td>
-                    
-                    {/* Group */}
-                    <td className="py-3.5 px-4 text-[#5B6B7F] whitespace-nowrap">{emp.group}</td>
-                    
-                    {/* Position */}
-                    <td className="py-3.5 px-4 text-[#1F2D3D] whitespace-nowrap font-normal">{emp.position}</td>
-                    
-                    {/* Level */}
-                    <td className="py-3.5 px-3 text-center font-medium text-[#1F2D3D] whitespace-nowrap">{emp.level}</td>
-                    
-                    {/* Age */}
-                    <td className="py-3.5 px-2 text-center text-[#1F2D3D] whitespace-nowrap font-light">{emp.age} ปี</td>
-                    
-                    {/* Tenure */}
-                    <td className="py-3.5 px-2 text-center text-[#1F2D3D] whitespace-nowrap font-medium">{emp.tenure} ปี</td>
-                    
-                    {/* Performance Badge - strictly no-wrap */}
-                    <td className="py-3.5 px-3 text-center">
-                      <span className={`inline-flex items-center justify-center whitespace-nowrap px-2 py-1 rounded-full text-[10px] font-medium leading-none border ${
-                        emp.performanceRating === "High Performer"
-                          ? "bg-[#2DBE7F]/5 text-[#2DBE7F] border-[#2DBE7F]/15"
-                          : emp.performanceRating === "Meets Standard"
-                          ? "bg-[#FFB547]/5 text-[#FFB547] border-[#FFB547]/15"
-                          : "bg-[#F36B6B]/5 text-[#F36B6B] border-[#F36B6B]/15"
-                      }`}>
-                        {emp.performanceRating === "High Performer" ? "High" : emp.performanceRating === "Meets Standard" ? "Meets" : "Needs Support"}
-                      </span>
-                    </td>
-
-                    {/* Location Badge - strictly no-wrap */}
-                    <td className="py-3.5 px-3 text-center">
-                      <span className={`inline-flex items-center justify-center whitespace-nowrap px-2 py-1 rounded text-[10px] font-medium leading-none border ${
-                        emp.hb === "Head Office" ? "bg-slate-50 text-slate-700 border-slate-200" : "bg-[#25B7D3]/5 text-[#25B7D3] border-[#25B7D3]/15"
-                      }`}>
-                        {emp.hb}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={11} className="py-10 text-center text-[#5B6B7F] font-medium bg-white">
-                    <span className="flex items-center justify-center gap-1.5"><Search size={14} className="text-[#5B6B7F]" /> ไม่พบข้อมูลพนักงานที่สอดคล้องตามเกณฑ์วิเคราะห์</span>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination controls */}
-        <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#DCE6F2]/40 text-[11px]">
-          <span className="text-[#5B6B7F] font-light">
-            แสดงผล {(filteredTableData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0)} ถึง {Math.min(currentPage * itemsPerPage, filteredTableData.length)} จาก {filteredTableData.length.toLocaleString()} รายชื่อ
-          </span>
-
-          <div className="flex gap-1.5">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-1.5 rounded-lg border border-[#DCE6F2] bg-white hover:bg-[#F6F9FC] disabled:opacity-40 transition-colors cursor-pointer flex items-center justify-center text-[#5B6B7F]"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <div className="flex gap-1 max-w-[150px] sm:max-w-xs overflow-x-auto items-center">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-2.5 py-1 text-[11px] rounded-md border transition-all cursor-pointer ${currentPage === page ? "bg-[#2F6FE4] text-white border-[#2F6FE4] font-medium" : "bg-white border-[#DCE6F2] text-[#5B6B7F] hover:bg-[#F6F9FC]"}`}
-                >
-                  {page}
-                </button>
-              ))}
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div style={{ width: `${pct}%`, backgroundColor: p.color }} className="h-full rounded-full transition-all duration-500" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="p-1.5 rounded-lg border border-[#DCE6F2] bg-white hover:bg-[#F6F9FC] disabled:opacity-40 transition-colors cursor-pointer flex items-center justify-center text-[#5B6B7F]"
-            >
-              <ChevronRight size={14} />
-            </button>
           </div>
         </div>
+
+        {/* Card 3: Management & Span of Control */}
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-1 h-5 bg-[#8B5CF6] rounded-full" />
+              <div>
+                <h3 className="text-sm font-semibold text-[#1F2D3D]">สัดส่วนผู้บริหารและอัตราการกำกับดูแล (Management & Span of Control)</h3>
+                <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์สัดส่วนระหว่างกลุ่มผู้บริหารและผู้ปฏิบัติงานเพื่อประเมินความลื่นไหลในองค์กร</p>
+              </div>
+            </div>
+
+            <div className="space-y-5 py-2">
+              <div className="flex justify-between items-center text-xs font-normal">
+                <span className="text-[#1F2D3D] font-medium flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#2F6FE4] inline-block" />
+                  ระดับจัดการ (Manager+) : <strong className="text-[#2F6FE4]">{managementData.managers.toLocaleString()}</strong> คน
+                </span>
+                <span className="text-[#1F2D3D] font-medium flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#4C8DFF] inline-block" />
+                  กลุ่มพนักงาน (Staff) : <strong className="text-[#4C8DFF]">{managementData.staff.toLocaleString()}</strong> คน
+                </span>
+              </div>
+
+              {/* Horizontal Segmented Bar */}
+              {(() => {
+                const managerPct = totalCount > 0 ? (managementData.managers / totalCount) * 100 : 0;
+                const staffPct = totalCount > 0 ? (managementData.staff / totalCount) * 100 : 0;
+                return (
+                  <div className="space-y-1.5">
+                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex border border-slate-200/50">
+                      <div style={{ width: `${managerPct}%` }} className="bg-[#2F6FE4] h-full transition-all duration-500" />
+                      <div style={{ width: `${staffPct}%` }} className="bg-[#4C8DFF] h-full transition-all duration-500" />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-[#5B6B7F] font-semibold">
+                      <span>สัดส่วนจัดการ: {Math.round(managerPct)}%</span>
+                      <span>สัดส่วนทีมปฏิบัติ: {Math.round(staffPct)}%</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Gauge visualization of Span of control ratio */}
+              <div className="bg-[#F8FAFC] border border-[#DCE6F2]/70 rounded-xl p-4 flex justify-between items-center gap-4 hover:border-[#2F6FE4]/30 transition-all">
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#1F2D3D] block">Span of Control (อัตราดูแลเฉลี่ย)</span>
+                  <p className="text-[10px] text-[#5B6B7F] font-light leading-relaxed">จำนวนผู้ปฏิบัติงานในความรับผิดชอบและดูแลโดยเฉลี่ยต่อผู้บริหาร 1 ท่าน</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-2xl font-bold text-[#2F6FE4] tracking-tight block">1 : {managementData.spanOfControl}</span>
+                  <span className="text-[9px] text-[#5B6B7F] font-medium block mt-0.5">ท่านต่อผู้บริหาร</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Retirement Horizon Forecast */}
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-1 h-5 bg-[#F36B6B] rounded-full" />
+              <div>
+                <h3 className="text-sm font-semibold text-[#1F2D3D]">พยากรณ์ความเสี่ยงจากการเกษียณอายุสะสม (Retirement Forecast Horizon)</h3>
+                <p className="text-[11px] text-[#5B6B7F] mt-0.5">จำนวนพนักงานช่วงอายุ 55-59 ปี ที่พร้อมเข้าเกณฑ์พ้นวาระการทำงานสะสมในอนาคตอันใกล้</p>
+              </div>
+            </div>
+
+            <div className="h-[180px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={retirementBarData}
+                  margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis dataKey="name" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                    formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                  />
+                  <Bar dataKey="จำนวนพนักงาน" radius={[4, 4, 0, 0]} barSize={32}>
+                    {retirementBarData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                    <LabelList dataKey="จำนวนพนักงาน" position="top" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 600 }} offset={6} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 }

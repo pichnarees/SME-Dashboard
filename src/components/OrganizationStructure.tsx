@@ -206,7 +206,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{stats.totalLines} สายงาน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalLines} สายงาน</span>
               <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">โครงสร้างฝ่ายบริหารหลัก</span>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{stats.totalGroups} กลุ่มปฏิบัติการ</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalGroups} กลุ่มปฏิบัติการ</span>
               <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">สนับสนุนและการตลาดหลัก</span>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{stats.totalDepartments} ส่วนงาน / ฝ่าย</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalDepartments} ส่วนงาน / ฝ่าย</span>
               <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">ฝ่ายปฏิบัติการส่วนย่อย</span>
             </div>
           </div>
@@ -248,7 +248,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{stats.totalZones} เขตพื้นที่บริการ</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalZones} เขตพื้นที่บริการ</span>
               <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">ครอบคลุมทั่วประเทศ</span>
             </div>
           </div>
@@ -333,7 +333,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
 
               {/* Dynamic Center Headcount Display */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-light text-[#1F2D3D] tracking-tight leading-none">
+                <span className="text-2xl font-medium text-[#1F2D3D] tracking-tight leading-none">
                   {totalCount.toLocaleString()}
                 </span>
                 <span className="text-[10px] text-[#5B6B7F] font-light mt-1">พนักงานทั้งหมด</span>

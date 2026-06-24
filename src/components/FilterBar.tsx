@@ -81,7 +81,6 @@ export default function FilterBar({
     if (filters.frontBack !== "All") list.push({ key: "frontBack", label: "ลักษณะสายงาน", value: filters.frontBack === "Front" ? "Front Office" : "Back Office" });
     if (filters.hb !== "All") list.push({ key: "hb", label: "ที่ตั้ง", value: filters.hb === "Head Office" ? "สำนักงานใหญ่" : "สาขาภูมิภาค" });
     if (filters.gender !== "All") list.push({ key: "gender", label: "เพศ", value: filters.gender });
-    if (filters.searchQuery) list.push({ key: "searchQuery", label: "ค้นหา", value: filters.searchQuery });
     return list;
   }, [filters]);
 
@@ -142,32 +141,8 @@ export default function FilterBar({
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
           
-          {/* Main Search Input */}
-          <div className="lg:col-span-5">
-            <label htmlFor="quick-search-input" className="block text-[11px] font-medium text-[#5B6B7F] mb-1.5">คำสำคัญค้นหาเชิงลึก (Search query)</label>
-            <div className="relative">
-              <input
-                type="text"
-                id="quick-search-input"
-                value={filters.searchQuery}
-                onChange={(e) => handleFilterChange("searchQuery", e.target.value)}
-                placeholder="ค้นหาด้วยชื่อพนักงาน, รหัสพนักงาน, หรือชื่อตำแหน่งหลัก..."
-                className="w-full pl-9.5 pr-8 py-2.5 text-xs rounded-xl border border-[#DCE6F2] bg-[#F8FAFC] focus:outline-hidden focus:border-[#2F6FE4] focus:bg-white focus:ring-2 focus:ring-[#2F6FE4]/8 transition-all text-[#1F2D3D] placeholder:text-[#5B6B7F]/60"
-              />
-              <Search size={14} className="absolute left-3.5 top-3 text-[#5B6B7F]" />
-              {filters.searchQuery && (
-                <button 
-                  onClick={() => handleFilterChange("searchQuery", "")}
-                  className="absolute right-2.5 top-2.5 p-1 hover:bg-[#DCE6F2]/40 rounded-full text-[#5B6B7F] transition-colors"
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Business Line Select */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-5">
             <label htmlFor="filter-business-line" className="block text-[11px] font-medium text-[#5B6B7F] mb-1.5">สายงานการบริหารหลัก (Business Line)</label>
             <select
               id="filter-business-line"
@@ -188,7 +163,7 @@ export default function FilterBar({
           </div>
 
           {/* Employee Level Select */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-4">
             <label htmlFor="filter-level" className="block text-[11px] font-medium text-[#5B6B7F] mb-1.5">ระดับตำแหน่งพนักงาน (Level)</label>
             <select
               id="filter-level"
@@ -209,7 +184,7 @@ export default function FilterBar({
           </div>
 
           {/* Toggle Advanced Filters Button */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <button
               type="button"
               onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}

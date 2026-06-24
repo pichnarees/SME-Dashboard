@@ -137,7 +137,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{(totalCount).toLocaleString()} คน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{(totalCount).toLocaleString()} คน</span>
               <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">ข้อมูลสะสม 6 เดือนล่าสุด</span>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{(stats.focus).toLocaleString()} คน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.focus).toLocaleString()} คน</span>
               <span className="text-[9px] text-[#F36B6B] mt-1 block font-medium">กลุ่มตำแหน่งวิกฤตสูญเสีย</span>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{(stats.nonFocus).toLocaleString()} คน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.nonFocus).toLocaleString()} คน</span>
               <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">กลุ่มงานทั่วไปและสนับสนุน</span>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{(stats.permanent).toLocaleString()} คน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.permanent).toLocaleString()} คน</span>
               <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">พนักงานในระบบสัญญาหลัก</span>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-light text-[#1F2D3D] block">{(stats.contract).toLocaleString()} คน</span>
+              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.contract).toLocaleString()} คน</span>
               <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">สัญญาชั่วคราว/เฉพาะโครงการ</span>
             </div>
           </div>
