@@ -24,7 +24,8 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Sparkle
+  Sparkle,
+  X
 } from "lucide-react";
 import { 
   ResponsiveContainer, 
@@ -153,6 +154,29 @@ export default function ExecutiveOverview({
     })).filter(item => item.จำนวนคน > 0);
   }, [employees]);
 
+  const levelChartData = useMemo(() => {
+    return levelDistribution.map(entry => {
+      let shortName = entry.name;
+      if (entry.name.includes("13")) shortName = "L13+";
+      else if (entry.name.includes("12")) shortName = "L12";
+      else if (entry.name.includes("11")) shortName = "L11";
+      else if (entry.name.includes("10")) shortName = "L10";
+      else if (entry.name.includes("9")) shortName = "L9";
+      else if (entry.name.includes("8 ผู้ช่วย")) shortName = "L8 (ผช.ผจก.)";
+      else if (entry.name.includes("8 เจ้าหน้าที่")) shortName = "L8 (จนท.อาวุโส)";
+      else if (entry.name.includes("7")) shortName = "L7";
+      else if (entry.name.includes("6")) shortName = "L6";
+      else if (entry.name.includes("5")) shortName = "L5";
+      else if (entry.name.includes("4")) shortName = "L4-";
+      
+      return {
+        ...entry,
+        shortName,
+        fullName: entry.name
+      };
+    });
+  }, [levelDistribution]);
+
   // Management vs Staff Snapshot
   const managementData = useMemo(() => {
     const managerCount = employees.filter(e => {
@@ -171,15 +195,24 @@ export default function ExecutiveOverview({
     };
   }, [employees, totalCount]);
 
+  // Management Tier breakdown
+  const managementTiers = useMemo(() => {
+    const high = employees.filter(e => e.level.includes("13") || e.level.includes("12") || e.level.includes("11")).length;
+    const mid = employees.filter(e => e.level.includes("10") || e.level.includes("9")).length;
+    const lead = employees.filter(e => e.level.includes("8") || e.level.includes("7")).length;
+    const staff = totalCount - (high + mid + lead);
+    return { high, mid, lead, staff };
+  }, [employees, totalCount]);
+
   // Performance distribution Donut Data
   const performanceDonutData = useMemo(() => {
     const high = employees.filter(e => e.performanceRating === "High Performer").length;
     const meets = employees.filter(e => e.performanceRating === "Meets Standard").length;
     const needs = employees.filter(e => e.performanceRating === "Needs Support").length;
     return [
-      { name: "High Performer", value: high, color: "#2DBE7F" },
-      { name: "Meets Standard", value: meets, color: "#FFB547" },
-      { name: "Needs Support", value: needs, color: "#F36B6B" }
+      { name: "กลุ่มดาวเด่น (High Performer)", value: high, color: "#2DBE7F" },
+      { name: "กลุ่มตามมาตรฐาน (Meets Standard)", value: meets, color: "#FFB547" },
+      { name: "กลุ่มต้องการพัฒนา (Needs Support)", value: needs, color: "#F36B6B" }
     ];
   }, [employees]);
 
@@ -609,8 +642,8 @@ export default function ExecutiveOverview({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Card 1: Level Distribution */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
-          <div>
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[440px]">
+          <div className="flex flex-col h-full justify-between">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
               <div>
@@ -619,35 +652,58 @@ export default function ExecutiveOverview({
               </div>
             </div>
 
-            <div className="h-[340px] w-full">
+            <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={levelDistribution}
+                  data={levelChartData}
                   layout="vertical"
-                  margin={{ top: 5, right: 35, left: 10, bottom: 5 }}
+                  margin={{ top: 5, right: 35, left: -10, bottom: 5 }}
                 >
                   <CartesianGrid horizontal={false} stroke="#F1F5F9" strokeDasharray="3 3" />
-                  <XAxis type="number" stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#1F2D3D" fontSize={9} tickLine={false} axisLine={false} width={115} />
+                  <XAxis type="number" stroke="#8898AA" fontSize={8} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="shortName" type="category" stroke="#344054" fontSize={9} fontWeight={600} tickLine={false} axisLine={false} width={85} />
                   <Tooltip
                     contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                    formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                    formatter={(value, name, props) => [`${value} คน`, props.payload.fullName]}
                   />
-                  <Bar dataKey="จำนวนคน" radius={[0, 4, 4, 0]} barSize={14}>
-                    {levelDistribution.map((entry, index) => {
-                      const isManager = entry.name.includes("13") || entry.name.includes("12") || entry.name.includes("11") || entry.name.includes("10");
-                      return <Cell key={`cell-${index}`} fill={isManager ? "#2F6FE4" : "#4C8DFF"} />;
+                  <Bar dataKey="จำนวนคน" radius={[0, 4, 4, 0]} barSize={12}>
+                    {levelChartData.map((entry, index) => {
+                      const name = entry.name;
+                      let color = "#94A3B8";
+                      if (name.includes("13") || name.includes("12") || name.includes("11")) color = "#2F6FE4";
+                      else if (name.includes("10") || name.includes("9")) color = "#3B82F6";
+                      else if (name.includes("8") || name.includes("7")) color = "#60A5FA";
+                      return <Cell key={`cell-${index}`} fill={color} />;
                     })}
-                    <LabelList dataKey="จำนวนคน" position="right" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 600 }} offset={8} />
+                    <LabelList dataKey="จำนวนคน" position="right" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 700 }} offset={8} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-4 pt-2 border-t border-slate-100 text-[9px] text-slate-500 font-bold">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2F6FE4]" />
+                <span>ระดับบริหารสูง (L11+)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" />
+                <span>ระดับบริหารกลาง (L9-10)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#60A5FA]" />
+                <span>หัวหน้าทีม/วิชาชีพ (L7-8)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#94A3B8]" />
+                <span>ระดับปฏิบัติการ (L6-)</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Card 2: Performance Distribution */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[440px]">
           <div>
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 bg-[#2DBE7F] rounded-full" />
@@ -715,97 +771,417 @@ export default function ExecutiveOverview({
         </div>
 
         {/* Card 3: Management & Span of Control */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
-          <div>
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[440px]">
+          <div className="flex flex-col h-full justify-between">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 bg-[#8B5CF6] rounded-full" />
               <div>
                 <h3 className="text-sm font-semibold text-[#1F2D3D]">สัดส่วนผู้บริหารและอัตราการกำกับดูแล (Management & Span of Control)</h3>
-                <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์สัดส่วนระหว่างกลุ่มผู้บริหารและผู้ปฏิบัติงานเพื่อประเมินความลื่นไหลในองค์กร</p>
+                <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์สัดส่วนกลุ่มผู้บริหาร หัวหน้างาน และผู้ปฏิบัติงาน เพื่อการกำกับดูแลที่สมดุล</p>
               </div>
             </div>
 
-            <div className="space-y-5 py-2">
-              <div className="flex justify-between items-center text-xs font-normal">
-                <span className="text-[#1F2D3D] font-medium flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#2F6FE4] inline-block" />
-                  ระดับจัดการ (Manager+) : <strong className="text-[#2F6FE4]">{managementData.managers.toLocaleString()}</strong> คน
-                </span>
-                <span className="text-[#1F2D3D] font-medium flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#4C8DFF] inline-block" />
-                  กลุ่มพนักงาน (Staff) : <strong className="text-[#4C8DFF]">{managementData.staff.toLocaleString()}</strong> คน
-                </span>
+            <div className="space-y-4">
+              {/* Row 1: Span of Control & Ratio summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-[#F8FAFC] border border-violet-100 rounded-xl p-3 flex items-center justify-between gap-3 hover:border-violet-200 transition-all">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Span of Control</span>
+                    <span className="text-lg font-black text-[#8B5CF6] block mt-1">1 : {managementData.spanOfControl}</span>
+                    <span className="text-[9px] text-[#5B6B7F] font-medium block mt-0.5">สัดส่วนดูแล (หัวหน้าต่อพนักงาน)</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-purple-50 flex items-center justify-center text-[#8B5CF6] text-xs font-bold shrink-0">
+                    1:{Math.round(parseFloat(managementData.spanOfControl))}
+                  </div>
+                </div>
+
+                <div className="bg-[#F8FAFC] border border-blue-100 rounded-xl p-3 flex flex-col justify-between hover:border-blue-200 transition-all">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">สัดส่วนหัวหน้า : ทีม</span>
+                    <span className="text-[9px] font-bold text-slate-500">รวม {totalCount.toLocaleString()} คน</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1.5">
+                    <span className="text-[11px] font-bold text-[#2F6FE4]">{managementData.managers.toLocaleString()} <span className="font-normal text-slate-400">ผู้ดูแล</span></span>
+                    <span className="text-[11px] font-bold text-[#4C8DFF]">{managementData.staff.toLocaleString()} <span className="font-normal text-slate-400">ผู้ปฏิบัติ</span></span>
+                  </div>
+                </div>
               </div>
 
-              {/* Horizontal Segmented Bar */}
-              {(() => {
-                const managerPct = totalCount > 0 ? (managementData.managers / totalCount) * 100 : 0;
-                const staffPct = totalCount > 0 ? (managementData.staff / totalCount) * 100 : 0;
-                return (
-                  <div className="space-y-1.5">
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex border border-slate-200/50">
-                      <div style={{ width: `${managerPct}%` }} className="bg-[#2F6FE4] h-full transition-all duration-500" />
-                      <div style={{ width: `${staffPct}%` }} className="bg-[#4C8DFF] h-full transition-all duration-500" />
-                    </div>
-                    <div className="flex justify-between text-[10px] text-[#5B6B7F] font-semibold">
-                      <span>สัดส่วนจัดการ: {Math.round(managerPct)}%</span>
-                      <span>สัดส่วนทีมปฏิบัติ: {Math.round(staffPct)}%</span>
+              {/* Segmented bar */}
+              <div className="space-y-1">
+                {(() => {
+                  const managerPct = totalCount > 0 ? (managementData.managers / totalCount) * 100 : 0;
+                  const staffPct = totalCount > 0 ? (managementData.staff / totalCount) * 100 : 0;
+                  return (
+                    <>
+                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex border border-slate-200/50">
+                        <div style={{ width: `${managerPct}%` }} className="bg-[#2F6FE4] h-full transition-all duration-500" />
+                        <div style={{ width: `${staffPct}%` }} className="bg-[#4C8DFF] h-full transition-all duration-500" />
+                      </div>
+                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                        <span>สัดส่วนจัดการ: {Math.round(managerPct)}%</span>
+                        <span>ทีมปฏิบัติการ: {Math.round(staffPct)}%</span>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Row 3: 4 Tiers in 2x2 grid */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
+                {[
+                  { name: "บริหารระดับสูง (L11-13)", count: managementTiers.high, pct: totalCount > 0 ? Math.round((managementTiers.high / totalCount) * 100) : 0, color: "#2F6FE4", bg: "bg-blue-50/40 border-blue-100/60" },
+                  { name: "บริหารระดับกลาง (L9-10)", count: managementTiers.mid, pct: totalCount > 0 ? Math.round((managementTiers.mid / totalCount) * 100) : 0, color: "#3B82F6", bg: "bg-indigo-50/40 border-indigo-100/60" },
+                  { name: "หัวหน้างาน/วิชาชีพ (L7-8)", count: managementTiers.lead, pct: totalCount > 0 ? Math.round((managementTiers.lead / totalCount) * 100) : 0, color: "#8B5CF6", bg: "bg-purple-50/40 border-purple-100/60" },
+                  { name: "ผู้ปฏิบัติการ (L6 ลงไป)", count: managementTiers.staff, pct: totalCount > 0 ? Math.round((managementTiers.staff / totalCount) * 100) : 0, color: "#94A3B8", bg: "bg-slate-50 border-slate-100" }
+                ].map((tier, idx) => (
+                  <div key={idx} className={`p-2.5 rounded-xl border ${tier.bg} flex flex-col justify-between hover:shadow-2xs transition-all duration-300`}>
+                    <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1 leading-none">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tier.color }} />
+                      {tier.name}
+                    </span>
+                    <div className="flex justify-between items-baseline mt-1.5">
+                      <span className="text-xs font-black text-slate-800">{tier.count.toLocaleString()} <span className="text-[9px] font-normal text-slate-400">คน</span></span>
+                      <span className="text-[10px] font-bold text-slate-500">{tier.pct}%</span>
                     </div>
                   </div>
-                );
-              })()}
-
-              {/* Gauge visualization of Span of control ratio */}
-              <div className="bg-[#F8FAFC] border border-[#DCE6F2]/70 rounded-xl p-4 flex justify-between items-center gap-4 hover:border-[#2F6FE4]/30 transition-all">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-[#1F2D3D] block">Span of Control (อัตราดูแลเฉลี่ย)</span>
-                  <p className="text-[10px] text-[#5B6B7F] font-light leading-relaxed">จำนวนผู้ปฏิบัติงานในความรับผิดชอบและดูแลโดยเฉลี่ยต่อผู้บริหาร 1 ท่าน</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="text-2xl font-bold text-[#2F6FE4] tracking-tight block">1 : {managementData.spanOfControl}</span>
-                  <span className="text-[9px] text-[#5B6B7F] font-medium block mt-0.5">ท่านต่อผู้บริหาร</span>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
         {/* Card 4: Retirement Horizon Forecast */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
-          <div>
+        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[440px]">
+          <div className="flex flex-col h-full justify-between">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 bg-[#F36B6B] rounded-full" />
               <div>
-                <h3 className="text-sm font-semibold text-[#1F2D3D]">พยากรณ์ความเสี่ยงจากการเกษียณอายุสะสม (Retirement Forecast Horizon)</h3>
-                <p className="text-[11px] text-[#5B6B7F] mt-0.5">จำนวนพนักงานช่วงอายุ 55-59 ปี ที่พร้อมเข้าเกณฑ์พ้นวาระการทำงานสะสมในอนาคตอันใกล้</p>
+                <h3 className="text-sm font-semibold text-[#1F2D3D]">พยากรณ์ความเสี่ยงการเกษียณอายุ (Retirement Horizon Forecast)</h3>
+                <p className="text-[11px] text-[#5B6B7F] mt-0.5">พยากรณ์พนักงานอายุ 55-59 ปี ที่พร้อมพ้นวาระการทำงานสะสมใน 1, 3 และ 5 ปีข้างหน้า</p>
               </div>
             </div>
 
-            <div className="h-[180px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={retirementBarData}
-                  margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                  <XAxis dataKey="name" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                    formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
-                  />
-                  <Bar dataKey="จำนวนพนักงาน" radius={[4, 4, 0, 0]} barSize={32}>
-                    {retirementBarData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                    <LabelList dataKey="จำนวนพนักงาน" position="top" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 600 }} offset={6} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="space-y-4">
+              {/* Row 1: 3-column risk metrics */}
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { name: "วิกฤต (ใน 1 ปี / อายุ 59)", count: retirementForecast.r1, color: "#F36B6B", bg: "bg-red-50/40 border-red-100" },
+                  { name: "เฝ้าระวัง (ใน 3 ปี / อายุ 57+)", count: retirementForecast.r3, color: "#FFB547", bg: "bg-amber-50/40 border-amber-100" },
+                  { name: "เตรียมการ (ใน 5 ปี / อายุ 55+)", count: retirementForecast.r5, color: "#4C8DFF", bg: "bg-blue-50/40 border-blue-100" }
+                ].map((risk, idx) => (
+                  <div key={idx} className={`p-2 rounded-xl border ${risk.bg} text-center flex flex-col justify-between hover:shadow-2xs transition-all`}>
+                    <span className="text-[9px] font-bold text-slate-500 block leading-tight">{risk.name}</span>
+                    <span className="text-sm font-black text-slate-800 mt-1 block">
+                      {risk.count.toLocaleString()} <span className="text-[9px] font-normal text-slate-400">คน</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Row 2: Wide Bar Chart */}
+              <div className="h-[145px] w-full mt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={retirementBarData}
+                    margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                    <XAxis dataKey="name" stroke="#8898AA" fontSize={8} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#8898AA" fontSize={8} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                      formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                    />
+                    <Bar dataKey="จำนวนพนักงาน" radius={[4, 4, 0, 0]} barSize={32}>
+                      {retirementBarData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                      <LabelList dataKey="จำนวนพนักงาน" position="top" style={{ fill: "#1F2D3D", fontSize: 9, fontWeight: 700 }} offset={6} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Row 3: Strategic Advice Box */}
+              <div className="bg-amber-50/40 border border-amber-100/60 rounded-xl p-2.5 flex items-start gap-2.5">
+                <span className="text-xs mt-0.5 shrink-0">💡</span>
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-medium text-amber-800 block">ข้อเสนอเชิงยุทธศาสตร์:</span>
+                  <p className="text-[9.5px] text-[#5B6B7F] leading-relaxed">ควรทำโปรแกรมส่งต่อวิชาชีพและ Succession Plan เร่งด่วนสำหรับบุคลากรที่จะเกษียณใน 1-3 ปีแรกเพื่อลดความเสี่ยงการสูญเสียองค์ความรู้สำคัญ</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+      </div>
+
+      {/* SECTION C: Executive Insights */}
+      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-[#DCE6F2]/50">
+          <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
+          <div>
+            <h3 className="text-sm font-medium text-[#1F2D3D]">ข้อมูลเชิงลึกและข้อเสนอแนะผู้บริหาร (Section C: Executive Insights & Recommendations)</h3>
+            <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์หาจุดสังเกต ประเมินความเสี่ยงและโอกาสเชิงยุทธศาสตร์เพื่อประกอบการตัดสินใจของฝ่ายบริหาร</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Column 1: Risks */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#DCE6F2]/30">
+              <span className="p-1 bg-[#F36B6B]/10 text-[#F36B6B] rounded-lg">
+                <ShieldAlert size={14} />
+              </span>
+              <span className="text-xs font-medium text-[#1F2D3D]">ความเสี่ยงที่ต้องเฝ้าระวัง (Risks & Flags)</span>
+            </div>
+            {executiveHighlights.risks.length === 0 ? (
+              <p className="text-xs text-[#5B6B7F] font-light italic">ไม่พบประเด็นความเสี่ยงรุนแรงภายใต้เงื่อนไขปัจจุบัน</p>
+            ) : (
+              <div className="space-y-3">
+                {executiveHighlights.risks.map((item, idx) => (
+                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} space-y-2`}>
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0">{item.icon}</span>
+                      <span className={`text-xs font-medium ${item.labelColor}`}>{item.title}</span>
+                    </div>
+                    <p className="text-[11px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Column 2: Opportunities */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#DCE6F2]/30">
+              <span className="p-1 bg-[#2DBE7F]/10 text-[#2DBE7F] rounded-lg">
+                <Award size={14} />
+              </span>
+              <span className="text-xs font-medium text-[#1F2D3D]">โอกาสการพัฒนาองค์กร (Opportunities)</span>
+            </div>
+            {executiveHighlights.opportunities.length === 0 ? (
+              <p className="text-xs text-[#5B6B7F] font-light italic">ไม่พบโอกาสเพิ่มเติมในกลุ่มข้อมูลปัจจุบัน</p>
+            ) : (
+              <div className="space-y-3">
+                {executiveHighlights.opportunities.map((item, idx) => (
+                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} space-y-2`}>
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0">{item.icon}</span>
+                      <span className={`text-xs font-medium ${item.labelColor}`}>{item.title}</span>
+                    </div>
+                    <p className="text-[11px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Column 3: Recommendations */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#DCE6F2]/30">
+              <span className="p-1 bg-[#2F6FE4]/10 text-[#2F6FE4] rounded-lg">
+                <Calendar size={14} />
+              </span>
+              <span className="text-xs font-medium text-[#1F2D3D]">ข้อเสนอเชิงยุทธศาสตร์ (Strategic Actions)</span>
+            </div>
+            {executiveHighlights.recommendations.length === 0 ? (
+              <p className="text-xs text-[#5B6B7F] font-light italic">ไม่พบข้อเสนอแนะเพิ่มเติมในกลุ่มข้อมูลปัจจุบัน</p>
+            ) : (
+              <div className="space-y-3">
+                {executiveHighlights.recommendations.map((item, idx) => (
+                  <div key={idx} className={`p-4 rounded-xl border ${item.bg} space-y-2`}>
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0">{item.icon}</span>
+                      <span className={`text-xs font-medium ${item.labelColor}`}>{item.title}</span>
+                    </div>
+                    <p className="text-[11px] text-[#5B6B7F] leading-relaxed font-light">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION D: Detailed Explorer / Table */}
+      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-3 border-b border-[#DCE6F2]/50">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-[#2F6FE4]/8 text-[#2F6FE4] rounded-xl shrink-0">
+              <Search size={16} />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-[#1F2D3D]">ทำเนียบรายชื่อและตัวค้นหาข้อมูลบุคลากร (Section D: Detailed Employee Explorer)</h3>
+              <p className="text-[11px] text-[#5B6B7F] mt-0.5">ค้นหาข้อมูลรายบุคคล ตรวจสอบรายชื่อตามประเภทสัญญา และระดับผลประเมินผลงานสำหรับผู้บริหาร</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Inline Filters bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <div className="relative w-full md:max-w-xs">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B7F]" />
+            <input
+              type="text"
+              placeholder="ค้นหารหัส, ชื่อ, หรือตำแหน่ง..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#DCE6F2] bg-[#F8FAFC] focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/8 focus:border-[#2F6FE4]/30 transition-all text-[#1F2D3D]"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-[#5B6B7F]"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-medium text-[#5B6B7F]">ประเภทสัญญา:</span>
+              <div className="flex bg-[#F4F7FC] p-0.5 rounded-lg border border-slate-200/50">
+                {(["All", "พนักงานประจำ", "พนักงานสัญญาจ้าง"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeFilter(t)}
+                    className={`px-2.5 py-1 text-[10px] font-medium rounded-md transition-all cursor-pointer ${
+                      typeFilter === t
+                        ? "bg-white text-[#2F6FE4] shadow-xs border border-slate-200/20"
+                        : "text-[#5B6B7F] hover:text-[#2F6FE4]"
+                    }`}
+                  >
+                    {t === "All" ? "ทั้งหมด" : t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-medium text-[#5B6B7F]">ผลงาน:</span>
+              <div className="flex bg-[#F4F7FC] p-0.5 rounded-lg border border-slate-200/50">
+                {(["All", "High", "Meets", "Needs"] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPerfFilter(p)}
+                    className={`px-2.5 py-1 text-[10px] font-medium rounded-md transition-all cursor-pointer ${
+                      perfFilter === p
+                        ? "bg-white text-[#2F6FE4] shadow-xs border border-slate-200/20"
+                        : "text-[#5B6B7F] hover:text-[#2F6FE4]"
+                    }`}
+                  >
+                    {p === "All" ? "ทั้งหมด" : p === "High" ? "High" : p === "Meets" ? "Meets" : "Needs"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Table itself */}
+        <div className="border border-[#DCE6F2] rounded-xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-[#DCE6F2] text-[10px] text-[#1F2D3D] font-medium uppercase tracking-wider">
+                  <th className="py-3 px-4">รหัสพนักงาน</th>
+                  <th className="py-3 px-4">ชื่อ-นามสกุล</th>
+                  <th className="py-3 px-4">ตำแหน่ง / ระดับ</th>
+                  <th className="py-3 px-4">ประเภทสัญญา</th>
+                  <th className="py-3 px-4">ผลประเมิน</th>
+                  <th className="py-3 px-4 text-center">อายุงาน / อายุตัว</th>
+                  <th className="py-3 px-4 text-center">ดำเนินการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#DCE6F2]/50 bg-white">
+                {paginatedTableData.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-10 text-center text-xs text-[#5B6B7F] italic">
+                      ไม่พบข้อมูลตรงตามเงื่อนไขที่กำหนด
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedTableData.map((emp) => (
+                    <tr key={emp.empId} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B6B7F]">{emp.empId}</td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-xs font-medium text-[#1F2D3D]">{emp.name}</div>
+                        <div className="text-[10px] text-[#5B6B7F] font-light mt-0.5">{emp.nameEn}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-xs text-[#1F2D3D] truncate max-w-[200px]">{emp.position}</div>
+                        <div className="text-[10px] text-[#5B6B7F] font-medium mt-0.5">{emp.level}</div>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#5B6B7F]">{emp.contractType}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium leading-none ${
+                            emp.performanceRating === "High Performer"
+                              ? "bg-[#2DBE7F]/10 text-[#2DBE7F]"
+                              : emp.performanceRating === "Meets Standard"
+                              ? "bg-[#FFB547]/10 text-[#FFB547]"
+                              : "bg-[#F36B6B]/10 text-[#F36B6B]"
+                          }`}
+                        >
+                          {emp.performanceRating === "High Performer"
+                            ? "High Performer"
+                            : emp.performanceRating === "Meets Standard"
+                            ? "Meets Standard"
+                            : "Needs Support"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center text-xs text-[#5B6B7F]">
+                        {emp.tenure} ปี <span className="text-[10px] text-slate-300 mx-1">/</span> {emp.age} ปี
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <button
+                          onClick={() => onSelectEmployee(emp)}
+                          className="px-2.5 py-1 text-[10px] font-medium text-[#2F6FE4] bg-[#2F6FE4]/5 hover:bg-[#2F6FE4]/10 rounded border border-[#2F6FE4]/15 transition-all cursor-pointer"
+                        >
+                          ตรวจสอบ
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Footer */}
+          {filteredTableData.length > 0 && (
+            <div className="bg-[#F8FAFC] px-4 py-3 border-t border-[#DCE6F2] flex items-center justify-between text-xs text-[#5B6B7F] flex-wrap gap-2">
+              <div>
+                แสดงผล <span className="font-medium text-[#1F2D3D]">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredTableData.length)}</span> จากทั้งหมด <span className="font-medium text-[#1F2D3D]">{filteredTableData.length.toLocaleString()} คน</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                
+                <span className="px-2.5 text-[11px]">
+                  หน้า {currentPage} / {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
     </div>

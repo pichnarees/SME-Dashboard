@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Resignation } from "../data/mockData";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, BarChart, Bar, Cell, CartesianGrid } from "recharts";
 import { 
@@ -18,7 +18,11 @@ import {
   Building,
   MapPin,
   Flame,
-  ArrowRight
+  ArrowRight,
+  Search,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 interface TurnoverAnalysisProps {
@@ -27,7 +31,38 @@ interface TurnoverAnalysisProps {
 }
 
 export default function TurnoverAnalysis({ resignations, totalActiveCount }: TurnoverAnalysisProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"All" | "Focus resignation" | "Non-Focus resignation">("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const totalCount = resignations.length;
+
+  const filteredTableData = useMemo(() => {
+    return resignations.filter(r => {
+      const matchesSearch = searchTerm === "" ||
+        r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.empId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.resignReason.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesType = typeFilter === "All" || r.resignType === typeFilter;
+
+      return matchesSearch && matchesType;
+    });
+  }, [resignations, searchTerm, typeFilter]);
+
+  const paginatedResignations = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredTableData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredTableData, currentPage]);
+
+  const totalPages = Math.ceil(filteredTableData.length / itemsPerPage) || 1;
+
+  // Reset pagination on search or filter change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, typeFilter]);
 
   // Section 1: KPI Cards
   const stats = useMemo(() => {
@@ -428,6 +463,149 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
           <span className="font-medium text-[#2F6FE4]">จัดทำโดย ทีมวิเคราะห์ข้อมูลทรัพยากรมนุษย์ (HR Analytics - SME D Bank)</span>
         </div>
 
+      </div>
+
+      {/* SECTION 4: Detailed Explorer / Table */}
+      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-3 border-b border-[#DCE6F2]/50">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-[#2F6FE4]/8 text-[#2F6FE4] rounded-xl shrink-0">
+              <Search size={16} />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-[#1F2D3D]">ทำเนียบประวัติและสืบค้นการลาออก (Section D: Detailed Resignation Explorer)</h3>
+              <p className="text-[11px] text-[#5B6B7F] mt-0.5">ค้นหาข้อมูลรายชื่อพนักงานที่ลาออก ตรวจสอบสังกัด วันที่พ้นสภาพ และเหตุผลสำคัญสำหรับประกอบการวางนโยบาย</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Filters */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <div className="relative w-full md:max-w-xs">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5B6B7F]" />
+            <input
+              type="text"
+              placeholder="ค้นหารหัส, ชื่อ, หรือสาเหตุ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#DCE6F2] bg-[#F8FAFC] focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/8 focus:border-[#2F6FE4]/30 transition-all text-[#1F2D3D]"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-[#5B6B7F]"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-medium text-[#5B6B7F]">ประเภทการลาออก:</span>
+            <div className="flex bg-[#F4F7FC] p-0.5 rounded-lg border border-slate-200/50">
+              {(["All", "Focus resignation", "Non-Focus resignation"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTypeFilter(t)}
+                  className={`px-2.5 py-1 text-[10px] font-medium rounded-md transition-all cursor-pointer ${
+                    typeFilter === t
+                      ? "bg-white text-[#2F6FE4] shadow-xs border border-slate-200/20"
+                      : "text-[#5B6B7F] hover:text-[#2F6FE4]"
+                  }`}
+                >
+                  {t === "All" ? "ทั้งหมด" : t === "Focus resignation" ? "Focus" : "Non-Focus"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Table itself */}
+        <div className="border border-[#DCE6F2] rounded-xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-[#DCE6F2] text-[10px] text-[#1F2D3D] font-medium uppercase tracking-wider">
+                  <th className="py-3 px-4">รหัสพนักงาน</th>
+                  <th className="py-3 px-4">ชื่อ-นามสกุล</th>
+                  <th className="py-3 px-4">ตำแหน่ง / ระดับ</th>
+                  <th className="py-3 px-4">ส่วนงาน / สังกัดฝ่าย</th>
+                  <th className="py-3 px-4">วันที่ลาออก</th>
+                  <th className="py-3 px-4">เหตุผลในการลาออก</th>
+                  <th className="py-3 px-4">สถานะลาออก</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#DCE6F2]/50 bg-white">
+                {paginatedResignations.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-10 text-center text-xs text-[#5B6B7F] italic">
+                      ไม่พบข้อมูลตรงตามเงื่อนไขที่กำหนด
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedResignations.map((res) => (
+                    <tr key={res.empId} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B6B7F]">{res.empId}</td>
+                      <td className="py-3.5 px-4 text-xs font-medium text-[#1F2D3D]">{res.name}</td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-xs text-[#1F2D3D] truncate max-w-[180px]">{res.position}</div>
+                        <div className="text-[10px] text-[#5B6B7F] font-medium mt-0.5">{res.level}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-xs text-[#1F2D3D] truncate max-w-[180px]">{res.department}</div>
+                        <div className="text-[10px] text-[#5B6B7F] font-light mt-0.5">{res.division}</div>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#5B6B7F] font-mono">{res.resignDate}</td>
+                      <td className="py-3.5 px-4 text-xs text-[#1F2D3D]">{res.resignReason}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium leading-none ${
+                            res.resignType === "Focus resignation"
+                              ? "bg-[#F36B6B]/10 text-[#F36B6B]"
+                              : "bg-[#94A3B8]/10 text-[#5B6B7F]"
+                          }`}
+                        >
+                          {res.resignType === "Focus resignation" ? "Focus" : "Non-Focus"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Footer */}
+          {filteredTableData.length > 0 && (
+            <div className="bg-[#F8FAFC] px-4 py-3 border-t border-[#DCE6F2] flex items-center justify-between text-xs text-[#5B6B7F] flex-wrap gap-2">
+              <div>
+                แสดงผล <span className="font-medium text-[#1F2D3D]">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredTableData.length)}</span> จากทั้งหมด <span className="font-medium text-[#1F2D3D]">{filteredTableData.length.toLocaleString()} คน</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                
+                <span className="px-2.5 text-[11px]">
+                  หน้า {currentPage} / {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
     </div>
