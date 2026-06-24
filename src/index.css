@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* SME D Bank CI Theme Palette */
+  --color-brand-primary: #2F6FE4;
+  --color-brand-secondary: #4C8DFF;
+  --color-brand-cyan: #25B7D3;
+  --color-brand-accent: #2DBE7F;
+  --color-bg-light: #F6F9FC;
+  --color-card-bg: #FFFFFF;
+  --color-border-light: #DCE6F2;
+  --color-text-primary: #1F2D3D;
+  --color-text-secondary: #5B6B7F;
+  --color-text-table-header: #1F2D3D;
+  --color-warning-accent: #FFB547;
+  --color-critical-accent: #F36B6B;
+  --color-success-accent: #2DBE7F;
+}
+
+/* Custom styles and scrollbar styling for executive-level finish */
+html, body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-light);
+  color: var(--color-text-primary);
+  letter-spacing: 0px !important;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  letter-spacing: 0px !important;
+}
+
+/* Enforce font weight rules globally to prevent unauthorized heavy weights */
+b, strong, .font-bold, .font-semibold, .font-extrabold {
+  font-weight: 500 !important; /* Limit maximum weight to Medium (500) */
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+

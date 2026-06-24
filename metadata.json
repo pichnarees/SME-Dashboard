@@ -1,0 +1,8 @@
+{
+  "name": "Remix: SME D Bank Executive HR Dashboard",
+  "description": "Executive dashboard for SME D Bank for viewing workforce composition, risk management, and resignation trends.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
