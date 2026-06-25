@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Employee } from "../data/mockData";
+import { FilterState } from "./FilterBar";
 import { 
   Users, 
   ShieldAlert, 
@@ -46,12 +47,16 @@ interface ExecutiveOverviewProps {
   employees: Employee[];
   totalResignationsCount: number;
   onSelectEmployee: (emp: Employee) => void;
+  activeFilters: FilterState;
+  onSetFilters: React.Dispatch<React.SetStateAction<FilterState>>;
 }
 
 export default function ExecutiveOverview({
   employees,
   totalResignationsCount,
   onSelectEmployee,
+  activeFilters,
+  onSetFilters,
 }: ExecutiveOverviewProps) {
   // Pagination & Search States inside the table
   const [searchTerm, setSearchTerm] = useState("");
@@ -452,6 +457,33 @@ export default function ExecutiveOverview({
     );
   };
 
+  const kpiClicks: Record<string, () => void> = {
+    "พนักงานประจำ": () => {
+      onSetFilters(prev => ({
+        ...prev,
+        contractType: prev.contractType === "พนักงานประจำ" ? "All" : "พนักงานประจำ"
+      }));
+    },
+    "พนักงานสัญญาจ้าง": () => {
+      onSetFilters(prev => ({
+        ...prev,
+        contractType: prev.contractType === "พนักงานสัญญาจ้าง" ? "All" : "พนักงานสัญญาจ้าง"
+      }));
+    },
+    "กำลังกลุ่มเตรียมเกษียณ": () => {
+      onSetFilters(prev => ({
+        ...prev,
+        retirementRisk: prev.retirementRisk === "r5" ? "All" : "r5"
+      }));
+    },
+    "ผู้ปฏิบัติงานผลงานโดดเด่น": () => {
+      onSetFilters(prev => ({
+        ...prev,
+        performanceRating: prev.performanceRating === "High Performer" ? "All" : "High Performer"
+      }));
+    }
+  };
+
   const kpis = [
     {
       title: "จำนวนพนักงานทั้งหมด",
@@ -462,7 +494,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#2F6FE4]/8",
       text: "text-[#2F6FE4]",
       leftBar: "bg-[#2F6FE4]",
-      subtext: "กำลังคนรวมที่ปฏิบัติการจริง"
+      subtext: "กำลังคนรวมที่ปฏิบัติการจริง",
+      clickable: false,
+      active: false
     },
     {
       title: "พนักงานประจำ",
@@ -473,7 +507,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#4C8DFF]/8",
       text: "text-[#4C8DFF]",
       leftBar: "bg-[#4C8DFF]",
-      subtext: "สัญญาหลักระยะยาวธนาคาร"
+      subtext: "สัญญาหลักระยะยาวธนาคาร",
+      clickable: true,
+      active: activeFilters.contractType === "พนักงานประจำ"
     },
     {
       title: "พนักงานสัญญาจ้าง",
@@ -484,7 +520,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#25B7D3]/8",
       text: "text-[#25B7D3]",
       leftBar: "bg-[#25B7D3]",
-      subtext: "กลุ่มโครงการเฉพาะกิจ"
+      subtext: "กลุ่มโครงการเฉพาะกิจ",
+      clickable: true,
+      active: activeFilters.contractType === "พนักงานสัญญาจ้าง"
     },
     {
       title: "อายุเฉลี่ยพนักงาน",
@@ -495,7 +533,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#FFB547]/8",
       text: "text-[#FFB547]",
       leftBar: "bg-[#FFB547]",
-      subtext: "อายุเฉลี่ยกำลังคน"
+      subtext: "อายุเฉลี่ยกำลังคน",
+      clickable: false,
+      active: false
     },
     {
       title: "อายุงานเฉลี่ย",
@@ -506,7 +546,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#2DBE7F]/8",
       text: "text-[#2DBE7F]",
       leftBar: "bg-[#2DBE7F]",
-      subtext: "เสถียรภาพความผูกพันองค์กร"
+      subtext: "เสถียรภาพความผูกพันองค์กร",
+      clickable: false,
+      active: false
     },
     {
       title: "อัตราการลาออก (Turnover Rate)",
@@ -517,7 +559,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#F36B6B]/8",
       text: "text-[#F36B6B]",
       leftBar: "bg-[#F36B6B]",
-      subtext: "อัตราการลาออกสะสมในปีนี้"
+      subtext: "อัตราการลาออกสะสมในปีนี้",
+      clickable: false,
+      active: false
     },
     {
       title: "กำลังกลุ่มเตรียมเกษียณ",
@@ -528,7 +572,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#F36B6B]/8",
       text: "text-[#F36B6B]",
       leftBar: "bg-[#F36B6B]",
-      subtext: "กลุ่มอายุ 55 ปีขึ้นไป"
+      subtext: "กลุ่มอายุ 55 ปีขึ้นไป",
+      clickable: true,
+      active: activeFilters.retirementRisk === "r5"
     },
     {
       title: "ผู้ปฏิบัติงานผลงานโดดเด่น",
@@ -539,7 +585,9 @@ export default function ExecutiveOverview({
       bg: "bg-[#2DBE7F]/8",
       text: "text-[#2DBE7F]",
       leftBar: "bg-[#2DBE7F]",
-      subtext: "High Performer สะสม"
+      subtext: "High Performer สะสม",
+      clickable: true,
+      active: activeFilters.performanceRating === "High Performer"
     }
   ];
 
@@ -551,41 +599,55 @@ export default function ExecutiveOverview({
           <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
           <div>
             <h3 className="text-sm font-medium text-[#1F2D3D]">สรุปดัชนีชี้วัดหลักกำลังพล (Section A: Executive KPI Snapshot)</h3>
-            <p className="text-[11px] text-[#5B6B7F] mt-0.5">ภาพรวมสถิติกำลังพล คัดกรองและประเมิลผลจำแนกรายหัวข้อเพื่อฝ่ายการจัดการ</p>
+            <p className="text-[11px] text-[#5B6B7F] mt-0.5">ภาพรวมสถิติกำลังพล คลิกเพื่อกรองข้อมูลพนักงานในแต่ละหมวดหมู่</p>
           </div>
         </div>
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-cards-grid">
-          {kpis.map((kpi, idx) => (
-            <div 
-              key={idx} 
-              className="relative bg-white border border-[#DCE6F2] rounded-xl p-4 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between overflow-hidden group pl-5 min-h-[105px]"
-            >
-              {/* Left vertical accent indicator bar */}
-              <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${kpi.leftBar}`} />
-              
-              <div className="flex items-start justify-between">
-                <span className="text-[11px] font-medium text-[#5B6B7F] tracking-tight">{kpi.title}</span>
-                <div className={`p-1.5 rounded-lg shrink-0 ${kpi.bg} ${kpi.text} transition-transform group-hover:scale-105 duration-300`}>
-                  {kpi.icon}
+          {kpis.map((kpi, idx) => {
+            const hasClick = kpi.clickable && kpiClicks[kpi.title];
+            return (
+              <div 
+                key={idx} 
+                onClick={() => hasClick && kpiClicks[kpi.title]()}
+                className={`relative border rounded-xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden group pl-5 min-h-[105px] ${
+                  kpi.clickable ? "cursor-pointer select-none" : ""
+                } ${
+                  kpi.active 
+                    ? "bg-blue-50/40 border-[#2F6FE4] shadow-sm ring-1 ring-[#2F6FE4]/30" 
+                    : "bg-white border-[#DCE6F2] hover:border-[#2F6FE4]/30 hover:shadow-xs"
+                }`}
+              >
+                {/* Left vertical accent indicator bar */}
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${kpi.leftBar}`} />
+                
+                <div className="flex items-start justify-between">
+                  <span className="text-[11px] font-medium text-[#5B6B7F] tracking-tight">{kpi.title}</span>
+                  <div className={`p-1.5 rounded-lg shrink-0 ${kpi.bg} ${kpi.text} transition-transform group-hover:scale-105 duration-300`}>
+                    {kpi.icon}
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-2.5">
-                <div className="text-xl font-medium text-[#1F2D3D] leading-none tracking-normal">
-                  {kpi.value}
+                <div className="mt-2.5">
+                  <div className="text-xl font-medium text-[#1F2D3D] leading-none tracking-normal">
+                    {kpi.value}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <span className={`text-[10px] font-medium ${kpi.trendColor}`}>
+                      {kpi.trend}
+                    </span>
+                    <span className="text-[9px] text-[#5B6B7F] font-light">
+                      • {kpi.subtext}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className={`text-[10px] font-medium ${kpi.trendColor}`}>
-                    {kpi.trend}
-                  </span>
-                  <span className="text-[9px] text-[#5B6B7F] font-light">
-                    • {kpi.subtext}
-                  </span>
-                </div>
+
+                {kpi.active && (
+                  <div className="absolute bottom-1 right-2 w-1.5 h-1.5 rounded-full bg-[#2F6FE4]" />
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

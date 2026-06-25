@@ -31,6 +31,11 @@ export interface FilterState {
   gender: string;
   searchQuery: string;
   region: string;
+  retirementRisk: string;
+  successionStatus: string;
+  performanceRating: string;
+  resignType: string;
+  resignReason: string;
 }
 
 interface FilterBarProps {
@@ -81,6 +86,17 @@ export default function FilterBar({
     if (filters.frontBack !== "All") list.push({ key: "frontBack", label: "ลักษณะสายงาน", value: filters.frontBack === "Front" ? "Front Office" : "Back Office" });
     if (filters.hb !== "All") list.push({ key: "hb", label: "ที่ตั้ง", value: filters.hb === "Head Office" ? "สำนักงานใหญ่" : "สาขาภูมิภาค" });
     if (filters.gender !== "All") list.push({ key: "gender", label: "เพศ", value: filters.gender });
+    if (filters.retirementRisk !== "All") {
+      const v = filters.retirementRisk === "r1" ? "วิกฤต (ใน 1 ปี)" : filters.retirementRisk === "r3" ? "เฝ้าระวัง (ใน 3 ปี)" : "เตรียมการ (ใน 5 ปี)";
+      list.push({ key: "retirementRisk", label: "ความเสี่ยงเกษียณ", value: v });
+    }
+    if (filters.successionStatus !== "All") {
+      const v = filters.successionStatus === "None" ? "ไม่มีผู้สืบทอด" : filters.successionStatus === "Ready Now" ? "พร้อมสืบทอดทันที" : filters.successionStatus;
+      list.push({ key: "successionStatus", label: "ความเสี่ยงผู้สืบทอด", value: v });
+    }
+    if (filters.performanceRating !== "All") list.push({ key: "performanceRating", label: "ประเมินผลงาน", value: filters.performanceRating });
+    if (filters.resignType !== "All") list.push({ key: "resignType", label: "ประเภทการลาออก", value: filters.resignType });
+    if (filters.resignReason !== "All") list.push({ key: "resignReason", label: "เหตุผลการลาออก", value: filters.resignReason });
     return list;
   }, [filters]);
 

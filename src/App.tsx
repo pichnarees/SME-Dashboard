@@ -8,6 +8,7 @@ import { generateHRData, Employee } from "./data/mockData";
 import FilterBar, { FilterState } from "./components/FilterBar";
 import ExecutiveOverview from "./components/ExecutiveOverview";
 import OrganizationStructure from "./components/OrganizationStructure";
+import WorkforceRisk from "./components/WorkforceRisk";
 import TurnoverAnalysis from "./components/TurnoverAnalysis";
 import { LayoutDashboard, Network, ShieldAlert, LogOut, X, User, Phone, Mail, Award, MapPin, Briefcase, Sparkles } from "lucide-react";
 
@@ -25,10 +26,15 @@ export default function App() {
     gender: "All",
     searchQuery: "",
     region: "All",
+    retirementRisk: "All",
+    successionStatus: "All",
+    performanceRating: "All",
+    resignType: "All",
+    resignReason: "All",
   });
 
   // Selected Tab State
-  const [activeTab, setActiveTab] = useState<"overview" | "org" | "turnover">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "org" | "risk" | "turnover">("overview");
 
   // Selected Employee Detail Modal/Sidebar State
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -64,6 +70,14 @@ export default function App() {
       if (filters.contractType !== "All" && emp.contractType !== filters.contractType) return false;
       if (filters.gender !== "All" && emp.gender !== filters.gender) return false;
       if (filters.region !== "All" && emp.region !== filters.region) return false;
+      if (filters.performanceRating !== "All" && emp.performanceRating !== filters.performanceRating) return false;
+      if (filters.successionStatus !== "All" && emp.successionStatus !== filters.successionStatus) return false;
+      
+      if (filters.retirementRisk !== "All") {
+        if (filters.retirementRisk === "r1" && emp.age !== 59) return false;
+        if (filters.retirementRisk === "r3" && (emp.age < 57 || emp.age > 58)) return false;
+        if (filters.retirementRisk === "r5" && (emp.age < 55 || emp.age > 56)) return false;
+      }
       
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
@@ -79,9 +93,10 @@ export default function App() {
   // Apply filters to Resignations list
   const filteredResignations = useMemo(() => {
     return allResignations.filter(res => {
-      // Since resignations don't have all active fields, we filter where matching
       if (filters.level !== "All" && res.level !== filters.level) return false;
       if (filters.contractType !== "All" && res.contractType !== filters.contractType) return false;
+      if (filters.resignType !== "All" && res.resignType !== filters.resignType) return false;
+      if (filters.resignReason !== "All" && res.resignReason !== filters.resignReason) return false;
       
       // Filter by text search
       if (filters.searchQuery) {
@@ -106,6 +121,11 @@ export default function App() {
       gender: "All",
       searchQuery: "",
       region: "All",
+      retirementRisk: "All",
+      successionStatus: "All",
+      performanceRating: "All",
+      resignType: "All",
+      resignReason: "All",
     });
     triggerToast("ล้างตัวกรองและรีเซ็ตข้อมูลแล้ว");
   };
@@ -251,6 +271,18 @@ export default function App() {
           </button>
 
           <button
+            onClick={() => setActiveTab("risk")}
+            className={`flex items-center gap-2 px-6 py-3 text-xs font-medium rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === "risk"
+                ? "bg-white text-[#2F6FE4] shadow-sm font-medium border border-slate-100"
+                : "text-[#5B6B7F] hover:text-[#2F6FE4] hover:bg-white/50"
+            }`}
+          >
+            <ShieldAlert size={14} className={activeTab === "risk" ? "text-[#2F6FE4]" : "text-[#5B6B7F]"} /> 
+            <span>ความเสี่ยงกำลังคน (Workforce Risk)</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("turnover")}
             className={`flex items-center gap-2 px-6 py-3 text-xs font-medium rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "turnover"
@@ -270,6 +302,8 @@ export default function App() {
               employees={filteredEmployees}
               totalResignationsCount={filteredResignations.length}
               onSelectEmployee={setSelectedEmployee}
+              activeFilters={filters}
+              onSetFilters={setFilters}
             />
           )}
 
@@ -277,10 +311,29 @@ export default function App() {
             <OrganizationStructure employees={filteredEmployees} />
           )}
 
+          {activeTab === "risk" && (
+            <WorkforceRisk
+              employees={filteredEmployees}
+              onSelectEmployee={setSelectedEmployee}
+              activeFilters={{
+                retirementRisk: filters.retirementRisk,
+                successionStatus: filters.successionStatus
+              }}
+              onToggleFilter={(key, value) => {
+                setFilters(prev => ({
+                  ...prev,
+                  [key]: value
+                }));
+              }}
+            />
+          )}
+
           {activeTab === "turnover" && (
             <TurnoverAnalysis
               resignations={filteredResignations}
               totalActiveCount={filteredEmployees.length}
+              activeFilters={filters}
+              onSetFilters={setFilters}
             />
           )}
         </div>

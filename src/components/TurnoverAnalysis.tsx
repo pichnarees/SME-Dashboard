@@ -25,12 +25,21 @@ import {
   ChevronRight
 } from "lucide-react";
 
+import { FilterState } from "./FilterBar";
+
 interface TurnoverAnalysisProps {
   resignations: Resignation[];
   totalActiveCount: number;
+  activeFilters: FilterState;
+  onSetFilters: React.Dispatch<React.SetStateAction<FilterState>>;
 }
 
-export default function TurnoverAnalysis({ resignations, totalActiveCount }: TurnoverAnalysisProps) {
+export default function TurnoverAnalysis({ 
+  resignations, 
+  totalActiveCount,
+  activeFilters,
+  onSetFilters
+}: TurnoverAnalysisProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<"All" | "Focus resignation" | "Non-Focus resignation">("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -164,7 +173,7 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="turnover-summary-cards">
           {/* Card 1 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs transition-all duration-300 flex flex-col justify-between min-h-[110px]">
             <div className="flex items-center justify-between text-[#5B6B7F]">
               <span className="text-[11px] font-medium text-[#5B6B7F]">จำนวนการลาออกรวม</span>
               <span className="p-1.5 bg-[#F36B6B]/8 text-[#F36B6B] rounded-lg">
@@ -192,7 +201,19 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#F36B6B]/30 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div 
+            onClick={() => {
+              onSetFilters(prev => ({
+                ...prev,
+                resignType: prev.resignType === "Focus resignation" ? "All" : "Focus resignation"
+              }));
+            }}
+            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+              activeFilters.resignType === "Focus resignation"
+                ? "bg-red-50/40 border-[#F36B6B] shadow-sm ring-1 ring-[#F36B6B]/30"
+                : "bg-white border-[#DCE6F2] hover:border-[#F36B6B]/35 hover:shadow-xs"
+            }`}
+          >
             <div className="flex items-center justify-between text-[#5B6B7F]">
               <span className="text-[11px] font-medium text-[#5B6B7F]">Focus Resignation</span>
               <span className="p-1.5 bg-[#F36B6B]/8 text-[#F36B6B] rounded-lg">
@@ -206,7 +227,19 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
           </div>
 
           {/* Card 4 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#5B6B7F]/30 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div 
+            onClick={() => {
+              onSetFilters(prev => ({
+                ...prev,
+                resignType: prev.resignType === "Non-Focus resignation" ? "All" : "Non-Focus resignation"
+              }));
+            }}
+            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+              activeFilters.resignType === "Non-Focus resignation"
+                ? "bg-slate-50 border-slate-400 shadow-sm ring-1 ring-slate-400/30"
+                : "bg-white border-[#DCE6F2] hover:border-slate-300 hover:shadow-xs"
+            }`}
+          >
             <div className="flex items-center justify-between text-[#5B6B7F]">
               <span className="text-[11px] font-medium text-[#5B6B7F]">Non-Focus Resign</span>
               <span className="p-1.5 bg-slate-100 text-slate-600 rounded-lg">
@@ -220,7 +253,19 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
           </div>
 
           {/* Card 5 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#4C8DFF]/30 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div 
+            onClick={() => {
+              onSetFilters(prev => ({
+                ...prev,
+                contractType: prev.contractType === "พนักงานประจำ" ? "All" : "พนักงานประจำ"
+              }));
+            }}
+            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+              activeFilters.contractType === "พนักงานประจำ"
+                ? "bg-blue-50/40 border-[#2F6FE4] shadow-sm ring-1 ring-[#2F6FE4]/30"
+                : "bg-white border-[#DCE6F2] hover:border-[#2F6FE4]/35 hover:shadow-xs"
+            }`}
+          >
             <div className="flex items-center justify-between text-[#5B6B7F]">
               <span className="text-[11px] font-medium text-[#5B6B7F]">ลาออกพนักงานประจำ</span>
               <span className="p-1.5 bg-[#4C8DFF]/8 text-[#4C8DFF] rounded-lg">
@@ -234,7 +279,19 @@ export default function TurnoverAnalysis({ resignations, totalActiveCount }: Tur
           </div>
 
           {/* Card 6 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#8B5CF6]/30 transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div 
+            onClick={() => {
+              onSetFilters(prev => ({
+                ...prev,
+                contractType: prev.contractType === "พนักงานสัญญาจ้าง" ? "All" : "พนักงานสัญญาจ้าง"
+              }));
+            }}
+            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+              activeFilters.contractType === "พนักงานสัญญาจ้าง"
+                ? "bg-cyan-50/40 border-[#25B7D3] shadow-sm ring-1 ring-[#25B7D3]/30"
+                : "bg-white border-[#DCE6F2] hover:border-[#25B7D3]/35 hover:shadow-xs"
+            }`}
+          >
             <div className="flex items-center justify-between text-[#5B6B7F]">
               <span className="text-[11px] font-medium text-[#5B6B7F]">ลาออกสัญญาจ้าง</span>
               <span className="p-1.5 bg-[#8B5CF6]/8 text-[#8B5CF6] rounded-lg">
