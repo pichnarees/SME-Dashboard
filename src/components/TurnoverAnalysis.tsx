@@ -162,41 +162,42 @@ export default function TurnoverAnalysis({
     <div className="space-y-8">
       
       {/* SECTION 1: Turnover Summary KPIs */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
+      <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-6.5 shadow-md shadow-[#2F6FE4]/4">
+        <div className="flex items-center gap-2.5 mb-5.5">
           <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
           <div>
-            <h3 className="text-sm font-medium text-[#1F2D3D]">อัตราและสถิติการลาออก (Section A: Corporate Turnover Metrics)</h3>
+            <h3 className="text-sm font-semibold text-[#1F2D3D]">อัตราและสถิติการลาออก (Section A: Corporate Turnover Metrics)</h3>
             <p className="text-[11px] text-[#5B6B7F] mt-0.5">วัดผลแนวโน้มการรักษาสมดุลกำลังพนักงาน ดัชนีการเข้าออกรายเดือน และกลุ่มงานที่อ่อนไหวสูง</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="turnover-summary-cards">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4.5" id="turnover-summary-cards">
           {/* Card 1 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs transition-all duration-300 flex flex-col justify-between min-h-[110px]">
+          <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-4.5 hover-card-premium flex flex-col justify-between min-h-[110px] shadow-sm">
             <div className="flex items-center justify-between text-[#5B6B7F]">
-              <span className="text-[11px] font-medium text-[#5B6B7F]">จำนวนการลาออกรวม</span>
-              <span className="p-1.5 bg-[#F36B6B]/8 text-[#F36B6B] rounded-lg">
+              <span className="text-[11px] font-semibold text-[#5B6B7F]">จำนวนการลาออกรวม</span>
+              <span className="p-2 bg-[#F36B6B]/8 text-[#F36B6B] rounded-xl">
                 <LogOut size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{(totalCount).toLocaleString()} คน</span>
-              <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">ข้อมูลสะสม 6 เดือนล่าสุด</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{(totalCount).toLocaleString()} คน</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1.5 block font-light">ข้อมูลสะสม 6 เดือนล่าสุด</span>
             </div>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-[#2F6FE4]/5 border border-[#2F6FE4]/15 rounded-xl p-4.5 flex flex-col justify-between min-h-[110px]">
+          <div className="bg-[#2F6FE4]/4 border border-[#2F6FE4]/18 rounded-2xl p-4.5 flex flex-col justify-between min-h-[110px] shadow-xs relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-12 h-12 bg-[#2F6FE4]/4 rounded-full translate-x-4 -translate-y-4" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium text-[#2F6FE4]">อัตราการลาออก (Turnover Rate)</span>
-              <span className="p-1.5 bg-[#2F6FE4]/10 text-[#2F6FE4] rounded-lg">
+              <span className="text-[11px] font-semibold text-[#2F6FE4]">อัตราการลาออก</span>
+              <span className="p-2 bg-[#2F6FE4]/10 text-[#2F6FE4] rounded-xl">
                 <TrendingUp size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#2F6FE4] block">{stats.rate}%</span>
-              <span className="text-[9px] text-[#2F6FE4] mt-1 block font-medium">ต่ำกว่าเกณฑ์เฉลี่ยอุตสาหกรรม</span>
+              <span className="text-lg font-bold text-[#2F6FE4] block">{stats.rate}%</span>
+              <span className="text-[9.5px] text-[#2F6FE4] mt-1.5 block font-medium">ต่ำกว่าเกณฑ์อุตสาหกรรม</span>
             </div>
           </div>
 
@@ -208,21 +209,21 @@ export default function TurnoverAnalysis({
                 resignType: prev.resignType === "Focus resignation" ? "All" : "Focus resignation"
               }));
             }}
-            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+            className={`cursor-pointer select-none border rounded-2xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] hover-card-premium shadow-sm ${
               activeFilters.resignType === "Focus resignation"
-                ? "bg-red-50/40 border-[#F36B6B] shadow-sm ring-1 ring-[#F36B6B]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#F36B6B]/35 hover:shadow-xs"
+                ? "bg-red-50/50 border-[#F36B6B] ring-1 ring-[#F36B6B]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#F36B6B]/35"
             }`}
           >
             <div className="flex items-center justify-between text-[#5B6B7F]">
-              <span className="text-[11px] font-medium text-[#5B6B7F]">Focus Resignation</span>
-              <span className="p-1.5 bg-[#F36B6B]/8 text-[#F36B6B] rounded-lg">
+              <span className="text-[11px] font-semibold text-[#5B6B7F]">Focus Resignation</span>
+              <span className="p-2 bg-[#F36B6B]/8 text-[#F36B6B] rounded-xl">
                 <ShieldAlert size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.focus).toLocaleString()} คน</span>
-              <span className="text-[9px] text-[#F36B6B] mt-1 block font-medium">กลุ่มตำแหน่งวิกฤตสูญเสีย</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{(stats.focus).toLocaleString()} คน</span>
+              <span className="text-[9.5px] text-[#F36B6B] mt-1.5 block font-semibold">กลุ่มตำแหน่งวิกฤตสูญเสีย</span>
             </div>
           </div>
 
@@ -234,21 +235,21 @@ export default function TurnoverAnalysis({
                 resignType: prev.resignType === "Non-Focus resignation" ? "All" : "Non-Focus resignation"
               }));
             }}
-            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+            className={`cursor-pointer select-none border rounded-2xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] hover-card-premium shadow-sm ${
               activeFilters.resignType === "Non-Focus resignation"
-                ? "bg-slate-50 border-slate-400 shadow-sm ring-1 ring-slate-400/30"
-                : "bg-white border-[#DCE6F2] hover:border-slate-300 hover:shadow-xs"
+                ? "bg-slate-50 border-slate-400 ring-1 ring-slate-400/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-slate-300"
             }`}
           >
             <div className="flex items-center justify-between text-[#5B6B7F]">
-              <span className="text-[11px] font-medium text-[#5B6B7F]">Non-Focus Resign</span>
-              <span className="p-1.5 bg-slate-100 text-slate-600 rounded-lg">
+              <span className="text-[11px] font-semibold text-[#5B6B7F]">Non-Focus Resign</span>
+              <span className="p-2 bg-slate-100 text-slate-600 rounded-xl">
                 <HelpCircle size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.nonFocus).toLocaleString()} คน</span>
-              <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">กลุ่มงานทั่วไปและสนับสนุน</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{(stats.nonFocus).toLocaleString()} คน</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1.5 block font-light">กลุ่มงานทั่วไปและสนับสนุน</span>
             </div>
           </div>
 
@@ -260,21 +261,21 @@ export default function TurnoverAnalysis({
                 contractType: prev.contractType === "พนักงานประจำ" ? "All" : "พนักงานประจำ"
               }));
             }}
-            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+            className={`cursor-pointer select-none border rounded-2xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] hover-card-premium shadow-sm ${
               activeFilters.contractType === "พนักงานประจำ"
-                ? "bg-blue-50/40 border-[#2F6FE4] shadow-sm ring-1 ring-[#2F6FE4]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#2F6FE4]/35 hover:shadow-xs"
+                ? "bg-blue-50/50 border-[#2F6FE4] ring-1 ring-[#2F6FE4]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#2F6FE4]/35"
             }`}
           >
             <div className="flex items-center justify-between text-[#5B6B7F]">
-              <span className="text-[11px] font-medium text-[#5B6B7F]">ลาออกพนักงานประจำ</span>
-              <span className="p-1.5 bg-[#4C8DFF]/8 text-[#4C8DFF] rounded-lg">
+              <span className="text-[11px] font-semibold text-[#5B6B7F]">ลาออกพนักงานประจำ</span>
+              <span className="p-2 bg-[#4C8DFF]/8 text-[#4C8DFF] rounded-xl">
                 <Briefcase size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.permanent).toLocaleString()} คน</span>
-              <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">พนักงานในระบบสัญญาหลัก</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{(stats.permanent).toLocaleString()} คน</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1.5 block font-light">พนักงานในระบบสัญญาหลัก</span>
             </div>
           </div>
 
@@ -286,21 +287,21 @@ export default function TurnoverAnalysis({
                 contractType: prev.contractType === "พนักงานสัญญาจ้าง" ? "All" : "พนักงานสัญญาจ้าง"
               }));
             }}
-            className={`cursor-pointer select-none border rounded-xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] ${
+            className={`cursor-pointer select-none border rounded-2xl p-4.5 transition-all duration-300 flex flex-col justify-between min-h-[110px] hover-card-premium shadow-sm ${
               activeFilters.contractType === "พนักงานสัญญาจ้าง"
-                ? "bg-cyan-50/40 border-[#25B7D3] shadow-sm ring-1 ring-[#25B7D3]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#25B7D3]/35 hover:shadow-xs"
+                ? "bg-cyan-50/50 border-[#25B7D3] ring-1 ring-[#25B7D3]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#25B7D3]/35"
             }`}
           >
             <div className="flex items-center justify-between text-[#5B6B7F]">
-              <span className="text-[11px] font-medium text-[#5B6B7F]">ลาออกสัญญาจ้าง</span>
-              <span className="p-1.5 bg-[#8B5CF6]/8 text-[#8B5CF6] rounded-lg">
+              <span className="text-[11px] font-semibold text-[#5B6B7F]">ลาออกสัญญาจ้าง</span>
+              <span className="p-2 bg-[#8B5CF6]/8 text-[#8B5CF6] rounded-xl">
                 <FileWarning size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{(stats.contract).toLocaleString()} คน</span>
-              <span className="text-[9px] text-[#5B6B7F] mt-1 block font-light">สัญญาชั่วคราว/เฉพาะโครงการ</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{(stats.contract).toLocaleString()} คน</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1.5 block font-light">สัญญาชั่วคราว/เฉพาะโครงการ</span>
             </div>
           </div>
         </div>
@@ -326,7 +327,9 @@ export default function TurnoverAnalysis({
                 <XAxis dataKey="name" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
                 <YAxis stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
+                  contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                  itemStyle={{ color: "#E2E8F0" }}
+                  labelStyle={{ color: "#94A3B8" }}
                   formatter={(value) => [`${value} คน`, "ลาออก"]}
                 />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: "11px" }} />
@@ -354,7 +357,9 @@ export default function TurnoverAnalysis({
                 <XAxis type="number" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
                 <YAxis dataKey="name" type="category" stroke="#1F2D3D" fontSize={9} tickLine={false} axisLine={false} width={135} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
+                  contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                  itemStyle={{ color: "#E2E8F0" }}
+                  labelStyle={{ color: "#94A3B8" }}
                   formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
                 />
                 <Bar dataKey="จำนวนคน" fill="#4C8DFF" radius={[0, 4, 4, 0]} barSize={10}>
@@ -436,7 +441,9 @@ export default function TurnoverAnalysis({
                 <XAxis dataKey="name" stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
                 <YAxis stroke="#5B6B7F" fontSize={9} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
+                  contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                  itemStyle={{ color: "#E2E8F0" }}
+                  labelStyle={{ color: "#94A3B8" }}
                   formatter={(value) => [`${value} คน`, "จำนวนคน"]}
                 />
                 <Bar dataKey="จำนวนคน" fill="#2DBE7F" radius={[4, 4, 0, 0]} barSize={26}>

@@ -42,6 +42,7 @@ export default function WorkforceRisk({
 }: WorkforceRiskProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeInsightTab, setActiveInsightTab] = useState<"succession" | "demographics">("succession");
   const itemsPerPage = 6;
 
   const totalCount = employees.length;
@@ -159,13 +160,13 @@ export default function WorkforceRisk({
     <div className="space-y-8 animate-fadeIn">
       
       {/* SECTION 1: Strategic Risk Cards (Interactive) */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#DCE6F2]/50">
+      <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-6 shadow-md shadow-[#2F6FE4]/4">
+        <div className="flex items-center justify-between mb-5.5 pb-3 border-b border-[#DCE6F2]/50">
           <div className="flex items-center gap-2.5">
             <div className="w-1 h-5 bg-[#F36B6B] rounded-full" />
             <div>
-              <h3 className="text-sm font-medium text-[#1F2D3D]">ดัชนีความเสี่ยงกำลังคนเชิงยุทธศาสตร์ (Strategic Workforce Risk Cards)</h3>
-              <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์ประเด็นความมั่นคงของบุคลากร คลิกเพื่อกรองข้อมูลพนักงานในแต่ละกลุ่มเสี่ยง</p>
+              <h3 className="text-sm font-semibold text-[#1F2D3D]">ดัชนีความเสี่ยงกำลังคนเชิงยุทธศาสตร์ (Strategic Workforce Risk Cards)</h3>
+              <p className="text-[11px] text-[#5B6B7F] mt-0.5 font-normal">วิเคราะห์ประเด็นความมั่นคงของบุคลากร คลิกเพื่อกรองข้อมูลพนักงานในแต่ละกลุ่มเสี่ยงแบบตอบสนอง</p>
             </div>
           </div>
 
@@ -175,7 +176,7 @@ export default function WorkforceRisk({
                 if (activeFilters.retirementRisk !== "All") onToggleFilter("retirementRisk", "All");
                 if (activeFilters.successionStatus !== "All") onToggleFilter("successionStatus", "All");
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-[#F36B6B] bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold text-[#F36B6B] bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all cursor-pointer active:scale-95"
             >
               <X size={12} />
               <span>ล้างตัวกรองความเสี่ยง</span>
@@ -187,27 +188,27 @@ export default function WorkforceRisk({
           {/* Card 1: Retirement Critical */}
           <div 
             onClick={() => onToggleFilter("retirementRisk", activeFilters.retirementRisk === "r1" ? "All" : "r1")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group ${
+            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
               activeFilters.retirementRisk === "r1"
-                ? "bg-red-50/70 border-[#F36B6B] shadow-sm ring-1 ring-[#F36B6B]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#F36B6B]/40 hover:shadow-sm"
+                ? "bg-red-50/70 border-[#F36B6B] ring-1 ring-[#F36B6B]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#F36B6B]/40"
             }`}
           >
             <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-medium block">เสี่ยงสูง: เกษียณอายุใน 1 ปี</span>
-              <span className={`p-1.5 rounded-lg shrink-0 ${
+              <span className="text-[11px] text-[#5B6B7F] font-semibold block">เสี่ยงสูง: เกษียณอายุใน 1 ปี</span>
+              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
                 activeFilters.retirementRisk === "r1" ? "bg-[#F36B6B] text-white" : "bg-[#F36B6B]/8 text-[#F36B6B]"
               }`}>
                 <AlertTriangle size={14} className={activeFilters.retirementRisk === "r1" ? "" : "animate-pulse"} />
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-medium text-[#1F2D3D]">{riskStats.retirementCritical}</span>
+              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.retirementCritical}</span>
               <span className="text-xs text-[#5B6B7F]">ท่าน</span>
             </div>
             <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">บุคลากรอายุ 59 ปี ที่พร้อมพ้นวาระการทำงานและต้องการแผนการส่งต่องานเร่งด่วน</p>
             {activeFilters.retirementRisk === "r1" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-medium text-[#F36B6B] bg-white px-2 py-0.5 rounded-md border border-red-100 shadow-3xs">
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#F36B6B] bg-white px-2 py-0.5 rounded-md border border-red-100 shadow-3xs">
                 <span>กำลังกรอง</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#F36B6B]" />
               </div>
@@ -217,27 +218,27 @@ export default function WorkforceRisk({
           {/* Card 2: Succession Gaps */}
           <div 
             onClick={() => onToggleFilter("successionStatus", activeFilters.successionStatus === "None" ? "All" : "None")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group ${
+            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
               activeFilters.successionStatus === "None"
-                ? "bg-amber-50/70 border-[#FFB547] shadow-sm ring-1 ring-[#FFB547]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#FFB547]/40 hover:shadow-sm"
+                ? "bg-amber-50/70 border-[#FFB547] ring-1 ring-[#FFB547]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#FFB547]/40"
             }`}
           >
             <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-medium block">ช่องว่างผู้สืบทอด (ระดับ L9 ขึ้นไป)</span>
-              <span className={`p-1.5 rounded-lg shrink-0 ${
+              <span className="text-[11px] text-[#5B6B7F] font-semibold block">ช่องว่างผู้สืบทอด (ระดับ L9 ขึ้นไป)</span>
+              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
                 activeFilters.successionStatus === "None" ? "bg-[#FFB547] text-white" : "bg-[#FFB547]/8 text-[#FFB547]"
               }`}>
                 <ShieldAlert size={14} />
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-medium text-[#1F2D3D]">{riskStats.noSuccessor}</span>
+              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.noSuccessor}</span>
               <span className="text-xs text-[#5B6B7F]">ตำแหน่ง</span>
             </div>
             <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">ตำแหน่งบริหารและเชี่ยวชาญ (L9 ขึ้นไป) ที่ยังไม่ได้รับการระบุตัวผู้สืบทอดตำแหน่ง</p>
             {activeFilters.successionStatus === "None" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-medium text-[#FFB547] bg-white px-2 py-0.5 rounded-md border border-amber-100 shadow-3xs">
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#FFB547] bg-white px-2 py-0.5 rounded-md border border-amber-100 shadow-3xs">
                 <span>กำลังกรอง</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FFB547]" />
               </div>
@@ -247,27 +248,27 @@ export default function WorkforceRisk({
           {/* Card 3: Ready Now Successors */}
           <div 
             onClick={() => onToggleFilter("successionStatus", activeFilters.successionStatus === "Ready Now" ? "All" : "Ready Now")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group ${
+            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
               activeFilters.successionStatus === "Ready Now"
-                ? "bg-emerald-50/70 border-[#2DBE7F] shadow-sm ring-1 ring-[#2DBE7F]/30"
-                : "bg-white border-[#DCE6F2] hover:border-[#2DBE7F]/40 hover:shadow-sm"
+                ? "bg-emerald-50/70 border-[#2DBE7F] ring-1 ring-[#2DBE7F]/30"
+                : "bg-white border-[#DCE6F2]/70 hover:border-[#2DBE7F]/40"
             }`}
           >
             <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-medium block">อัตราความพร้อมสืบทอดทันที</span>
-              <span className={`p-1.5 rounded-lg shrink-0 ${
+              <span className="text-[11px] text-[#5B6B7F] font-semibold block">อัตราความพร้อมสืบทอดทันที</span>
+              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
                 activeFilters.successionStatus === "Ready Now" ? "bg-[#2DBE7F] text-white" : "bg-[#2DBE7F]/8 text-[#2DBE7F]"
               }`}>
                 <UserCheck size={14} />
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-medium text-[#1F2D3D]">{riskStats.readyNow}</span>
+              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.readyNow}</span>
               <span className="text-xs text-[#5B6B7F]">ท่าน</span>
             </div>
             <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">กลุ่มพนักงานผู้มีศักยภาพสูงที่ได้รับการประเมินว่าพร้อมขึ้นดำรงตำแหน่งทดแทนได้ทันที</p>
             {activeFilters.successionStatus === "Ready Now" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-medium text-[#2DBE7F] bg-white px-2 py-0.5 rounded-md border border-emerald-100 shadow-3xs">
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#2DBE7F] bg-white px-2 py-0.5 rounded-md border border-emerald-100 shadow-3xs">
                 <span>กำลังกรอง</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2DBE7F]" />
               </div>
@@ -276,111 +277,143 @@ export default function WorkforceRisk({
         </div>
       </div>
 
-      {/* SECTION 2: Succession & Retirement Insights Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Succession Pipeline Donut */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-1 h-5 bg-[#4C8DFF] rounded-full" />
-              <h3 className="text-sm font-medium text-[#1F2D3D]">ภาพรวมทายาทสืบทอดตำแหน่ง (Succession Planning Status)</h3>
+      {/* SECTION 2: Succession & Retirement Insights Charts (Consolidated to reduce visual overload) */}
+      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
+        {/* Header and consolidated Tab Switches */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#DCE6F2]/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-1 h-5 bg-[#4C8DFF] rounded-full" />
+            <div>
+              <h3 className="text-sm font-semibold text-[#1F2D3D]">บทวิเคราะห์เสถียรภาพกำลังพล (Workforce Succession & Age Insights)</h3>
+              <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์ประเด็นความสืบทอดและช่วงประชากรวัยหลักในองค์กรเพื่อการรักษากำลังคนระยะยาว</p>
             </div>
-            <p className="text-[11px] text-[#5B6B7F] font-light">
-              แสดงความพร้อมของทายาทสืบทอดตำแหน่งทั่วทั้งองค์กรเพื่อวิเคราะห์เสถียรภาพกำลังพลในอนาคต (คลิกเพื่อจัดกรองตามกลุ่มความพร้อม)
-            </p>
           </div>
+          
+          <div className="flex bg-[#F1F5F9] p-1 rounded-xl border border-slate-200/50 shrink-0 self-start sm:self-auto">
+            <button
+              onClick={() => setActiveInsightTab("succession")}
+              className={`px-3.5 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                activeInsightTab === "succession"
+                  ? "bg-white text-[#4C8DFF] shadow-xs border border-slate-200/20"
+                  : "text-slate-500 hover:text-[#4C8DFF]"
+              }`}
+            >
+              ทายาทสืบทอด (Succession Pipeline)
+            </button>
+            <button
+              onClick={() => setActiveInsightTab("demographics")}
+              className={`px-3.5 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                activeInsightTab === "demographics"
+                  ? "bg-white text-[#2DBE7F] shadow-xs border border-slate-200/20"
+                  : "text-slate-500 hover:text-[#2DBE7F]"
+              }`}
+            >
+              สถิติช่วงอายุ (Age Demographics)
+            </button>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center mt-6">
-            <div className="sm:col-span-5 h-40 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={successionChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="80%"
-                    paddingAngle={3}
-                    dataKey="value"
+        {/* Tab Content */}
+        {activeInsightTab === "succession" ? (
+          <div className="animate-fadeIn">
+            <p className="text-[11px] text-[#5B6B7F] font-light mb-4">
+              แสดงความพร้อมของทายาทสืบทอดตำแหน่งทั่วทั้งองค์กรเพื่อวิเคราะห์เสถียรภาพกำลังพลในอนาคต (คลิกแถบสีเพื่อจัดกรองตารางตามกลุ่มความพร้อม)
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="md:col-span-5 h-48 flex items-center justify-center relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={successionChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="58%"
+                      outerRadius="78%"
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {successionChartData.map((entry, idx) => (
+                        <Cell 
+                          key={`cell-${idx}`} 
+                          fill={entry.fill} 
+                          className="cursor-pointer hover:opacity-85 transition-all"
+                          onClick={() => onToggleFilter("successionStatus", entry.key)}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                      itemStyle={{ color: "#E2E8F0" }}
+                      labelStyle={{ color: "#94A3B8" }}
+                      formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Central total value for a premium look */}
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-2xl font-extrabold text-[#1F2D3D] tracking-tight leading-none">
+                    {riskStats.readyNow + riskStats.noSuccessor}
+                  </span>
+                  <span className="text-[8px] text-[#5B6B7F] font-bold tracking-wider uppercase mt-1">เป้าหมายหลัก</span>
+                </div>
+              </div>
+
+              <div className="md:col-span-7 space-y-2.5">
+                {successionChartData.map((item, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => onToggleFilter("successionStatus", item.key)}
+                    className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-all ${
+                      activeFilters.successionStatus === item.key
+                        ? "bg-blue-50 border-blue-200 font-semibold"
+                        : "bg-slate-50/50 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
+                    }`}
                   >
-                    {successionChartData.map((entry, idx) => (
-                      <Cell 
-                        key={`cell-${idx}`} 
-                        fill={entry.fill} 
-                        className="cursor-pointer hover:opacity-80 transition-all"
-                        onClick={() => onToggleFilter("successionStatus", entry.key)}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #DCE6F2", fontSize: "11px" }}
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: item.fill }} />
+                      <span className="text-[#1F2D3D] font-medium truncate max-w-[200px]">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#1F2D3D]">{item.value} คน</span>
+                      <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="animate-fadeIn">
+            <p className="text-[11px] text-[#5B6B7F] font-light mb-4">
+              วิเคราะห์ช่วงอายุการทำงานเพื่อประเมินระดับความอ่อนตัวและความเสี่ยงด้านสังคมผู้สูงอายุขององค์กรและการส่งต่องาน
+            </p>
+
+            <div className="h-60 w-full mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ageDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis dataKey="name" stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                    itemStyle={{ color: "#E2E8F0" }}
+                    labelStyle={{ color: "#94A3B8" }}
                     formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
                   />
-                </PieChart>
+                  <Bar dataKey="จำนวนคน" fill="#2F6FE4" radius={[4, 4, 0, 0]} barSize={34}>
+                    {ageDistributionData.map((entry, index) => {
+                      let fill = "#2F6FE4";
+                      if (entry.name.includes("59")) fill = "#F36B6B";
+                      else if (entry.name.includes("55-58")) fill = "#FFB547";
+                      return <Cell key={`cell-${index}`} fill={fill} />;
+                    })}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="sm:col-span-7 space-y-2">
-              {successionChartData.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => onToggleFilter("successionStatus", item.key)}
-                  className={`p-2 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-all ${
-                    activeFilters.successionStatus === item.key
-                      ? "bg-blue-50 border-blue-200"
-                      : "bg-slate-50/50 border-transparent hover:bg-slate-50 hover:border-slate-100"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: item.fill }} />
-                    <span className="text-[#1F2D3D] font-light truncate max-w-[150px]">{item.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-[#1F2D3D]">{item.value} คน</span>
-                    <span className="text-[10px] text-slate-400">({item.percentage}%)</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
-        </div>
-
-        {/* Age Demographics Bar */}
-        <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-1 h-5 bg-[#2DBE7F] rounded-full" />
-              <h3 className="text-sm font-medium text-[#1F2D3D]">สัดส่วนช่วงอายุพนักงานหลัก (Age Demographics)</h3>
-            </div>
-            <p className="text-[11px] text-[#5B6B7F] font-light">
-              วิเคราะห์ช่วงอายุการทำงานเพื่อประเมินระดับความอ่อนตัวและความเสี่ยงด้านสังคมผู้สูงอายุขององค์กร
-            </p>
-          </div>
-
-          <div className="h-44 w-full mt-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="name" stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "12px", borderColor: "#DCE6F2", fontSize: "11px" }}
-                  formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
-                />
-                <Bar dataKey="จำนวนคน" fill="#2F6FE4" radius={[4, 4, 0, 0]} barSize={28}>
-                  {ageDistributionData.map((entry, index) => {
-                    let fill = "#2F6FE4";
-                    if (entry.name.includes("59")) fill = "#F36B6B";
-                    else if (entry.name.includes("55-58")) fill = "#FFB547";
-                    return <Cell key={`cell-${index}`} fill={fill} />;
-                  })}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+        )}
       </div>
 
       {/* SECTION 3: Executive Action Panel */}

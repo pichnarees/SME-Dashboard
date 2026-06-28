@@ -187,80 +187,81 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
     <div className="space-y-8">
       
       {/* SECTION 1: Organization Summary KPIs */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
+      <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-6 shadow-md shadow-[#2F6FE4]/4">
+        <div className="flex items-center gap-2.5 mb-5.5">
           <div className="w-1 h-5 bg-[#2F6FE4] rounded-full" />
           <div>
-            <h3 className="text-sm font-medium text-[#1F2D3D]">สรุปดัชนีโครงสร้างและสายปฏิบัติการ (Section A: Organization KPI Summary)</h3>
+            <h3 className="text-sm font-semibold text-[#1F2D3D]">สรุปดัชนีโครงสร้างและสายปฏิบัติการ (Section A: Organization KPI Summary)</h3>
             <p className="text-[11px] text-[#5B6B7F] mt-0.5">ภาพรวมสัดส่วนจำแนกตามโครงสร้างตามพระราชบัญญัติและสายบังคับบัญชาหลักธนาคาร</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4" id="org-summary-kpis">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4.5" id="org-summary-kpis">
           {/* KPI 1 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between min-h-[105px]">
+          <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-4.5 hover-card-premium flex flex-col justify-between min-h-[110px] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#5B6B7F] font-medium">จำนวนสายงานหลัก</span>
-              <span className="p-1.5 bg-[#2F6FE4]/8 text-[#2F6FE4] rounded-lg">
+              <span className="text-[11px] text-[#5B6B7F] font-semibold">จำนวนสายงานหลัก</span>
+              <span className="p-2 bg-[#2F6FE4]/8 text-[#2F6FE4] rounded-xl">
                 <Layers size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalLines} สายงาน</span>
-              <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">โครงสร้างฝ่ายบริหารหลัก</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{stats.totalLines} สายงาน</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1 block font-light">โครงสร้างฝ่ายบริหารหลัก</span>
             </div>
           </div>
 
           {/* KPI 2 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between min-h-[105px]">
+          <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-4.5 hover-card-premium flex flex-col justify-between min-h-[110px] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#5B6B7F] font-medium">จำนวนกลุ่มงานในระบบ</span>
-              <span className="p-1.5 bg-[#2DBE7F]/8 text-[#2DBE7F] rounded-lg">
+              <span className="text-[11px] text-[#5B6B7F] font-semibold">จำนวนกลุ่มงานในระบบ</span>
+              <span className="p-2 bg-[#2DBE7F]/8 text-[#2DBE7F] rounded-xl">
                 <GitBranch size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalGroups} กลุ่มปฏิบัติการ</span>
-              <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">สนับสนุนและการตลาดหลัก</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{stats.totalGroups} กลุ่มปฏิบัติการ</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1 block font-light">สนับสนุนและการตลาดหลัก</span>
             </div>
           </div>
 
           {/* KPI 3 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between min-h-[105px]">
+          <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-4.5 hover-card-premium flex flex-col justify-between min-h-[110px] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#5B6B7F] font-medium">ฝ่ายงานย่อยปฏิบัติการ</span>
-              <span className="p-1.5 bg-[#8B5CF6]/8 text-[#8B5CF6] rounded-lg">
+              <span className="text-[11px] text-[#5B6B7F] font-semibold">ฝ่ายงานย่อยปฏิบัติการ</span>
+              <span className="p-2 bg-[#8B5CF6]/8 text-[#8B5CF6] rounded-xl">
                 <ShieldCheck size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalDepartments} ส่วนงาน / ฝ่าย</span>
-              <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">ฝ่ายปฏิบัติการส่วนย่อย</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{stats.totalDepartments} ส่วนงาน / ฝ่าย</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1 block font-light">ฝ่ายปฏิบัติการส่วนย่อย</span>
             </div>
           </div>
 
           {/* KPI 4 */}
-          <div className="bg-white border border-[#DCE6F2] rounded-xl p-4.5 hover:shadow-xs hover:border-[#2F6FE4]/30 transition-all duration-300 flex flex-col justify-between min-h-[105px]">
+          <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-4.5 hover-card-premium flex flex-col justify-between min-h-[110px] shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#5B6B7F] font-medium">เขตพื้นที่บริการและสาขา</span>
-              <span className="p-1.5 bg-[#25B7D3]/8 text-[#25B7D3] rounded-lg">
+              <span className="text-[11px] text-[#5B6B7F] font-semibold">เขตพื้นที่บริการและสาขา</span>
+              <span className="p-2 bg-[#25B7D3]/8 text-[#25B7D3] rounded-xl">
                 <Home size={14} />
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-lg font-medium text-[#1F2D3D] block">{stats.totalZones} เขตพื้นที่บริการ</span>
-              <span className="text-[10px] text-[#5B6B7F] mt-1 block font-light">ครอบคลุมทั่วประเทศ</span>
+              <span className="text-lg font-bold text-[#1F2D3D] block">{stats.totalZones} เขตพื้นที่</span>
+              <span className="text-[9.5px] text-[#5B6B7F] mt-1 block font-light font-sans">ครอบคลุมทั่วประเทศ</span>
             </div>
           </div>
 
           {/* KPI 5 */}
-          <div className="bg-[#2F6FE4]/5 border border-[#2F6FE4]/15 rounded-xl p-4.5 flex flex-col justify-between col-span-2 lg:col-span-1 min-h-[105px]">
+          <div className="bg-[#2F6FE4]/4 border border-[#2F6FE4]/18 rounded-2xl p-4.5 flex flex-col justify-between col-span-2 lg:col-span-1 min-h-[110px] shadow-xs relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-12 h-12 bg-[#2F6FE4]/4 rounded-full translate-x-4 -translate-y-4" />
             <div>
-              <span className="text-[10px] text-[#2F6FE4] font-medium block uppercase tracking-wider">สายงานกำลังพลหนาแน่นที่สุด</span>
-              <span className="text-xs font-medium text-[#1F2D3D] block truncate mt-1" title={stats.maxLine}>{stats.maxLine}</span>
+              <span className="text-[9.5px] text-[#2F6FE4] font-bold block uppercase tracking-wider">สายงานหนาแน่นที่สุด</span>
+              <span className="text-xs font-semibold text-[#1F2D3D] block truncate mt-1" title={stats.maxLine}>{stats.maxLine}</span>
             </div>
             <div className="mt-2 text-right">
-              <span className="text-sm font-medium text-[#2F6FE4] block">{stats.maxCount.toLocaleString()} คน</span>
+              <span className="text-sm font-bold text-[#2F6FE4] block">{stats.maxCount.toLocaleString()} คน</span>
               <span className="text-[9px] text-[#5B6B7F] block font-light">คิดเป็น {totalCount > 0 ? Math.round((stats.maxCount/totalCount)*100) : 0}% ของธนาคาร</span>
             </div>
           </div>
@@ -325,7 +326,9 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#FFFFFF", borderRadius: "10px", borderColor: "#DCE6F2", fontSize: "11px" }}
+                    contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
+                    itemStyle={{ color: "#E2E8F0" }}
+                    labelStyle={{ color: "#94A3B8" }}
                     formatter={(value: any, name: any) => [`${value.toLocaleString()} คน`, name]}
                   />
                 </PieChart>
