@@ -211,7 +211,7 @@ export default function FilterBar({
                 id="filter-business-line"
                 value={filters.businessLine}
                 onChange={(e) => handleFilterChange("businessLine", e.target.value)}
-                className={`w-full pl-8.5 pr-8 py-2.5 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                className={`w-full pl-8.5 pr-8 py-2.5 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                   filters.businessLine !== "All" 
                     ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium shadow-xs" 
                     : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -240,7 +240,7 @@ export default function FilterBar({
                 id="filter-level"
                 value={filters.level}
                 onChange={(e) => handleFilterChange("level", e.target.value)}
-                className={`w-full pl-8.5 pr-8 py-2.5 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                className={`w-full pl-8.5 pr-8 py-2.5 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                   filters.level !== "All" 
                     ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium shadow-xs" 
                     : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -271,7 +271,7 @@ export default function FilterBar({
               }`}
             >
               <span>ตัวกรองขั้นสูง</span>
-              {isAdvancedOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              {isAdvancedOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
             </button>
           </div>
 
@@ -292,7 +292,7 @@ export default function FilterBar({
                   id="filter-region"
                   value={filters.region}
                   onChange={(e) => handleFilterChange("region", e.target.value)}
-                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                     filters.region !== "All" 
                       ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium" 
                       : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -321,7 +321,7 @@ export default function FilterBar({
                   id="filter-contract-type"
                   value={filters.contractType}
                   onChange={(e) => handleFilterChange("contractType", e.target.value)}
-                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                     filters.contractType !== "All" 
                       ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium" 
                       : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -349,7 +349,7 @@ export default function FilterBar({
                   id="filter-front-back"
                   value={filters.frontBack}
                   onChange={(e) => handleFilterChange("frontBack", e.target.value)}
-                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                     filters.frontBack !== "All" 
                       ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium" 
                       : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -377,7 +377,7 @@ export default function FilterBar({
                   id="filter-hb"
                   value={filters.hb}
                   onChange={(e) => handleFilterChange("hb", e.target.value)}
-                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                     filters.hb !== "All" 
                       ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium" 
                       : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
@@ -405,7 +405,7 @@ export default function FilterBar({
                   id="filter-gender"
                   value={filters.gender}
                   onChange={(e) => handleFilterChange("gender", e.target.value)}
-                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] ${
+                  className={`w-full pl-8 pr-8 py-2 text-xs rounded-xl border focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/12 transition-all text-[#1F2D3D] cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[size:10px_10px] ${
                     filters.gender !== "All" 
                       ? "border-[#2F6FE4] bg-[#2F6FE4]/4 font-medium" 
                       : "border-[#DCE6F2] bg-[#F8FAFC] hover:border-[#2F6FE4]/40"
