@@ -105,6 +105,210 @@ const PROVINCES_DATA: ProvinceData[] = [
   { name: "ตาก", engName: "Tak", status: "red", headcount: 14, highPerfRatio: 5, successionCoverage: 22, retirementRisk: 35, region: "West" }
 ];
 
+interface ThailandSvgMapProps {
+  provinces: ProvinceData[];
+  selectedProvinceName: string;
+  selectedRegion: "All" | "North" | "Northeast" | "Central" | "South" | "East" | "West";
+  onSelectProvince: (provinceName: string) => void;
+}
+
+const SVG_PROVINCE_ALIASES: Record<string, string> = {
+  "Bangkok Metropolis": "Bangkok",
+  "Phra Nakhon Si Ayutthaya": "Ayutthaya",
+};
+
+function ThailandSvgMap({
+  provinces,
+  selectedProvinceName,
+  selectedRegion,
+  onSelectProvince,
+}: ThailandSvgMapProps) {
+  const mapRef = React.useRef<HTMLDivElement | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = React.useState(false);
+  const [isMapError, setIsMapError] = React.useState(false);
+
+  const provinceBySvgName = useMemo(() => {
+    const result = new Map<string, ProvinceData>();
+
+    provinces.forEach((province) => {
+      result.set(province.engName, province);
+    });
+
+    Object.entries(SVG_PROVINCE_ALIASES).forEach(([svgName, dataName]) => {
+      const matchedProvince = provinces.find((province) => province.engName === dataName);
+      if (matchedProvince) result.set(svgName, matchedProvince);
+    });
+
+    return result;
+  }, [provinces]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    async function loadThailandMap() {
+      try {
+        const response = await fetch("th.svg");
+        if (!response.ok) throw new Error(`Cannot load map: ${response.status}`);
+
+        const svgText = await response.text();
+        if (!isMounted || !mapRef.current) return;
+
+        mapRef.current.innerHTML = svgText;
+
+        const svg = mapRef.current.querySelector("svg");
+        if (!svg) throw new Error("SVG element not found");
+
+        svg.removeAttribute("width");
+        svg.removeAttribute("height");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", "Thailand province map");
+        svg.style.display = "block";
+        svg.style.maxWidth = "100%";
+        svg.style.maxHeight = "100%";
+
+        // ซ่อนจุด/label ที่ติดมากับ SVG เพื่อให้เหลือเฉพาะตัวแผนที่จังหวัด
+        svg.querySelector("#points")?.setAttribute("display", "none");
+        svg.querySelector("#label_points")?.setAttribute("display", "none");
+
+        setIsMapLoaded(true);
+        setIsMapError(false);
+      } catch (error) {
+        console.error("Cannot load Thailand SVG map:", error);
+        setIsMapLoaded(false);
+        setIsMapError(true);
+      }
+    }
+
+    loadThailandMap();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const root = mapRef.current;
+    if (!root || !isMapLoaded) return;
+
+    const paths = root.querySelectorAll<SVGPathElement>("path[name]");
+
+    paths.forEach((path) => {
+      const svgProvinceName = path.getAttribute("name") || "";
+      const province = provinceBySvgName.get(svgProvinceName);
+      const hasData = Boolean(province);
+      const isSelected =
+        province?.name === selectedProvinceName ||
+        province?.engName === selectedProvinceName ||
+        svgProvinceName === selectedProvinceName;
+      const isInSelectedRegion = selectedRegion === "All" || province?.region === selectedRegion;
+
+      path.style.transition = "fill 160ms ease, stroke 160ms ease, opacity 160ms ease, filter 160ms ease";
+      path.style.strokeLinejoin = "round";
+      path.style.strokeLinecap = "round";
+      path.style.cursor = isInSelectedRegion ? "pointer" : "default";
+      path.style.outline = "none";
+
+      // base color: ขาว/เทา ตาม requirement
+      path.style.fill = hasData ? "#FFFFFF" : "#EEF2F7";
+      path.style.stroke = "#CBD5E1";
+      path.style.strokeWidth = "1";
+      path.style.opacity = isInSelectedRegion ? "1" : "0.22";
+      path.style.filter = "none";
+
+      if (isSelected) {
+        path.style.fill = "#DBEAFE";
+        path.style.stroke = "#2563EB";
+        path.style.strokeWidth = "3";
+        path.style.opacity = "1";
+        path.style.filter = "drop-shadow(0 8px 14px rgba(37, 99, 235, 0.22))";
+      }
+
+      path.onmouseenter = () => {
+        if (!isInSelectedRegion || isSelected) return;
+        path.style.fill = hasData ? "#F0F7FF" : "#F8FAFC";
+        path.style.stroke = "#60A5FA";
+        path.style.strokeWidth = "2";
+        path.style.opacity = "1";
+      };
+
+      path.onmouseleave = () => {
+        if (!isInSelectedRegion || isSelected) return;
+        path.style.fill = hasData ? "#FFFFFF" : "#EEF2F7";
+        path.style.stroke = "#CBD5E1";
+        path.style.strokeWidth = "1";
+        path.style.opacity = isInSelectedRegion ? "1" : "0.22";
+        path.style.filter = "none";
+      };
+
+      path.onclick = () => {
+        if (!isInSelectedRegion) return;
+        onSelectProvince(province?.name || svgProvinceName);
+      };
+
+      path.setAttribute("tabindex", "0");
+      path.setAttribute("aria-label", province ? province.name : svgProvinceName);
+      path.onkeydown = (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        if (!isInSelectedRegion) return;
+        onSelectProvince(province?.name || svgProvinceName);
+      };
+
+      const oldTitle = path.querySelector("title");
+      oldTitle?.remove();
+
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = province
+        ? `${province.name} (${province.engName}) | พนักงาน ${province.headcount.toLocaleString()} คน`
+        : `${svgProvinceName} | ยังไม่มี mock data`;
+      path.appendChild(title);
+    });
+  }, [isMapLoaded, provinceBySvgName, selectedProvinceName, selectedRegion, onSelectProvince]);
+
+  return (
+    <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 shadow-sm">
+      <div className="absolute left-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-[10px] font-light text-slate-500 shadow-sm backdrop-blur">
+        คลิกจังหวัดเพื่อดูรายละเอียด
+      </div>
+
+      <div className="absolute right-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-[10px] font-light text-slate-500 shadow-sm backdrop-blur">
+        แผนที่ประเทศไทย
+      </div>
+
+      {isMapError && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-white/90 p-6 text-center">
+          <MapPin size={28} className="text-blue-500" />
+          <p className="text-xs font-medium text-slate-700">ไม่พบไฟล์แผนที่ประเทศไทย</p>
+          <p className="max-w-[320px] text-[11px] font-light text-slate-500">
+            กรุณาวางไฟล์ th.svg ไว้ที่ public/maps/th.svg แล้ว refresh หน้าอีกครั้ง
+          </p>
+        </div>
+      )}
+
+      <div ref={mapRef} className="absolute inset-0 flex items-center justify-center p-5" />
+
+      <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-2 rounded-2xl bg-white/90 px-3 py-2 shadow-sm backdrop-blur">
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+          <span className="h-2.5 w-2.5 rounded-full border border-slate-300 bg-white" />
+          <span>จังหวัด</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+          <span className="h-2.5 w-2.5 rounded-full border border-blue-500 bg-blue-100" />
+          <span>จังหวัดที่เลือก</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+          <span className="h-2.5 w-2.5 rounded-full border border-slate-300 bg-slate-200" />
+          <span>ยังไม่มีข้อมูล</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 interface ExecutiveOverviewProps {
   employees: Employee[];
   totalResignationsCount: number;
@@ -173,8 +377,23 @@ export default function ExecutiveOverview({
     return PROVINCES_DATA.filter(p => p.region === selectedMapRegion);
   }, [selectedMapRegion]);
 
-  const activeProvinceDetails = useMemo(() => {
-    return PROVINCES_DATA.find(p => p.name === selectedProvinceName) || PROVINCES_DATA[0];
+  const activeProvinceDetails = useMemo<ProvinceData>(() => {
+    const matchedProvince = PROVINCES_DATA.find(
+      (p) => p.name === selectedProvinceName || p.engName === selectedProvinceName
+    );
+
+    if (matchedProvince) return matchedProvince;
+
+    return {
+      name: selectedProvinceName,
+      engName: selectedProvinceName,
+      status: "green",
+      headcount: 0,
+      highPerfRatio: 0,
+      successionCoverage: 0,
+      retirementRisk: 0,
+      region: "Central",
+    };
   }, [selectedProvinceName]);
 
   const forecastModifier = useMemo(() => {
@@ -603,92 +822,14 @@ export default function ExecutiveOverview({
             {/* Map and details container */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mt-5">
               
-              {/* Stylized SVG Interactive Map (md:col-span-5) */}
-              <div className="md:col-span-5 bg-slate-50/50 rounded-2xl p-4 border border-slate-100 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden">
-                <span className="absolute top-2 left-2 text-[9px] font-light text-slate-400">
-                  คลิกโหนดภูมิภาคเพื่อคัดกรอง
-                </span>
-                
-                {/* SVG Schematic Map of Thailand */}
-                <svg width="100%" height="280" viewBox="0 0 200 320" className="drop-shadow-sm">
-                  {/* Grid Lines background */}
-                  <g opacity="0.15">
-                    <line x1="20" y1="0" x2="20" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="60" y1="0" x2="60" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="100" y1="0" x2="100" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="140" y1="0" x2="140" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="180" y1="0" x2="180" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
-                    
-                    <line x1="0" y1="40" x2="200" y2="40" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="0" y1="100" x2="200" y2="100" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="0" y1="160" x2="200" y2="160" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="0" y1="220" x2="200" y2="220" stroke="#94A3B8" strokeDasharray="2 2" />
-                    <line x1="0" y1="280" x2="200" y2="280" stroke="#94A3B8" strokeDasharray="2 2" />
-                  </g>
-
-                  {/* Connected schematic regional links */}
-                  <path d="M 85,60 L 150,100 L 100,140 L 130,185 L 100,140 L 60,130 L 85,60" fill="none" stroke="#E2E8F0" strokeWidth="2.5" />
-                  <path d="M 100,140 L 70,260 L 70,300" fill="none" stroke="#E2E8F0" strokeWidth="2.5" />
-
-                  {/* Region 1: North */}
-                  <g onClick={() => { setSelectedMapRegion("North"); const f = PROVINCES_DATA.find(p=>p.region==="North"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="85" cy="60" r={selectedMapRegion === "North" ? "22" : "18"} fill={selectedMapRegion === "North" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "North" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="85" y="63" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">เหนือ</text>
-                    {/* Status dot indicator for region performance (overall green/yellow) */}
-                    <circle cx="97" cy="48" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
-                  </g>
-
-                  {/* Region 2: Northeast */}
-                  <g onClick={() => { setSelectedMapRegion("Northeast"); const f = PROVINCES_DATA.find(p=>p.region==="Northeast"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="150" cy="100" r={selectedMapRegion === "Northeast" ? "24" : "20"} fill={selectedMapRegion === "Northeast" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "Northeast" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="150" y="103" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">อีสาน</text>
-                    <circle cx="164" cy="88" r="4.5" className="fill-amber-500 stroke-white stroke-2" />
-                  </g>
-
-                  {/* Region 3: Central */}
-                  <g onClick={() => { setSelectedMapRegion("Central"); const f = PROVINCES_DATA.find(p=>p.region==="Central"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="100" cy="140" r={selectedMapRegion === "Central" ? "22" : "18"} fill={selectedMapRegion === "Central" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "Central" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="100" y="143" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">กลาง</text>
-                    <circle cx="112" cy="128" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
-                  </g>
-
-                  {/* Region 4: West */}
-                  <g onClick={() => { setSelectedMapRegion("West"); const f = PROVINCES_DATA.find(p=>p.region==="West"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="60" cy="130" r={selectedMapRegion === "West" ? "20" : "16"} fill={selectedMapRegion === "West" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "West" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="60" y="133" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ตก</text>
-                    <circle cx="70" cy="118" r="4.5" className="fill-rose-500 stroke-white stroke-2" />
-                  </g>
-
-                  {/* Region 5: East */}
-                  <g onClick={() => { setSelectedMapRegion("East"); const f = PROVINCES_DATA.find(p=>p.region==="East"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="130" cy="185" r={selectedMapRegion === "East" ? "20" : "16"} fill={selectedMapRegion === "East" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "East" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="130" y="188" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ออก</text>
-                    <circle cx="140" cy="173" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
-                  </g>
-
-                  {/* Region 6: South */}
-                  <g onClick={() => { setSelectedMapRegion("South"); const f = PROVINCES_DATA.find(p=>p.region==="South"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
-                    <circle cx="70" cy="260" r={selectedMapRegion === "South" ? "22" : "18"} fill={selectedMapRegion === "South" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "South" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
-                    <text x="70" y="263" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ใต้</text>
-                    <circle cx="82" cy="248" r="4.5" className="fill-amber-500 stroke-white stroke-2" />
-                  </g>
-                </svg>
-
-                {/* Status Legend */}
-                <div className="flex justify-center gap-3 w-full border-t border-slate-100 pt-3 text-[9px] text-slate-500 font-light">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span>On Target (ผ่านเกณฑ์)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                    <span>ต่ำเป้า 20%</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                    <span>ต่ำเป้า 50%</span>
-                  </div>
-                </div>
+              {/* Real Thailand SVG Interactive Map */}
+              <div className="md:col-span-5">
+                <ThailandSvgMap
+                  provinces={PROVINCES_DATA}
+                  selectedProvinceName={selectedProvinceName}
+                  selectedRegion={selectedMapRegion}
+                  onSelectProvince={setSelectedProvinceName}
+                />
               </div>
 
               {/* Province list and Details Panel (md:col-span-7) */}
