@@ -516,70 +516,242 @@ div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-
 }
 
 /* ==========================================================================
-   FIX FILTER BAR ICON + TEXT OVERLAP
+   FILTER BAR STANDARD FIELD RESET - FINAL
+   Keep FilterBar fields as ONE clean field, not nested/overlapped fields.
+   This works with FilterBar.fixed-final.tsx.
    ========================================================================== */
 
-.theme-light #filter-bar-container input,
-.theme-light #filter-bar-container select,
-.theme-dark #filter-bar-container input,
-.theme-dark #filter-bar-container select {
-  height: 48px !important;
-  min-height: 48px !important;
-  line-height: 48px !important;
-  padding-left: 52px !important;
-  padding-right: 48px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0 !important;
+/* Panel spacing only. Do not style native input/select globally here. */
+.theme-light #filter-bar-container,
+.theme-dark #filter-bar-container {
+  padding: 24px 28px !important;
+}
+
+/* Filter labels */
+.theme-light #filter-bar-container .filter-label,
+.theme-dark #filter-bar-container .filter-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 0 8px 0 !important;
+  min-height: 20px !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  font-weight: 500 !important;
+  color: #64748B !important;
+}
+
+.theme-light #filter-bar-container .filter-label svg,
+.theme-dark #filter-bar-container .filter-label svg {
+  width: 15px !important;
+  height: 15px !important;
+  flex: 0 0 15px !important;
+}
+
+/* The visible field wrapper */
+.theme-light #filter-bar-container .filter-standard-field,
+.theme-dark #filter-bar-container .filter-standard-field {
+  position: relative !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  border: 1px solid #D9E5F2 !important;
   border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 8px 22px -18px rgba(30, 82, 182, 0.36) !important;
+  overflow: hidden !important;
   box-sizing: border-box !important;
 }
 
-.theme-light #filter-bar-container input[type="text"],
-.theme-light #filter-bar-container input[type="search"],
-.theme-dark #filter-bar-container input[type="text"],
-.theme-dark #filter-bar-container input[type="search"] {
-  padding-left: 58px !important;
-  padding-right: 110px !important;
+.theme-light #filter-bar-container .filter-standard-field:hover,
+.theme-dark #filter-bar-container .filter-standard-field:hover {
+  border-color: #9FC1F7 !important;
 }
 
-.theme-light #filter-bar-container select,
-.theme-dark #filter-bar-container select {
-  padding-left: 52px !important;
-  padding-right: 44px !important;
+.theme-light #filter-bar-container .filter-standard-field:focus-within,
+.theme-light #filter-bar-container .filter-standard-field.is-active,
+.theme-dark #filter-bar-container .filter-standard-field:focus-within,
+.theme-dark #filter-bar-container .filter-standard-field.is-active {
+  border-color: #2F6FE4 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 4px rgba(47, 111, 228, 0.11), 0 12px 28px -20px rgba(47, 111, 228, 0.46) !important;
+}
+
+/* Left icon block */
+.theme-light #filter-bar-container .filter-standard-icon,
+.theme-dark #filter-bar-container .filter-standard-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 13px !important;
+  color: #52627A !important;
+  background: #F3F7FC !important;
+  line-height: 1 !important;
+  flex: 0 0 32px !important;
+}
+
+.theme-light #filter-bar-container .filter-standard-icon svg,
+.theme-dark #filter-bar-container .filter-standard-icon svg {
+  width: 17px !important;
+  height: 17px !important;
+  display: block !important;
+  flex: 0 0 17px !important;
+}
+
+/* Native input/select inside wrapper: reset ALL global styles so it does not become a second visible field */
+.theme-light #filter-bar-container .filter-standard-field > input.filter-standard-input,
+.theme-light #filter-bar-container .filter-standard-field > select.filter-standard-select,
+.theme-dark #filter-bar-container .filter-standard-field > input.filter-standard-input,
+.theme-dark #filter-bar-container .filter-standard-field > select.filter-standard-select {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+
+  color: #1E293B !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 46px !important;
+  letter-spacing: 0 !important;
+  vertical-align: middle !important;
+
   appearance: none !important;
   -webkit-appearance: none !important;
   background-image: none !important;
+  box-sizing: border-box !important;
+  transform: none !important;
 }
 
-.theme-light #filter-bar-container .absolute.left-3,
-.theme-light #filter-bar-container .absolute.left-4,
-.theme-light #filter-bar-container .absolute.left-5,
-.theme-dark #filter-bar-container .absolute.left-3,
-.theme-dark #filter-bar-container .absolute.left-4,
-.theme-dark #filter-bar-container .absolute.left-5 {
-  left: 18px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: 2 !important;
+/* Select cursor + no native arrow */
+.theme-light #filter-bar-container .filter-standard-field > select.filter-standard-select,
+.theme-dark #filter-bar-container .filter-standard-field > select.filter-standard-select {
+  cursor: pointer !important;
+  padding-right: 2px !important;
+  text-indent: 0 !important;
+}
+
+/* Placeholder */
+.theme-light #filter-bar-container .filter-standard-field > input.filter-standard-input::placeholder,
+.theme-dark #filter-bar-container .filter-standard-field > input.filter-standard-input::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* Right chevron */
+.theme-light #filter-bar-container .filter-standard-chevron,
+.theme-dark #filter-bar-container .filter-standard-chevron {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  flex: 0 0 18px !important;
+  color: #64748B !important;
   pointer-events: none !important;
+  display: block !important;
 }
 
-.theme-light #filter-bar-container .absolute.right-3,
-.theme-light #filter-bar-container .absolute.right-4,
-.theme-light #filter-bar-container .absolute.right-5,
-.theme-dark #filter-bar-container .absolute.right-3,
-.theme-dark #filter-bar-container .absolute.right-4,
-.theme-dark #filter-bar-container .absolute.right-5 {
-  right: 16px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: 2 !important;
+/* Search shortcut and clear */
+.theme-light #filter-bar-container .filter-search-shortcut,
+.theme-dark #filter-bar-container .filter-search-shortcut {
+  height: 28px !important;
+  min-width: 70px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  border-radius: 12px !important;
+  background: #F1F5F9 !important;
+  color: #64748B !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  flex: 0 0 auto !important;
 }
 
-.theme-light #filter-bar-container button,
-.theme-dark #filter-bar-container button {
+.theme-light #filter-bar-container .filter-clear-search,
+.theme-dark #filter-bar-container .filter-clear-search {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #94A3B8 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+  flex: 0 0 28px !important;
+}
+
+/* Action buttons */
+.theme-light #filter-bar-container .filter-action-button,
+.theme-light #filter-bar-container .filter-toggle-button,
+.theme-dark #filter-bar-container .filter-action-button,
+.theme-dark #filter-bar-container .filter-toggle-button {
+  height: 46px !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 0 18px !important;
+  border-radius: 18px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.theme-light #filter-bar-container .filter-action-button svg,
+.theme-light #filter-bar-container .filter-toggle-button svg,
+.theme-dark #filter-bar-container .filter-action-button svg,
+.theme-dark #filter-bar-container .filter-toggle-button svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  flex: 0 0 16px !important;
+}
+
+/* Chips */
+.theme-light #filter-bar-container .filter-chip-remove,
+.theme-light #filter-bar-container .filter-clear-all,
+.theme-dark #filter-bar-container .filter-chip-remove,
+.theme-dark #filter-bar-container .filter-clear-all {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+}
+
+/* Remove old absolute field overrides from previous versions */
+.theme-light #filter-bar-container .filter-standard-field .absolute,
+.theme-dark #filter-bar-container .filter-standard-field .absolute {
+  position: static !important;
+  transform: none !important;
 }

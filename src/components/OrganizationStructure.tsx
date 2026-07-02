@@ -3,84 +3,192 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Employee } from "../data/mockData";
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Cell, 
-  CartesianGrid, 
-  PieChart, 
+import {
+  ResponsiveContainer,
+  PieChart,
   Pie,
-  Legend
+  Cell,
+  Tooltip,
 } from "recharts";
-import { 
-  Layers, 
-  GitBranch, 
-  Building, 
-  Search, 
-  ChevronRight, 
-  ChevronDown, 
-  MapPin, 
-  Activity, 
-  Award, 
-  TrendingUp, 
-  ArrowUpRight, 
-  Sparkles,
-  Users,
-  Grid,
-  ShieldAlert,
-  UserCheck,
-  Calendar,
+import {
+  Activity,
+  Award,
   Briefcase,
+  Building,
+  Calendar,
+  ChevronRight,
+  Grid,
   Hourglass,
-  Check,
-  Info
+  Layers,
+  MapPin,
+  Search,
+  ShieldAlert,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
+  Users,
 } from "lucide-react";
 
 interface OrganizationStructureProps {
   employees: Employee[];
 }
 
+type OrgDrillDownModel = Record<
+  string,
+  {
+    count: number;
+    groups: Record<
+      string,
+      {
+        count: number;
+        departments: Record<string, number>;
+      }
+    >;
+  }
+>;
+
+const getLevelNumber = (level: string) => {
+  const levelNumber = parseInt(level.replace(/[^0-9]/g, ""), 10);
+  return Number.isFinite(levelNumber) ? levelNumber : 1;
+};
+
+const formatNumber = (value: number) => value.toLocaleString("th-TH");
+
+const SectionHeader = ({
+  icon,
+  eyebrow,
+  title,
+  description,
+  right,
+}: {
+  icon: React.ReactNode;
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  right?: React.ReactNode;
+}) => (
+  <div className="mb-5 flex items-start justify-between gap-4">
+    <div className="flex min-w-0 items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-sm">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        {eyebrow && (
+          <p className="text-[10px] font-medium uppercase tracking-normal text-blue-600">
+            {eyebrow}
+          </p>
+        )}
+        <h3 className="text-[15px] font-medium leading-snug text-slate-900">
+          {title}
+        </h3>
+        {description && (
+          <p className="mt-1 max-w-2xl text-[11px] font-light leading-relaxed text-slate-500">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+const MetricCard = ({
+  title,
+  subtitle,
+  value,
+  percent,
+  icon,
+  accent,
+  selected,
+  onClick,
+}: {
+  title: string;
+  subtitle: string;
+  value: number;
+  percent: string;
+  icon: React.ReactNode;
+  accent: "blue" | "rose" | "emerald" | "violet" | "amber";
+  selected?: boolean;
+  onClick?: () => void;
+}) => {
+  const accentStyles = {
+    blue: "from-blue-500 to-indigo-500 text-blue-600 bg-blue-50 border-blue-100",
+    rose: "from-rose-500 to-pink-500 text-rose-600 bg-rose-50 border-rose-100",
+    emerald: "from-emerald-500 to-teal-500 text-emerald-600 bg-emerald-50 border-emerald-100",
+    violet: "from-violet-500 to-purple-500 text-violet-600 bg-violet-50 border-violet-100",
+    amber: "from-amber-500 to-orange-500 text-amber-600 bg-amber-50 border-amber-100",
+  }[accent];
+
+  const [gradient, , textColor, bgColor, borderColor] = accentStyles.split(" ");
+  const gradientTo = accentStyles.split(" ")[1];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative overflow-hidden rounded-[24px] border bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+        selected ? "border-blue-300 ring-4 ring-blue-100" : "border-slate-100"
+      }`}
+    >
+      <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${gradient} ${gradientTo}`} />
+      <div className="flex items-start justify-between gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${bgColor} ${textColor} border ${borderColor}`}>
+          {icon}
+        </div>
+        <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
+          {percent}
+        </span>
+      </div>
+      <div className="mt-4">
+        <p className="text-[11px] font-medium leading-snug text-slate-500">{title}</p>
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className="text-[28px] font-medium leading-none text-slate-900">
+            {formatNumber(value)}
+          </span>
+          <span className="text-[11px] font-light text-slate-400">คน</span>
+        </div>
+        <p className="mt-2 line-clamp-2 text-[10px] font-light leading-relaxed text-slate-500">
+          {subtitle}
+        </p>
+      </div>
+    </button>
+  );
+};
+
 export default function OrganizationStructure({ employees }: OrganizationStructureProps) {
-  
-  // Drill-down selection states
   const [selectedBusinessLine, setSelectedBusinessLine] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-
-  // Strategic Planning State (Calendar year 2026, 2027, 2028, 2029)
   const [selectedOrgYear, setSelectedOrgYear] = useState<number>(2026);
+  const [selectedMetric, setSelectedMetric] = useState<string>("headcount");
 
-  // DYNAMIC COMPONENT STATE AGER: Ages employees realistically based on chosen year
   const yearFilteredEmployees = useMemo(() => {
     const yearDiff = selectedOrgYear - 2026;
     if (yearDiff === 0) return employees;
-    return employees.map(emp => {
-      const aged = emp.age + yearDiff;
-      const agedTenure = emp.tenure + yearDiff;
-      
-      // Let's also predictively adjust succession statuses: as time passes, some "Ready 1-2 Years" become "Ready Now"
-      let adjustedSuccession = emp.successionStatus;
+
+    return employees.map((emp) => {
+      let adjustedSuccession: Employee["successionStatus"] = emp.successionStatus;
+
       if (yearDiff >= 2 && emp.successionStatus === "Ready 1-2 Years") {
         adjustedSuccession = "Ready Now";
       }
-      
+
+      if (yearDiff >= 3 && emp.successionStatus === "Ready 3-5 Years") {
+        adjustedSuccession = "Ready 1-2 Years";
+      }
+
       return {
         ...emp,
-        age: aged,
-        tenure: agedTenure,
-        successionStatus: adjustedSuccession
+        age: emp.age + yearDiff,
+        tenure: emp.tenure + yearDiff,
+        successionStatus: adjustedSuccession,
       };
     });
   }, [employees, selectedOrgYear]);
 
   const totalCount = yearFilteredEmployees.length;
 
-  // General counts & metrics computed on aged employees
   const orgStats = useMemo(() => {
     const businessLinesSet = new Set<string>();
     const groupsSet = new Set<string>();
@@ -88,14 +196,14 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
     const zonesSet = new Set<string>();
     const lineCounts: Record<string, number> = {};
 
-    yearFilteredEmployees.forEach(e => {
-      if (e.businessLine) {
-        businessLinesSet.add(e.businessLine);
-        lineCounts[e.businessLine] = (lineCounts[e.businessLine] || 0) + 1;
+    yearFilteredEmployees.forEach((employee) => {
+      if (employee.businessLine) {
+        businessLinesSet.add(employee.businessLine);
+        lineCounts[employee.businessLine] = (lineCounts[employee.businessLine] || 0) + 1;
       }
-      if (e.group) groupsSet.add(e.group);
-      if (e.department) departmentsSet.add(e.department);
-      if (e.zone && e.zone !== "สำนักงานใหญ่") zonesSet.add(e.zone);
+      if (employee.group) groupsSet.add(employee.group);
+      if (employee.department) departmentsSet.add(employee.department);
+      if (employee.zone && employee.zone !== "สำนักงานใหญ่") zonesSet.add(employee.zone);
     });
 
     let maxLineName = "-";
@@ -113,68 +221,95 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
       totalDepartments: departmentsSet.size,
       totalZones: zonesSet.size || 5,
       maxLineName,
-      maxLineCount
+      maxLineCount,
     };
   }, [yearFilteredEmployees]);
 
-  // Retirement aged group list (age >= 55) sorted closest to 60 (retirement)
   const retirementCohort = useMemo(() => {
     return yearFilteredEmployees
-      .filter(e => e.age >= 55)
-      .map(e => {
-        const yearsToRetire = Math.max(0, 60 - e.age);
-        const retireYear = selectedOrgYear + yearsToRetire;
+      .filter((employee) => employee.age >= 55)
+      .map((employee) => {
+        const yearsToRetire = Math.max(0, 60 - employee.age);
         return {
-          ...e,
+          ...employee,
           yearsToRetire,
-          retireYear
+          retireYear: selectedOrgYear + yearsToRetire,
         };
       })
-      .sort((a, b) => b.age - a.age); // Older people first
+      .sort((a, b) => b.age - a.age);
   }, [yearFilteredEmployees, selectedOrgYear]);
 
-  // Employee level pyramid calculation
   const pyramidBands = useMemo(() => {
-    let executiveCount = 0; // L9 - L11
-    let middleCount = 0;    // L6 - L8
-    let juniorCount = 0;    // L4 - L5
-    let professionalCount = 0; // L1 - L3
+    let executiveCount = 0;
+    let managementCount = 0;
+    let seniorCount = 0;
+    let operationCount = 0;
 
-    yearFilteredEmployees.forEach(e => {
-      const lvlStr = e.level.replace(/[^0-9]/g, "");
-      const lvl = parseInt(lvlStr) || 1;
-      if (lvl >= 9) executiveCount++;
-      else if (lvl >= 6) middleCount++;
-      else if (lvl >= 4) juniorCount++;
-      else professionalCount++;
+    yearFilteredEmployees.forEach((employee) => {
+      const level = getLevelNumber(employee.level);
+      if (level >= 9) executiveCount += 1;
+      else if (level >= 6) managementCount += 1;
+      else if (level >= 4) seniorCount += 1;
+      else operationCount += 1;
     });
 
-    const maxVal = Math.max(executiveCount, middleCount, juniorCount, professionalCount, 1);
-
     return [
-      { bandName: "ระดับบริหารระดับสูง (L9-L11)", count: executiveCount, percent: Math.round((executiveCount / totalCount) * 100), widthPercent: Math.max(15, Math.round((executiveCount / maxVal) * 100)), color: "from-indigo-600 to-violet-600", text: "Apex Layer" },
-      { bandName: "ผู้จัดการและหัวหน้าฝ่าย (L6-L8)", count: middleCount, percent: Math.round((middleCount / totalCount) * 100), widthPercent: Math.max(30, Math.round((middleCount / maxVal) * 100)), color: "from-blue-600 to-indigo-600", text: "Management" },
-      { bandName: "หัวหน้างานและเจ้าหน้าที่อาวุโส (L4-L5)", count: juniorCount, percent: Math.round((juniorCount / totalCount) * 100), widthPercent: Math.max(45, Math.round((juniorCount / maxVal) * 100)), color: "from-teal-500 to-emerald-600", text: "Senior Professional" },
-      { bandName: "เจ้าหน้าที่ปฏิบัติการ (L1-L3)", count: professionalCount, percent: Math.round((professionalCount / totalCount) * 100), widthPercent: 100, color: "from-cyan-500 to-blue-500", text: "Professional Base" }
+      {
+        id: "apex",
+        label: "L9-L11",
+        title: "ผู้บริหารระดับสูง",
+        count: executiveCount,
+        percent: Math.round((executiveCount / (totalCount || 1)) * 100),
+        width: 42,
+        gradient: "linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)",
+        dot: "bg-violet-500",
+      },
+      {
+        id: "management",
+        label: "L6-L8",
+        title: "ผู้จัดการ / หัวหน้าฝ่าย",
+        count: managementCount,
+        percent: Math.round((managementCount / (totalCount || 1)) * 100),
+        width: 62,
+        gradient: "linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)",
+        dot: "bg-blue-500",
+      },
+      {
+        id: "senior",
+        label: "L4-L5",
+        title: "อาวุโส / หัวหน้างาน",
+        count: seniorCount,
+        percent: Math.round((seniorCount / (totalCount || 1)) * 100),
+        width: 80,
+        gradient: "linear-gradient(135deg, #14B8A6 0%, #10B981 100%)",
+        dot: "bg-emerald-500",
+      },
+      {
+        id: "base",
+        label: "L1-L3",
+        title: "ฐานปฏิบัติการ",
+        count: operationCount,
+        percent: Math.round((operationCount / (totalCount || 1)) * 100),
+        width: 96,
+        gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
+        dot: "bg-cyan-500",
+      },
     ];
   }, [yearFilteredEmployees, totalCount]);
 
-  // Succession counts
   const successionStats = useMemo(() => {
     let readyNow = 0;
-    let readySoon = 0; // 1-2 Years
+    let readySoon = 0;
     let risk = 0;
     let noSuccessor = 0;
 
-    yearFilteredEmployees.forEach(e => {
-      // Look at high level roles only L9-L11 for succession
-      const lvlStr = e.level.replace(/[^0-9]/g, "");
-      const lvl = parseInt(lvlStr) || 1;
-      if (lvl >= 9) {
-        if (e.successionStatus === "Ready Now") readyNow++;
-        else if (e.successionStatus === "Ready 1-2 Years") readySoon++;
-        else if (e.successionStatus === "Risk") risk++;
-        else noSuccessor++;
+    yearFilteredEmployees.forEach((employee) => {
+      const level = getLevelNumber(employee.level);
+      if (level >= 9) {
+        if (employee.successionStatus === "Ready Now") readyNow += 1;
+        else if (employee.successionStatus === "Ready 1-2 Years") readySoon += 1;
+        else if (employee.successionStatus === "Ready 3-5 Years") risk += 1;
+        else noSuccessor += 1;
       }
     });
 
@@ -189,555 +324,461 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
       readyNowPct: Math.round((readyNow / totalKeyRoles) * 100),
       readySoonPct: Math.round((readySoon / totalKeyRoles) * 100),
       riskPct: Math.round((risk / totalKeyRoles) * 100),
-      noSuccessorPct: Math.round((noSuccessor / totalKeyRoles) * 100)
+      noSuccessorPct: Math.round((noSuccessor / totalKeyRoles) * 100),
     };
   }, [yearFilteredEmployees]);
 
-  // Chart data for succession donut
   const successionChartData = useMemo(() => {
     return [
-      { name: "พร้อมปฏิบัติทันที", value: successionStats.readyNow, color: "#10B981" },
+      { name: "พร้อมทันที", value: successionStats.readyNow, color: "#10B981" },
       { name: "พร้อมใน 1-2 ปี", value: successionStats.readySoon, color: "#3B82F6" },
-      { name: "มีความเสี่ยงขาดแคลน", value: successionStats.risk, color: "#F59E0B" },
-      { name: "ไม่มีผู้สืบทอด", value: successionStats.noSuccessor, color: "#EF4444" }
-    ].filter(d => d.value > 0);
+      { name: "ต้องพัฒนา", value: successionStats.risk, color: "#F59E0B" },
+      { name: "ไม่มีผู้สืบทอด", value: successionStats.noSuccessor, color: "#F43F5E" },
+    ].filter((item) => item.value > 0);
   }, [successionStats]);
 
-  // Business lines data list for directory matching
-  const businessLinesDataList = useMemo(() => {
-    const counts: Record<string, number> = {};
-    yearFilteredEmployees.forEach(e => {
-      counts[e.businessLine] = (counts[e.businessLine] || 0) + 1;
+  const drillDownModel = useMemo<OrgDrillDownModel>(() => {
+    const model: OrgDrillDownModel = {};
+
+    yearFilteredEmployees.forEach((employee) => {
+      const line = employee.businessLine || "ไม่ระบุสายงาน";
+      const group = employee.group || "ไม่ระบุกลุ่มงาน";
+      const department = employee.department || "ไม่ระบุหน่วยงาน";
+
+      if (!model[line]) model[line] = { count: 0, groups: {} };
+      model[line].count += 1;
+
+      if (!model[line].groups[group]) {
+        model[line].groups[group] = { count: 0, departments: {} };
+      }
+      model[line].groups[group].count += 1;
+      model[line].groups[group].departments[department] =
+        (model[line].groups[group].departments[department] || 0) + 1;
     });
 
-    return Object.entries(counts)
-      .map(([name, value]) => ({
-        name: name.replace("สายงาน", ""),
-        fullName: name,
-        จำนวนคน: value,
-        เปอร์เซ็นต์: totalCount > 0 ? Math.round((value / totalCount) * 100 * 10) / 10 : 0
-      }))
-      .sort((a, b) => b.จำนวนคน - a.จำนวนคน);
-  }, [yearFilteredEmployees, totalCount]);
-
-  // Structured Drill-down data builder
-  const drillDownModel = useMemo(() => {
-    const map: Record<string, {
-      count: number;
-      groups: Record<string, {
-        count: number;
-        departments: Record<string, number>;
-      }>;
-    }> = {};
-
-    yearFilteredEmployees.forEach(e => {
-      const line = e.businessLine;
-      const grp = e.group;
-      const dept = e.department;
-
-      if (!map[line]) {
-        map[line] = { count: 0, groups: {} };
-      }
-      map[line].count++;
-
-      if (!map[line].groups[grp]) {
-        map[line].groups[grp] = { count: 0, departments: {} };
-      }
-      map[line].groups[grp].count++;
-
-      if (!map[line].groups[grp].departments[dept]) {
-        map[line].groups[grp].departments[dept] = 0;
-      }
-      map[line].groups[grp].departments[dept]++;
-    });
-
-    return map;
+    return model;
   }, [yearFilteredEmployees]);
 
-  const handleLineClick = (lineName: string) => {
-    if (selectedBusinessLine === lineName) {
-      setSelectedBusinessLine(null);
-      setSelectedGroup(null);
-    } else {
-      setSelectedBusinessLine(lineName);
-      setSelectedGroup(null);
-    }
+  const businessLineItems = useMemo(() => {
+    return Object.entries(drillDownModel)
+      .map(([name, item]) => ({ name, count: item.count }))
+      .sort((a, b) => b.count - a.count);
+  }, [drillDownModel]);
+
+  const selectedLineModel = selectedBusinessLine ? drillDownModel[selectedBusinessLine] : undefined;
+  const groupItems = selectedLineModel
+    ? Object.entries(selectedLineModel.groups)
+        .map(([name, item]) => ({ name, count: item.count }))
+        .sort((a, b) => b.count - a.count)
+    : [];
+
+  const selectedGroupModel = selectedLineModel && selectedGroup ? selectedLineModel.groups[selectedGroup] : undefined;
+  const departmentItems = selectedGroupModel
+    ? Object.entries(selectedGroupModel.departments)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+    : [];
+
+  const insightCards = [
+    {
+      title: "Retirement Risk",
+      value: `${formatNumber(retirementCohort.length)} คน`,
+      detail: "ควรเตรียมแผนทดแทนก่อนครบกำหนดเกษียณ",
+      color: "border-rose-100 bg-rose-50 text-rose-700",
+      icon: <ShieldAlert size={15} />,
+    },
+    {
+      title: "Succession Gap",
+      value: `${formatNumber(successionStats.noSuccessor)} ตำแหน่ง`,
+      detail: "ตำแหน่งหลักที่ยังไม่มีผู้สืบทอดชัดเจน",
+      color: "border-amber-100 bg-amber-50 text-amber-700",
+      icon: <Hourglass size={15} />,
+    },
+    {
+      title: "Structure Focus",
+      value: orgStats.maxLineName.replace("สายงาน", ""),
+      detail: `สายงานกำลังพลมากที่สุด ${formatNumber(orgStats.maxLineCount)} คน`,
+      color: "border-blue-100 bg-blue-50 text-blue-700",
+      icon: <TrendingUp size={15} />,
+    },
+    {
+      title: "Readiness Target",
+      value: `${successionStats.readyNowPct + successionStats.readySoonPct}%`,
+      detail: "เป้าหมายรวม Ready Now และ Ready 1-2 ปี มากกว่า 70%",
+      color: "border-emerald-100 bg-emerald-50 text-emerald-700",
+      icon: <Award size={15} />,
+    },
+  ];
+
+  const handleBusinessLineClick = (lineName: string) => {
+    setSelectedBusinessLine((current) => (current === lineName ? null : lineName));
+    setSelectedGroup(null);
   };
 
   const handleGroupClick = (groupName: string) => {
-    if (selectedGroup === groupName) {
-      setSelectedGroup(null);
-    } else {
-      setSelectedGroup(groupName);
-    }
+    setSelectedGroup((current) => (current === groupName ? null : groupName));
   };
-
-  // Standardized KPI Cards mapping (matching ExecutiveOverview tab style perfectly!)
-  const standardizedKpiCards = [
-    {
-      id: "headcount",
-      title: `กำลังพลคาดการณ์ (ปี ${selectedOrgYear})`,
-      subtitle: "Projected Headcount",
-      value: totalCount,
-      percent: "100%",
-      badge: "อิงตามเป้าหมายปีปฏิทิน",
-      gradient: "from-blue-500/10 to-indigo-500/10",
-      icon: <Users size={18} className="text-blue-600" />,
-      colorClass: "text-blue-600"
-    },
-    {
-      id: "retirement",
-      title: "พนักงานอายุ 55 ปีขึ้นไป",
-      subtitle: "Near Retirement Risk",
-      value: retirementCohort.length,
-      percent: `${Math.round((retirementCohort.length / (totalCount || 1)) * 100)}%`,
-      badge: "กลุ่มเฝ้าระวังการทดแทน",
-      gradient: "from-rose-500/10 to-pink-500/10",
-      icon: <ShieldAlert size={18} className="text-rose-600" />,
-      colorClass: "text-rose-600"
-    },
-    {
-      id: "succession",
-      title: "ความพร้อมสืบทอด (Ready Now)",
-      subtitle: "Succession Security",
-      value: successionStats.readyNow,
-      percent: `${successionStats.readyNowPct}%`,
-      badge: "ผู้บริหารสืบทอดพร้อมทันที",
-      gradient: "from-purple-500/10 to-violet-500/10",
-      icon: <UserCheck size={18} className="text-purple-600" />,
-      colorClass: "text-purple-600"
-    },
-    {
-      id: "middle_mgmt",
-      title: "ผู้จัดการยุทธศาสตร์ (L6-L8)",
-      subtitle: "Strategic Middle Managers",
-      value: pyramidBands[1].count,
-      percent: `${pyramidBands[1].percent}%`,
-      badge: "แกนหลักประสานกลยุทธ์",
-      gradient: "from-teal-500/10 to-emerald-500/10",
-      icon: <Briefcase size={18} className="text-teal-600" />,
-      colorClass: "text-teal-600"
-    }
-  ];
 
   return (
     <div className="space-y-6">
-
-      {/* Dynamic strategic planning bar */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-[28px] p-6 text-white shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-5 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute right-0 top-0 w-32 h-32 rounded-full bg-white/5 -mr-8 -mt-8" />
-        <div className="absolute left-1/3 bottom-0 w-48 h-48 rounded-full bg-blue-500/10 -ml-8 -mb-20" />
-
-        <div className="space-y-1.5 z-10">
-          <div className="flex items-center gap-2">
-            <span className="bg-white/15 text-white text-[10px] px-2.5 py-0.5 rounded-full border border-white/10 font-sans tracking-wide">
-              STRATEGIC CALENDAR YEAR SELECTOR
-            </span>
-            <span className="flex items-center gap-1 text-[10px] text-teal-300 font-medium">
-              <Sparkles size={11} className="animate-pulse" />
-              <span>คาดการณ์ผลกระทบองค์กรรายปีปฏิทิน</span>
-            </span>
-          </div>
-          <h2 className="text-base font-medium text-white tracking-tight">
-            สลับปีปฏิทินเพื่อวิเคราะห์โครงสร้างองค์กรล่วงหน้า (Workforce Year Selection)
-          </h2>
-          <p className="text-[11px] text-blue-100 font-light max-w-2xl leading-relaxed">
-            เลือกปีปฏิทินเพื่อทดสอบจำลองภาวะอายุกำลังพลเกษียณ (Aged Retirement) ความพร้อมผู้สืบทอดอัตโนมัติตามระยะทางเวลา
-          </p>
-        </div>
-
-        {/* Year Selectors */}
-        <div className="flex flex-wrap items-center gap-2 z-10">
-          {[
-            { year: 2026, label: "2569 (ปัจจุบัน)", desc: "สถิติจริงกำลังคนปัจจุบัน" },
-            { year: 2027, label: "2570 (+1 ปี)", desc: "คำนวณอายุพนักงานเพิ่ม 1 ปี" },
-            { year: 2028, label: "2571 (+2 ปี)", desc: "คำนวณอายุพนักงานเพิ่ม 2 ปี" },
-            { year: 2029, label: "2572 (+3 ปี)", desc: "คำนวณจำลองสิทธิ์เกษียณล่วงหน้า" }
-          ].map((item) => {
-            const isSelected = selectedOrgYear === item.year;
-            return (
-              <button
-                key={item.year}
-                onClick={() => {
-                  setSelectedOrgYear(item.year);
-                  // Reset select directory tree to avoid mismatch
-                  setSelectedBusinessLine(null);
-                  setSelectedGroup(null);
-                }}
-                className={`text-left p-3 rounded-2xl transition-all border cursor-pointer shrink-0 min-w-[130px] ${
-                  isSelected
-                    ? "bg-white text-slate-800 border-transparent shadow-md shadow-blue-900/15 ring-2 ring-blue-500/10"
-                    : "bg-white/10 text-white border-white/10 hover:bg-white/15"
-                }`}
-              >
-                <p className="text-[11px] font-medium leading-tight">{item.label}</p>
-                <p className={`text-[9px] mt-0.5 font-light ${isSelected ? "text-slate-500" : "text-blue-100"}`}>
-                  {item.desc}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Standardized KPI Row matching ExecutiveOverview */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
-            <h2 className="text-sm font-medium text-slate-800 tracking-tight">
-              ตัวบ่งชี้ประสิทธิภาพโครงสร้างกำลังพลและแผนผู้สืบทอด (Standard KPIs - ปี {selectedOrgYear})
-            </h2>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-light">
-            <Info size={11} />
-            <span>ข้อมูลผันแปรตามสภาวะอายุล่วงหน้าของปีที่เลือก</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {standardizedKpiCards.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white border border-slate-100/90 shadow-xs hover:shadow-md text-left p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300"
-            >
-              {/* Decorative background glow */}
-              <div className="absolute -right-6 -bottom-6 w-16 h-16 rounded-full opacity-10 bg-blue-600 text-blue-600" />
-              
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-xl bg-slate-50 text-slate-500 group-hover:bg-slate-100 shrink-0">
-                  {item.icon}
-                </div>
-                <span className="text-[9.5px] font-sans font-medium bg-slate-50 text-slate-400 border border-slate-200/30 px-2 py-0.5 rounded-full uppercase">
-                  KPI
-                </span>
-              </div>
-
-              <div className="mt-4">
-                <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">
-                  {item.title}
-                </p>
-                <p className="text-[9px] font-light text-slate-400 truncate">
-                  {item.subtitle}
-                </p>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
-                    {item.value.toLocaleString()}
-                  </span>
-                  <span className="text-[11px] font-medium text-slate-400">
-                    ({item.percent})
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-3.5 pt-2.5 border-t border-slate-50 flex items-center justify-between text-[9px] text-slate-400 font-light">
-                <span>{item.badge}</span>
-                <span className="font-mono text-blue-600 font-medium">SME D Bank</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* RESTRUCTURED 3-COLUMN WORKSPACE AREA */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        
-        {/* LEFT COLUMN: Retirement Employee Table (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between min-h-[460px]">
-          <div>
-            <div className="pb-3 border-b border-slate-100 mb-4 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                  <span className="text-[10px] font-medium text-rose-600 uppercase tracking-wide">
-                    รายชื่อผู้เตรียมเกษียณอายุ (Retirement Watchlist)
-                  </span>
-                </div>
-                <h3 className="text-xs font-medium text-slate-800 mt-0.5">
-                  พนักงานที่มีความเสี่ยงเกษียณ (อายุ 55-60 ปี) ณ ปี {selectedOrgYear}
-                </h3>
-              </div>
-              <span className="text-[9.5px] font-sans bg-rose-50 text-rose-600 border border-rose-100 px-2.5 py-0.5 rounded-full">
-                {retirementCohort.length} รายการ
+      <section className="overflow-hidden rounded-[30px] border border-blue-100 bg-white shadow-sm">
+        <div className="flex flex-col gap-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-6 text-white lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-medium uppercase text-white">
+                Strategic Calendar Year
+              </span>
+              <span className="flex items-center gap-1 rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-medium text-emerald-100">
+                <Sparkles size={11} /> Dynamic Workforce Projection
               </span>
             </div>
-
-            {/* List Table Container */}
-            {retirementCohort.length === 0 ? (
-              <div className="h-[280px] flex flex-col items-center justify-center text-center text-slate-400 p-6">
-                <ShieldAlert size={22} className="text-slate-300 mb-2" />
-                <p className="text-xs">ไม่พบข้อมูลผู้เตรียมเกษียณอายุในช่วงเวลาปีปฏิทินป้อนเข้า</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                {retirementCohort.slice(0, 15).map((emp, index) => (
-                  <div 
-                    key={emp.empId}
-                    className="p-3 bg-slate-50/50 rounded-xl border border-slate-100 hover:border-slate-200 transition-all flex items-center justify-between text-xs"
-                  >
-                    <div className="space-y-0.5 max-w-[65%]">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-slate-800">{emp.name}</span>
-                        <span className="text-[9px] text-slate-400 font-mono">({emp.level})</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate">{emp.department}</p>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <div className="flex items-center gap-1 justify-end">
-                        <span className="font-medium text-slate-700 font-mono">{emp.age}</span>
-                        <span className="text-[9px] text-slate-400">ปี</span>
-                      </div>
-                      <div className="text-[9px] text-rose-600 font-light">
-                        {emp.yearsToRetire === 0 
-                          ? "เกษียณสิ้นปีนี้!" 
-                          : `เกษียณในอีก ${emp.yearsToRetire} ปี (${emp.retireYear})`}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {retirementCohort.length > 15 && (
-                  <p className="text-center text-[9px] text-slate-400 pt-2 font-light">
-                    แสดงเฉพาะ 15 รายงานอาวุโสสูงสุด... ขยายดูที่รายงานความเสี่ยงกำลังคนหลัก
-                  </p>
-                )}
-              </div>
-            )}
+            <h2 className="text-[18px] font-medium leading-snug">
+              วิเคราะห์โครงสร้างองค์กรและกำลังพลตามปีปฏิทิน
+            </h2>
+            <p className="mt-1 max-w-3xl text-[12px] font-light leading-relaxed text-blue-50">
+              เลือกปีเพื่อจำลองผลกระทบจากอายุพนักงาน ความเสี่ยงเกษียณ และความพร้อมของแผนสืบทอดตำแหน่ง
+            </p>
           </div>
 
-          <div className="text-[9.5px] text-slate-400 font-light mt-4 pt-3.5 border-t border-slate-100 flex items-center gap-1.5">
-            <Info size={11} />
-            <span>พยากรณ์อ้างอิงอายุเกษียณภาคบังคับที่ 60 ปีถ้วน</span>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {[
+              { year: 2026, label: "2569", desc: "ปีปัจจุบัน" },
+              { year: 2027, label: "2570", desc: "+1 ปี" },
+              { year: 2028, label: "2571", desc: "+2 ปี" },
+              { year: 2029, label: "2572", desc: "+3 ปี" },
+            ].map((item) => {
+              const active = selectedOrgYear === item.year;
+              return (
+                <button
+                  key={item.year}
+                  type="button"
+                  onClick={() => {
+                    setSelectedOrgYear(item.year);
+                    setSelectedBusinessLine(null);
+                    setSelectedGroup(null);
+                  }}
+                  className={`min-w-[100px] rounded-2xl border px-4 py-3 text-left transition-all ${
+                    active
+                      ? "border-white bg-white text-slate-900 shadow-lg"
+                      : "border-white/15 bg-white/10 text-white hover:bg-white/15"
+                  }`}
+                >
+                  <p className="text-[15px] font-medium leading-none">{item.label}</p>
+                  <p className={`mt-1 text-[10px] font-light ${active ? "text-slate-500" : "text-blue-100"}`}>{item.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader
+          icon={<Activity size={18} />}
+          eyebrow="Organization KPI Summary"
+          title={`ภาพรวมโครงสร้างกำลังพล ปี ${selectedOrgYear}`}
+          description="ตัวชี้วัดหลักที่ช่วยให้ผู้บริหารเห็นภาพรวมกำลังพล ความเสี่ยงเกษียณ และความพร้อมสืบทอดตำแหน่ง"
+          right={
+            selectedMetric && (
+              <button
+                type="button"
+                onClick={() => setSelectedMetric("headcount")}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-500 shadow-sm hover:text-blue-600"
+              >
+                Clear selection
+              </button>
+            )
+          }
+        />
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            title="กำลังพลทั้งหมด"
+            subtitle="จำนวนพนักงานทั้งหมดตามปีจำลองที่เลือก"
+            value={totalCount}
+            percent="100%"
+            icon={<Users size={19} />}
+            accent="blue"
+            selected={selectedMetric === "headcount"}
+            onClick={() => setSelectedMetric("headcount")}
+          />
+          <MetricCard
+            title="ใกล้เกษียณ 55 ปีขึ้นไป"
+            subtitle="กลุ่มที่ควรติดตามเพื่อจัดทำแผนทดแทน"
+            value={retirementCohort.length}
+            percent={`${Math.round((retirementCohort.length / (totalCount || 1)) * 100)}%`}
+            icon={<ShieldAlert size={19} />}
+            accent="rose"
+            selected={selectedMetric === "retirement"}
+            onClick={() => setSelectedMetric("retirement")}
+          />
+          <MetricCard
+            title="Ready Now"
+            subtitle="ผู้สืบทอดตำแหน่งหลักที่พร้อมปฏิบัติทันที"
+            value={successionStats.readyNow}
+            percent={`${successionStats.readyNowPct}%`}
+            icon={<UserCheck size={19} />}
+            accent="emerald"
+            selected={selectedMetric === "succession"}
+            onClick={() => setSelectedMetric("succession")}
+          />
+          <MetricCard
+            title="กลุ่มผู้จัดการ L6-L8"
+            subtitle="แกนกลางของโครงสร้างบริหารและการถ่ายทอดกลยุทธ์"
+            value={pyramidBands[1].count}
+            percent={`${pyramidBands[1].percent}%`}
+            icon={<Briefcase size={19} />}
+            accent="violet"
+            selected={selectedMetric === "management"}
+            onClick={() => setSelectedMetric("management")}
+          />
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="xl:col-span-4 rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
+          <SectionHeader
+            icon={<Calendar size={18} />}
+            eyebrow="Retirement Watchlist"
+            title="รายชื่อพนักงานเตรียมเกษียณ"
+            description={`อายุ 55-60 ปี ณ ปี ${selectedOrgYear}`}
+            right={<span className="rounded-full bg-rose-50 px-3 py-1 text-[11px] font-medium text-rose-600">{formatNumber(retirementCohort.length)} รายการ</span>}
+          />
+
+          <div className="max-h-[410px] space-y-3 overflow-y-auto pr-1">
+            {retirementCohort.slice(0, 12).map((employee) => (
+              <div key={employee.empId} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:border-rose-100 hover:bg-rose-50/40">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-[13px] font-medium text-slate-900">{employee.name}</p>
+                      <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-slate-500">{employee.level}</span>
+                    </div>
+                    <p className="mt-1 truncate text-[11px] font-light text-slate-500">{employee.department}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[18px] font-medium leading-none text-slate-900">{employee.age}</p>
+                    <p className="mt-1 text-[10px] text-slate-400">ปี</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-white pt-3 text-[10px]">
+                  <span className="font-light text-slate-500">ปีเกษียณ {employee.retireYear}</span>
+                  <span className={`font-medium ${employee.yearsToRetire === 0 ? "text-rose-600" : "text-amber-600"}`}>
+                    {employee.yearsToRetire === 0 ? "เกษียณสิ้นปีนี้" : `อีก ${employee.yearsToRetire} ปี`}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* CENTER COLUMN: Employee Level Pyramid Chart (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between min-h-[460px]">
-          <div>
-            <div className="pb-3 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-1.5">
-                <div className="p-1 bg-blue-50 text-blue-600 rounded-md shrink-0">
-                  <Layers size={13} />
-                </div>
-                <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">
-                  พีระมิดระดับชั้นกำลังพล (Employee Level Pyramid)
-                </span>
-              </div>
-              <h3 className="text-xs font-medium text-slate-800 mt-0.5">
-                สัดส่วนโครงสร้างสายงานแยกตามระดับชั้นประเมินปี {selectedOrgYear}
-              </h3>
+        <div className="xl:col-span-5 rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
+          <SectionHeader
+            icon={<Layers size={18} />}
+            eyebrow="Employee Level Pyramid"
+            title="พีระมิดระดับชั้นกำลังพล"
+            description="แสดงสัดส่วนระดับพนักงานแบบพีระมิดเพื่อให้เห็นฐานกำลังพลและชั้นบริหารชัดเจน"
+            right={<span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-600">{formatNumber(totalCount)} คน</span>}
+          />
+
+          <div className="rounded-[26px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-5">
+            <div className="relative mx-auto flex min-h-[360px] max-w-[560px] flex-col items-center justify-center gap-3">
+              <div className="absolute inset-y-5 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+              {pyramidBands.map((band, index) => {
+                const clipInset = [23, 15, 8, 2][index];
+                return (
+                  <div key={band.id} className="relative flex w-full items-center justify-center">
+                    <div className="absolute left-0 hidden w-[92px] text-left sm:block">
+                      <p className="text-[11px] font-medium text-slate-700">{band.label}</p>
+                      <p className="mt-0.5 text-[9px] font-light text-slate-400">{band.title}</p>
+                    </div>
+                    <div
+                      className="relative flex h-[66px] items-center justify-center overflow-hidden text-white shadow-lg transition-transform hover:scale-[1.015]"
+                      style={{
+                        width: `${band.width}%`,
+                        background: band.gradient,
+                        clipPath: `polygon(${clipInset}% 0%, ${100 - clipInset}% 0%, 100% 100%, 0% 100%)`,
+                        borderRadius: index === 0 ? "18px 18px 10px 10px" : "14px",
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/10" />
+                      <div className="relative z-10 text-center">
+                        <p className="text-[10px] font-light text-white/85">{band.title}</p>
+                        <div className="mt-1 flex items-baseline justify-center gap-2">
+                          <span className="text-[22px] font-medium leading-none">{formatNumber(band.count)}</span>
+                          <span className="text-[10px] font-light text-white/90">คน</span>
+                          <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium">{band.percent}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute right-0 hidden w-[72px] text-right sm:block">
+                      <p className="text-[12px] font-medium text-slate-700">{formatNumber(band.count)}</p>
+                      <p className="text-[9px] font-light text-slate-400">{band.percent}%</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Pyramid visual layers stack */}
-            <div className="space-y-4 mt-6">
-              {pyramidBands.map((band, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-700">{band.bandName}</span>
-                    <div className="flex items-center gap-1.5 font-mono">
-                      <span className="font-semibold text-slate-900">{band.count} คน</span>
-                      <span className="text-slate-400">({band.percent}%)</span>
-                    </div>
+            <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
+              {pyramidBands.map((band) => (
+                <div key={band.id} className="rounded-2xl border border-slate-100 bg-white px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${band.dot}`} />
+                    <span className="text-[11px] font-medium text-slate-700">{band.label}</span>
                   </div>
+                  <p className="mt-1 text-[10px] font-light text-slate-400">{band.percent}% ของกำลังพล</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                  {/* Centered progressive bar */}
-                  <div className="flex justify-center w-full bg-slate-50 p-1 rounded-xl">
-                    <div className="w-full bg-slate-100/50 h-6.5 rounded-lg overflow-hidden relative flex items-center justify-center">
-                      {/* Interactive progress filler */}
-                      <div 
-                        className={`h-full absolute left-0 bg-gradient-to-r ${band.color} opacity-85 transition-all duration-500`}
-                        style={{ width: `${band.widthPercent}%` }}
-                      />
-                      {/* Label text inside pyramid */}
-                      <span className="z-10 text-[10px] font-medium text-slate-800 drop-shadow-xs flex items-center gap-1">
-                        <span className="opacity-80">{band.text}:</span>
-                        <span>{band.widthPercent}%</span>
-                      </span>
-                    </div>
+        <div className="xl:col-span-3 rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
+          <SectionHeader
+            icon={<UserCheck size={18} />}
+            eyebrow="Succession Plan"
+            title="ความพร้อมสืบทอดตำแหน่งหลัก"
+            description="สถานะผู้สืบทอดของตำแหน่งบริหารระดับ L9-L11"
+          />
+
+          <div className="rounded-[26px] border border-slate-100 bg-slate-50/70 p-4">
+            <div className="relative h-[190px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={successionChartData} cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={3} dataKey="value">
+                    {successionChartData.map((entry, index) => (
+                      <Cell key={`succession-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ fontSize: 11, borderRadius: 12, border: "1px solid #E2E8F0" }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                <p className="text-[10px] font-light text-slate-400">ตำแหน่งหลัก</p>
+                <p className="text-[26px] font-medium leading-none text-slate-900">{formatNumber(successionStats.totalKeyRoles)}</p>
+                <p className="mt-1 text-[10px] font-light text-slate-400">อัตรา</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { label: "Ready Now", value: successionStats.readyNow, pct: successionStats.readyNowPct, color: "bg-emerald-500" },
+                { label: "Ready 1-2 Years", value: successionStats.readySoon, pct: successionStats.readySoonPct, color: "bg-blue-500" },
+                { label: "Developing", value: successionStats.risk, pct: successionStats.riskPct, color: "bg-amber-500" },
+                { label: "No Successor", value: successionStats.noSuccessor, pct: successionStats.noSuccessorPct, color: "bg-rose-500" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between rounded-2xl bg-white px-3 py-2 text-[11px]">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${item.color}`} />
+                    <span className="truncate font-light text-slate-600">{item.label}</span>
                   </div>
+                  <span className="font-medium text-slate-900">{formatNumber(item.value)} คน ({item.pct}%)</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-[9.5px] text-slate-400 font-light mt-4 pt-3.5 border-t border-slate-100 flex items-center gap-1">
-            <Check size={11} className="text-emerald-500" />
-            <span>โครงสร้างกำลังพลสมมาตรเชิงเสถียรภาพสถาบันการเงิน</span>
+          <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-[11px] leading-relaxed text-amber-800">
+            <div className="mb-1 flex items-center gap-2 font-medium">
+              <ShieldAlert size={15} /> Management Action
+            </div>
+            ควรเร่งพัฒนาแผนสืบทอดสำหรับกลุ่มที่ยังไม่มีผู้สืบทอด {formatNumber(successionStats.noSuccessor)} ตำแหน่ง
           </div>
         </div>
+      </section>
 
-        {/* RIGHT COLUMN: Succession Plan / Successor Readiness (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between min-h-[460px]">
-          <div>
-            <div className="pb-3 border-b border-slate-100 mb-4 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wide">
-                    ความพร้อมสืบทอดตำแหน่งหลัก (Succession Plan)
-                  </span>
-                </div>
-                <h3 className="text-xs font-medium text-slate-800 mt-0.5">
-                  สถานะการเตรียมผู้นำสำรองตำแหน่งบริหาร (L9-L11)
-                </h3>
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {insightCards.map((item) => (
+          <div key={item.title} className={`rounded-[24px] border p-4 ${item.color}`}>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-[12px] font-medium">
+                {item.icon}
+                {item.title}
               </div>
-              <span className="text-[9px] font-sans font-medium bg-emerald-50 text-emerald-600 border border-emerald-100 px-2 py-0.5 rounded-full uppercase">
-                Successor Chart
-              </span>
+              <ChevronRight size={14} />
             </div>
+            <p className="text-[20px] font-medium leading-none">{item.value}</p>
+            <p className="mt-2 text-[10px] font-light leading-relaxed opacity-80">{item.detail}</p>
+          </div>
+        ))}
+      </section>
 
-            {/* Recharts Pie Chart & statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 mt-2 items-center">
-              
-              {/* Succession Donut chart (sm:col-span-5) */}
-              <div className="sm:col-span-5 h-[130px] w-full relative flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={successionChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {successionChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ fontSize: 9, borderRadius: 10 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                
-                {/* Central headcount display */}
-                <div className="absolute text-center">
-                  <p className="text-[8px] uppercase text-slate-400">ตำแหน่งหลัก</p>
-                  <p className="text-sm font-sans font-medium text-slate-800">{successionStats.totalKeyRoles}</p>
-                  <p className="text-[8px] text-slate-400">อัตรา</p>
-                </div>
-              </div>
+      <section className="rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
+        <SectionHeader
+          icon={<Grid size={18} />}
+          eyebrow="Interactive Org Directory Explorer"
+          title="สำรวจโครงสร้างองค์กรแบบ Drill-down"
+          description="เลือกสายงานหลัก กลุ่มงาน และหน่วยงานย่อย เพื่อดูจำนวนกำลังพลตามลำดับโครงสร้าง"
+          right={
+            <div className="hidden items-center gap-2 rounded-full border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-500 md:flex">
+              <Search size={13} />
+              {selectedBusinessLine ? selectedBusinessLine.replace("สายงาน", "") : "ยังไม่ได้เลือกสายงาน"}
+            </div>
+          }
+        />
 
-              {/* Stat breakdowns (sm:col-span-7) */}
-              <div className="sm:col-span-7 space-y-2 pl-2">
-                {[
-                  { name: "พร้อมปฏิบัติทันที (Ready Now)", value: successionStats.readyNow, pct: successionStats.readyNowPct, colorClass: "text-emerald-500 border-emerald-500/10", dotColor: "bg-emerald-500" },
-                  { name: "พร้อมใน 1-2 ปี", value: successionStats.readySoon, pct: successionStats.readySoonPct, colorClass: "text-blue-500 border-blue-500/10", dotColor: "bg-blue-500" },
-                  { name: "ความเสี่ยงขาดแคลน (Risk)", value: successionStats.risk, pct: successionStats.riskPct, colorClass: "text-amber-500 border-amber-500/10", dotColor: "bg-amber-500" },
-                  { name: "ไม่มีผู้สืบทอด (No Successor)", value: successionStats.noSuccessor, pct: successionStats.noSuccessorPct, colorClass: "text-rose-500 border-rose-500/10", dotColor: "bg-rose-500" }
-                ].map((item, idx) => (
-                  <div key={idx} className="p-1.5 bg-slate-50/50 rounded-lg border border-slate-100/30 text-[10px] flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 truncate max-w-[70%]">
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.dotColor}`} />
-                      <span className="text-slate-600 truncate">{item.name}</span>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <div className="lg:col-span-4 rounded-[24px] border border-slate-100 bg-slate-50/70 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase text-slate-500">Business Line</p>
+              <span className="text-[10px] text-slate-400">{businessLineItems.length} สายงาน</span>
+            </div>
+            <div className="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+              {businessLineItems.map((item) => {
+                const active = selectedBusinessLine === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => handleBusinessLineClick(item.name)}
+                    className={`w-full rounded-2xl border p-3 text-left transition-all ${
+                      active ? "border-blue-200 bg-blue-600 text-white shadow-md" : "border-slate-100 bg-white text-slate-700 hover:border-blue-100"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-[12px] font-medium">{item.name}</p>
+                        <p className={`mt-0.5 text-[10px] font-light ${active ? "text-blue-100" : "text-slate-400"}`}>{formatNumber(item.count)} คน</p>
+                      </div>
+                      <ChevronRight size={15} className={active ? "rotate-90" : "text-slate-400"} />
                     </div>
-                    <span className="font-medium text-slate-800 font-mono">{item.value} คน ({item.pct}%)</span>
-                  </div>
-                ))}
-              </div>
-
+                  </button>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Quick alert bar inside Succession plan */}
-            <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-700 flex items-start gap-1.5 leading-relaxed">
-              <ShieldAlert size={14} className="shrink-0 text-amber-600 mt-0.5" />
-              <div>
-                <span className="font-semibold">ข้อเสนอแนะฝ่ายจัดการ:</span> มีความเสี่ยงขาดแคลนผู้สืบทอด {successionStats.risk} ตำแหน่ง และไม่มีผู้บริหารสำรองเลยอีก {successionStats.noSuccessor} ตำแหน่ง ควรผลักดันให้ดำเนินโครงการพัฒนาเร่งด่วน!
-              </div>
+          <div className="lg:col-span-4 rounded-[24px] border border-slate-100 bg-slate-50/70 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase text-slate-500">Division Group</p>
+              <span className="text-[10px] text-slate-400">{groupItems.length} กลุ่ม</span>
             </div>
-
-          </div>
-
-          <div className="text-[9.5px] text-slate-400 font-light mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between">
-            <span>SME D Bank Leadership Pipeline</span>
-            <span className="text-blue-600 font-mono text-[9px]">เป้าหมาย Readiness &gt; 70%</span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Interactive Breadcrumb Tree Drill-Down Directory */}
-      <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
-        
-        <div className="pb-4 border-b border-slate-100 mb-5">
-          <div className="flex items-center gap-2">
-            <Grid size={15} className="text-blue-600" />
-            <h3 className="text-xs font-medium text-slate-800">
-              สำรวจทำเนียบโครงสร้างจำแนกสายงาน (Interactive Org Directory Explorer)
-            </h3>
-          </div>
-          <p className="text-[10px] text-slate-400 mt-1 font-light">
-            คลิกเลือกสายงานหลัก และขยายกลุ่มเพื่อตรวจดูรายชื่อส่วนงาน/ฝ่ายงานพร้อมจำนวนอัตรากำลังคนจริงที่ปฏิบัติงานภายในสถาบัน ณ ปี {selectedOrgYear}
-          </p>
-        </div>
-
-        {/* Directory Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 text-xs">
-          
-          {/* Level 1: Business Lines (5 cols) */}
-          <div className="md:col-span-5 border border-slate-100 rounded-2xl p-4 space-y-2 max-h-[360px] overflow-y-auto bg-slate-50/30">
-            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-medium block mb-2">สายงานหลัก (Business Lines)</span>
-            
-            {Object.keys(drillDownModel).map((lineName) => {
-              const isSelected = selectedBusinessLine === lineName;
-              return (
-                <button
-                  key={lineName}
-                  onClick={() => handleLineClick(lineName)}
-                  className={`w-full p-3.5 text-left rounded-xl transition-all border flex items-center justify-between cursor-pointer group ${
-                    isSelected 
-                      ? "bg-slate-800 text-white border-transparent shadow-xs" 
-                      : "bg-white border-slate-100 hover:border-slate-300"
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium text-slate-800 group-hover:text-slate-950 transition-colors" style={{ color: isSelected ? "white" : "" }}>
-                      {lineName}
-                    </p>
-                    <p className={`text-[9px] font-light mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}>
-                      {drillDownModel[lineName].count} อัตราตำแหน่ง
-                    </p>
-                  </div>
-                  <ChevronRight size={14} className={`transition-transform ${isSelected ? "rotate-90 text-white" : "text-slate-400"}`} />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Level 2: Groups (4 cols) */}
-          <div className="md:col-span-4 border border-slate-100 rounded-2xl p-4 space-y-2 max-h-[360px] overflow-y-auto bg-slate-50/30">
-            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-medium block mb-2">กลุ่มงานและฝ่าย (Division Groups)</span>
-            
             {!selectedBusinessLine ? (
-              <div className="h-[260px] flex flex-col items-center justify-center text-center text-slate-400 font-light p-4">
-                <Activity size={18} className="text-slate-300 mb-2" />
-                <p className="text-[11px]">กรุณาเลือกสายงานหลักซ้ายมือ เพื่อขยายรายชื่อฝ่ายงานย่อย</p>
+              <div className="flex h-[300px] flex-col items-center justify-center rounded-2xl bg-white text-center text-slate-400">
+                <Building size={22} className="mb-2 text-slate-300" />
+                <p className="text-[12px] font-light">เลือกสายงานหลักเพื่อดู Division Group</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {Object.keys(drillDownModel[selectedBusinessLine].groups).map((groupName) => {
-                  const isSelected = selectedGroup === groupName;
-                  const item = drillDownModel[selectedBusinessLine].groups[groupName];
+              <div className="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+                {groupItems.map((item) => {
+                  const active = selectedGroup === item.name;
                   return (
                     <button
-                      key={groupName}
-                      onClick={() => handleGroupClick(groupName)}
-                      className={`w-full p-3.5 text-left rounded-xl transition-all border flex items-center justify-between cursor-pointer group ${
-                        isSelected 
-                          ? "bg-blue-600 text-white border-transparent" 
-                          : "bg-white border-slate-100 hover:border-slate-300"
+                      key={item.name}
+                      type="button"
+                      onClick={() => handleGroupClick(item.name)}
+                      className={`w-full rounded-2xl border p-3 text-left transition-all ${
+                        active ? "border-indigo-200 bg-indigo-600 text-white shadow-md" : "border-slate-100 bg-white text-slate-700 hover:border-indigo-100"
                       }`}
                     >
-                      <div>
-                        <p className="font-medium text-slate-800 group-hover:text-slate-950 transition-colors" style={{ color: isSelected ? "white" : "" }}>
-                          {groupName}
-                        </p>
-                        <p className={`text-[9px] font-light mt-0.5 ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
-                          {item.count} อัตรากำลังพล
-                        </p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-[12px] font-medium">{item.name}</p>
+                          <p className={`mt-0.5 text-[10px] font-light ${active ? "text-indigo-100" : "text-slate-400"}`}>{formatNumber(item.count)} คน</p>
+                        </div>
+                        <ChevronRight size={15} className={active ? "rotate-90" : "text-slate-400"} />
                       </div>
-                      <ChevronDown size={14} className={`transition-transform ${isSelected ? "rotate-180 text-white" : "text-slate-400"}`} />
                     </button>
                   );
                 })}
@@ -745,39 +786,36 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
             )}
           </div>
 
-          {/* Level 3: Departments & units list (3 cols) */}
-          <div className="md:col-span-3 border border-slate-100 rounded-2xl p-4 space-y-2 max-h-[360px] overflow-y-auto bg-slate-50/30">
-            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-medium block mb-2">ส่วนงานปฏิบัติการย่อย (Departments)</span>
-            
+          <div className="lg:col-span-4 rounded-[24px] border border-slate-100 bg-slate-50/70 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase text-slate-500">Department / Unit</p>
+              <span className="text-[10px] text-slate-400">{departmentItems.length} หน่วยงาน</span>
+            </div>
             {!selectedGroup ? (
-              <div className="h-[260px] flex flex-col items-center justify-center text-center text-slate-400 font-light p-4">
-                <MapPin size={18} className="text-slate-300 mb-2" />
-                <p className="text-[11px]">เลือกกลุ่มงานและฝ่าย เพื่อแจกแจงรายชื่อส่วนปฏิบัติการย่อย</p>
+              <div className="flex h-[300px] flex-col items-center justify-center rounded-2xl bg-white text-center text-slate-400">
+                <MapPin size={22} className="mb-2 text-slate-300" />
+                <p className="text-[12px] font-light">เลือกกลุ่มงานเพื่อดูหน่วยงานย่อย</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {Object.entries(drillDownModel[selectedBusinessLine!].groups[selectedGroup].departments).map(([deptName, count]) => (
-                  <div 
-                    key={deptName} 
-                    className="p-3 bg-white rounded-xl border border-slate-100 flex items-center justify-between shadow-3xs"
-                  >
-                    <div>
-                      <p className="font-medium text-slate-800 leading-normal">{deptName}</p>
-                      <p className="text-[8px] text-slate-400 font-light uppercase tracking-wider mt-0.5">SME D BANK DEPT</p>
+              <div className="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+                {departmentItems.map((item) => (
+                  <div key={item.name} className="rounded-2xl border border-slate-100 bg-white p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-medium leading-snug text-slate-800">{item.name}</p>
+                        <p className="mt-1 text-[9px] font-light uppercase text-slate-400">SME D BANK DEPT</p>
+                      </div>
+                      <span className="shrink-0 rounded-xl bg-blue-50 px-2.5 py-1 text-[10px] font-medium text-blue-600">
+                        {formatNumber(item.count)} คน
+                      </span>
                     </div>
-                    <span className="bg-blue-50 text-blue-600 text-[10px] font-semibold px-2 py-1 rounded-md">
-                      {count} คน
-                    </span>
                   </div>
                 ))}
               </div>
             )}
           </div>
-
         </div>
-
-      </div>
-
+      </section>
     </div>
   );
 }
