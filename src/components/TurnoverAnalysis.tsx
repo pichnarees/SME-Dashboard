@@ -219,69 +219,133 @@ export default function TurnoverAnalysis({
         {/* The Grid of turnover stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           
-          {/* Card 1 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 1: Turnover Rate */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-slate-500 bg-slate-50 px-2.5 py-0.5 rounded-md uppercase">Turnover Rate</span>
-              <TrendingUp size={14} className="text-rose-500" />
+              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 shrink-0">
+                <TrendingUp size={14} className="text-rose-500" />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded-full uppercase">
+                Rate
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">อัตราการลาออกสะสม</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{statsSummary.rate}%</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">อัตราการลาออกสะสม</p>
+              <p className="text-[9px] font-light text-slate-400">Turnover Rate</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {statsSummary.rate}%
+                </span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เทียบสัดส่วนกำลังคนแอคทีฟ</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>เทียบกำลังคนแอคทีฟทั้งหมด</span>
+              <span className="font-mono text-rose-600 font-medium">Accumulated</span>
+            </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 2: Focus Resign */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-md uppercase">Focus Resign</span>
-              <Flame size={14} className="text-rose-500 animate-pulse" />
+              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 shrink-0">
+                <Flame size={14} className="text-rose-500 animate-pulse" />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded-full uppercase">
+                Focus
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">กลุ่มงานกลยุทธ์สำคัญ (Focus)</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{statsSummary.focus.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">กลุ่มงานกลยุทธ์สำคัญ</p>
+              <p className="text-[9px] font-light text-slate-400">Focus Resignations</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {statsSummary.focus.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-rose-500 font-medium mt-2.5 pt-2 border-t border-slate-50">ความเสี่ยงระดับสูงต่อการผลิต</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-rose-600 font-medium">
+              <span>ความเสี่ยงกำลังผลิตสูง</span>
+              <span className="font-mono text-rose-600">Critical</span>
+            </div>
           </div>
 
-          {/* Card 3 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 3: Non-Focus */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-slate-500 bg-slate-50 px-2.5 py-0.5 rounded-md uppercase">Non-Focus</span>
-              <LogOut size={14} className="text-slate-400" />
+              <div className="p-1.5 rounded-lg bg-slate-50 text-slate-500 group-hover:bg-slate-100 shrink-0">
+                <LogOut size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-slate-50 text-slate-500 border border-slate-100 px-2 py-0.5 rounded-full uppercase">
+                Support
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">กลุ่มงานธุรการ/สนับสนุน</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{statsSummary.nonFocus.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">กลุ่มงานธุรการ/สนับสนุน</p>
+              <p className="text-[9px] font-light text-slate-400">Non-Focus Resignations</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {statsSummary.nonFocus.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สัดส่วนลาออกตามวาระปกติ</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>สัดส่วนลาออกตามวาระปกติ</span>
+              <span className="font-mono text-slate-500 font-medium">Standard</span>
+            </div>
           </div>
 
-          {/* Card 4 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 4: Permanent Resign */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-blue-500 bg-blue-50 px-2.5 py-0.5 rounded-md uppercase">Permanent Resign</span>
-              <Briefcase size={14} className="text-blue-500" />
+              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-100 shrink-0">
+                <Briefcase size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded-full uppercase">
+                Permanent
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">กลุ่มพนักงานประจำ</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{statsSummary.permanent.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">กลุ่มพนักงานประจำ</p>
+              <p className="text-[9px] font-light text-slate-400">Permanent Resignations</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {statsSummary.permanent.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สถิติลาออกพนักงานประจำ</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>สถิติลาออกพนักงานประจำ</span>
+              <span className="font-mono text-blue-600 font-medium">Regular Staff</span>
+            </div>
           </div>
 
-          {/* Card 5 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 5: Contract End */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-cyan-500 bg-cyan-50 px-2.5 py-0.5 rounded-md uppercase">Contract End</span>
-              <Calendar size={14} className="text-cyan-500" />
+              <div className="p-1.5 rounded-lg bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100 shrink-0">
+                <Calendar size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-cyan-50 text-cyan-500 border border-cyan-100 px-2 py-0.5 rounded-full uppercase">
+                Contract
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">กลุ่มสัญญาจ้างสิ้นสุดวาระ</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{statsSummary.contract.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">กลุ่มสัญญาจ้างสิ้นสุดวาระ</p>
+              <p className="text-[9px] font-light text-slate-400">Contract Endings</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {statsSummary.contract.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">หมดสัญญาจ้าง/ไม่ประสงค์ต่อ</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>หมดสัญญาจ้าง/ไม่ต่อสัญญา</span>
+              <span className="font-mono text-cyan-600 font-medium">Term End</span>
+            </div>
           </div>
 
         </div>

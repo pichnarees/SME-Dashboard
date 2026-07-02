@@ -295,10 +295,34 @@ th, strong, b {
   border: none !important;
   box-shadow: 0 4px 12px rgba(45, 190, 127, 0.2) !important;
   border-radius: 0.75rem !important;
+  color: #ffffff !important;
+}
+.theme-light #export-excel-btn span,
+.theme-light #export-excel-btn svg {
+  color: #ffffff !important;
 }
 .theme-light #export-excel-btn:hover {
   transform: translateY(-1.5px) !important;
   box-shadow: 0 6px 16px rgba(45, 190, 127, 0.28) !important;
+}
+
+/* Exact requested CSS selectors for Focus Mode targeting */
+div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-type(1) > div#filter-bar-container:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button#export-excel-btn:nth-of-type(1) > span:nth-of-type(1) {
+  color: #ffffff !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-type(1) > div#filter-bar-container:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button#export-excel-btn:nth-of-type(1) > svg:nth-of-type(1) {
+  color: #ffffff !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-type(1) > div#tab-navigation-bar:nth-of-type(2) > button:nth-of-type(1) > span:nth-of-type(1) > span:nth-of-type(1) {
+  color: #ffffff !important;
+}
+
+.theme-light #tab-navigation-bar button[class*="text-white"],
+.theme-light #tab-navigation-bar button[class*="text-white"] span,
+.theme-light #tab-navigation-bar button[class*="text-white"] svg {
+  color: #ffffff !important;
 }
 
 .theme-light #export-pdf-btn {

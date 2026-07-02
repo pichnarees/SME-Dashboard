@@ -41,8 +41,69 @@ import {
   YAxis, 
   Tooltip, 
   Legend,
-  CartesianGrid
+  CartesianGrid,
+  AreaChart,
+  Area,
+  LineChart,
+  Line
 } from "recharts";
+
+interface ProvinceData {
+  name: string;
+  engName: string;
+  status: "green" | "yellow" | "red";
+  headcount: number;
+  highPerfRatio: number;
+  successionCoverage: number;
+  retirementRisk: number;
+  region: "North" | "Northeast" | "Central" | "South" | "East" | "West";
+}
+
+const THAI_REGIONS_MAP: Record<string, string> = {
+  All: "ทุกภูมิภาค",
+  North: "ภาคเหนือ",
+  Northeast: "ภาคตะวันออกเฉียงเหนือ",
+  Central: "ภาคกลาง",
+  South: "ภาคใต้",
+  East: "ภาคตะวันออก",
+  West: "ภาคตะวันตก"
+};
+
+const PROVINCES_DATA: ProvinceData[] = [
+  // North
+  { name: "เชียงใหม่", engName: "Chiang Mai", status: "green", headcount: 45, highPerfRatio: 22, successionCoverage: 65, retirementRisk: 12, region: "North" },
+  { name: "เชียงราย", engName: "Chiang Rai", status: "yellow", headcount: 28, highPerfRatio: 15, successionCoverage: 50, retirementRisk: 18, region: "North" },
+  { name: "พิษณุโลก", engName: "Phitsanulok", status: "green", headcount: 32, highPerfRatio: 18, successionCoverage: 58, retirementRisk: 15, region: "North" },
+  { name: "นครสวรรค์", engName: "Nakhon Sawan", status: "red", headcount: 18, highPerfRatio: 5, successionCoverage: 25, retirementRisk: 30, region: "North" },
+  { name: "ลำปาง", engName: "Lampang", status: "yellow", headcount: 22, highPerfRatio: 12, successionCoverage: 45, retirementRisk: 20, region: "North" },
+  // Northeast
+  { name: "นครราชสีมา", engName: "Nakhon Ratchasima", status: "green", headcount: 55, highPerfRatio: 25, successionCoverage: 70, retirementRisk: 10, region: "Northeast" },
+  { name: "ขอนแก่น", engName: "Khon Kaen", status: "green", headcount: 42, highPerfRatio: 20, successionCoverage: 62, retirementRisk: 14, region: "Northeast" },
+  { name: "อุดรธานี", engName: "Udon Thani", status: "yellow", headcount: 35, highPerfRatio: 14, successionCoverage: 48, retirementRisk: 16, region: "Northeast" },
+  { name: "อุบลราชธานี", engName: "Ubon Ratchathani", status: "yellow", headcount: 30, highPerfRatio: 13, successionCoverage: 45, retirementRisk: 22, region: "Northeast" },
+  { name: "บุรีรัมย์", engName: "Buri Ram", status: "red", headcount: 15, highPerfRatio: 8, successionCoverage: 30, retirementRisk: 28, region: "Northeast" },
+  // Central
+  { name: "กรุงเทพมหานคร", engName: "Bangkok", status: "green", headcount: 1250, highPerfRatio: 28, successionCoverage: 72, retirementRisk: 8, region: "Central" },
+  { name: "นนทบุรี", engName: "Nonthaburi", status: "green", headcount: 120, highPerfRatio: 22, successionCoverage: 65, retirementRisk: 10, region: "Central" },
+  { name: "สมุทรปราการ", engName: "Samut Prakan", status: "yellow", headcount: 85, highPerfRatio: 16, successionCoverage: 55, retirementRisk: 12, region: "Central" },
+  { name: "พระนครศรีอยุธยา", engName: "Ayutthaya", status: "green", headcount: 40, highPerfRatio: 19, successionCoverage: 60, retirementRisk: 15, region: "Central" },
+  { name: "นครปฐม", engName: "Nakhon Pathom", status: "yellow", headcount: 34, highPerfRatio: 12, successionCoverage: 42, retirementRisk: 18, region: "Central" },
+  // South
+  { name: "สุราษฎร์ธานี", engName: "Surat Thani", status: "green", headcount: 38, highPerfRatio: 21, successionCoverage: 68, retirementRisk: 11, region: "South" },
+  { name: "สงขลา", engName: "Songkhla", status: "yellow", headcount: 46, highPerfRatio: 14, successionCoverage: 50, retirementRisk: 15, region: "South" },
+  { name: "ภูเก็ต", engName: "Phuket", status: "green", headcount: 25, highPerfRatio: 24, successionCoverage: 75, retirementRisk: 8, region: "South" },
+  { name: "นครศรีธรรมราช", engName: "Nakhon Si Thammarat", status: "red", headcount: 20, highPerfRatio: 6, successionCoverage: 20, retirementRisk: 32, region: "South" },
+  { name: "ตรัง", engName: "Trang", status: "yellow", headcount: 18, highPerfRatio: 11, successionCoverage: 40, retirementRisk: 22, region: "South" },
+  // East
+  { name: "ชลบุรี", engName: "Chon Buri", status: "green", headcount: 65, highPerfRatio: 26, successionCoverage: 74, retirementRisk: 9, region: "East" },
+  { name: "ระยอง", engName: "Rayong", status: "green", headcount: 48, highPerfRatio: 23, successionCoverage: 68, retirementRisk: 11, region: "East" },
+  { name: "ฉะเชิงเทรา", engName: "Chachoengsao", status: "yellow", headcount: 28, highPerfRatio: 15, successionCoverage: 52, retirementRisk: 14, region: "East" },
+  { name: "จันทบุรี", engName: "Chanthaburi", status: "red", headcount: 12, highPerfRatio: 7, successionCoverage: 28, retirementRisk: 25, region: "East" },
+  // West
+  { name: "ราชบุรี", engName: "Ratchaburi", status: "green", headcount: 26, highPerfRatio: 18, successionCoverage: 55, retirementRisk: 15, region: "West" },
+  { name: "กาญจนบุรี", engName: "Kanchanaburi", status: "yellow", headcount: 20, highPerfRatio: 13, successionCoverage: 46, retirementRisk: 18, region: "West" },
+  { name: "ตาก", engName: "Tak", status: "red", headcount: 14, highPerfRatio: 5, successionCoverage: 22, retirementRisk: 35, region: "West" }
+];
 
 interface ExecutiveOverviewProps {
   employees: Employee[];
@@ -69,6 +130,13 @@ export default function ExecutiveOverview({
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  // States for Thailand Performance Map and Strategic Forecast
+  const [selectedMapRegion, setSelectedMapRegion] = useState<"All" | "North" | "Northeast" | "Central" | "South" | "East" | "West">("All");
+  const [selectedProvinceName, setSelectedProvinceName] = useState("กรุงเทพมหานคร");
+  const [upskillingLevel, setUpskillingLevel] = useState<"None" | "Medium" | "Intensive">("Medium");
+  const [successionLevel, setSuccessionLevel] = useState<"Normal" | "Deep" | "Full Coverage">("Deep");
+  const [digitalLevel, setDigitalLevel] = useState<"Standard" | "Optimized" | "Advanced AI">("Optimized");
 
   // Local chart mode select
   const [activeDonutTab, setActiveDonutTab] = useState<"contract" | "hb" | "fb" | "gender">("contract");
@@ -98,6 +166,36 @@ export default function ExecutiveOverview({
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedMetric]);
+
+  // Derived memos for Thailand Performance Map & Future Forecast
+  const filteredProvinces = useMemo(() => {
+    if (selectedMapRegion === "All") return PROVINCES_DATA;
+    return PROVINCES_DATA.filter(p => p.region === selectedMapRegion);
+  }, [selectedMapRegion]);
+
+  const activeProvinceDetails = useMemo(() => {
+    return PROVINCES_DATA.find(p => p.name === selectedProvinceName) || PROVINCES_DATA[0];
+  }, [selectedProvinceName]);
+
+  const forecastModifier = useMemo(() => {
+    let bonus = 0;
+    if (upskillingLevel === "Medium") bonus += 4;
+    if (upskillingLevel === "Intensive") bonus += 8;
+    if (successionLevel === "Deep") bonus += 3;
+    if (successionLevel === "Full Coverage") bonus += 5;
+    if (digitalLevel === "Optimized") bonus += 3;
+    if (digitalLevel === "Advanced AI") bonus += 6;
+    return bonus;
+  }, [upskillingLevel, successionLevel, digitalLevel]);
+
+  const forecastChartData = useMemo(() => {
+    return [
+      { name: "2026 (ปัจจุบัน)", score: 82, withStrategy: 82, target: 100 },
+      { name: "2027", score: 84, withStrategy: Math.min(100, 84 + forecastModifier * 0.4), target: 100 },
+      { name: "2028", score: 85, withStrategy: Math.min(100, 85 + forecastModifier * 0.8), target: 100 },
+      { name: "2029 (คาดการณ์)", score: 87, withStrategy: Math.min(100, 87 + forecastModifier), target: 100 }
+    ];
+  }, [forecastModifier]);
 
   // Calculations on general employees for KPI summaries
   const totalCount = employees.length;
@@ -456,6 +554,373 @@ export default function ExecutiveOverview({
             );
           })}
         </div>
+      </div>
+
+      {/* SECTION: THAILAND PERFORMANCE MAP & STRATEGIC PERFORMANCE FORECAST */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: Thailand Performance Map (lg:col-span-7) */}
+        <div className="lg:col-span-7 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100/60">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+                  <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">
+                    แผนที่วิเคราะห์ศักยภาพรายจังหวัด (Thailand Performance Map)
+                  </span>
+                </div>
+                <h3 className="text-xs font-medium text-slate-800 mt-1">
+                  การประเมินประสิทธิภาพการทำงานและกำลังพลรายจังหวัด
+                </h3>
+              </div>
+
+              {/* Region filter segment pills */}
+              <div className="flex flex-wrap gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200/50">
+                {(["All", "North", "Northeast", "Central", "South", "East", "West"] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      setSelectedMapRegion(r);
+                      // Auto-select first province in that region to avoid blank details
+                      const firstInRegion = PROVINCES_DATA.find(p => r === "All" || p.region === r);
+                      if (firstInRegion) {
+                        setSelectedProvinceName(firstInRegion.name);
+                      }
+                    }}
+                    className={`px-2 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                      selectedMapRegion === r
+                        ? "bg-white text-slate-800 shadow-xs border border-slate-200/20 font-medium"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    {r === "All" ? "ทุกภาค" : r === "North" ? "เหนือ" : r === "Northeast" ? "อีสาน" : r === "Central" ? "กลาง" : r === "South" ? "ใต้" : r === "East" ? "ตะวันออก" : "ตะวันตก"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Map and details container */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mt-5">
+              
+              {/* Stylized SVG Interactive Map (md:col-span-5) */}
+              <div className="md:col-span-5 bg-slate-50/50 rounded-2xl p-4 border border-slate-100 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden">
+                <span className="absolute top-2 left-2 text-[9px] font-light text-slate-400">
+                  คลิกโหนดภูมิภาคเพื่อคัดกรอง
+                </span>
+                
+                {/* SVG Schematic Map of Thailand */}
+                <svg width="100%" height="280" viewBox="0 0 200 320" className="drop-shadow-sm">
+                  {/* Grid Lines background */}
+                  <g opacity="0.15">
+                    <line x1="20" y1="0" x2="20" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="60" y1="0" x2="60" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="100" y1="0" x2="100" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="140" y1="0" x2="140" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="180" y1="0" x2="180" y2="320" stroke="#94A3B8" strokeDasharray="2 2" />
+                    
+                    <line x1="0" y1="40" x2="200" y2="40" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="0" y1="100" x2="200" y2="100" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="0" y1="160" x2="200" y2="160" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="0" y1="220" x2="200" y2="220" stroke="#94A3B8" strokeDasharray="2 2" />
+                    <line x1="0" y1="280" x2="200" y2="280" stroke="#94A3B8" strokeDasharray="2 2" />
+                  </g>
+
+                  {/* Connected schematic regional links */}
+                  <path d="M 85,60 L 150,100 L 100,140 L 130,185 L 100,140 L 60,130 L 85,60" fill="none" stroke="#E2E8F0" strokeWidth="2.5" />
+                  <path d="M 100,140 L 70,260 L 70,300" fill="none" stroke="#E2E8F0" strokeWidth="2.5" />
+
+                  {/* Region 1: North */}
+                  <g onClick={() => { setSelectedMapRegion("North"); const f = PROVINCES_DATA.find(p=>p.region==="North"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="85" cy="60" r={selectedMapRegion === "North" ? "22" : "18"} fill={selectedMapRegion === "North" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "North" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="85" y="63" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">เหนือ</text>
+                    {/* Status dot indicator for region performance (overall green/yellow) */}
+                    <circle cx="97" cy="48" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
+                  </g>
+
+                  {/* Region 2: Northeast */}
+                  <g onClick={() => { setSelectedMapRegion("Northeast"); const f = PROVINCES_DATA.find(p=>p.region==="Northeast"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="150" cy="100" r={selectedMapRegion === "Northeast" ? "24" : "20"} fill={selectedMapRegion === "Northeast" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "Northeast" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="150" y="103" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">อีสาน</text>
+                    <circle cx="164" cy="88" r="4.5" className="fill-amber-500 stroke-white stroke-2" />
+                  </g>
+
+                  {/* Region 3: Central */}
+                  <g onClick={() => { setSelectedMapRegion("Central"); const f = PROVINCES_DATA.find(p=>p.region==="Central"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="100" cy="140" r={selectedMapRegion === "Central" ? "22" : "18"} fill={selectedMapRegion === "Central" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "Central" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="100" y="143" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">กลาง</text>
+                    <circle cx="112" cy="128" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
+                  </g>
+
+                  {/* Region 4: West */}
+                  <g onClick={() => { setSelectedMapRegion("West"); const f = PROVINCES_DATA.find(p=>p.region==="West"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="60" cy="130" r={selectedMapRegion === "West" ? "20" : "16"} fill={selectedMapRegion === "West" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "West" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="60" y="133" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ตก</text>
+                    <circle cx="70" cy="118" r="4.5" className="fill-rose-500 stroke-white stroke-2" />
+                  </g>
+
+                  {/* Region 5: East */}
+                  <g onClick={() => { setSelectedMapRegion("East"); const f = PROVINCES_DATA.find(p=>p.region==="East"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="130" cy="185" r={selectedMapRegion === "East" ? "20" : "16"} fill={selectedMapRegion === "East" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "East" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="130" y="188" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ออก</text>
+                    <circle cx="140" cy="173" r="4.5" className="fill-emerald-500 stroke-white stroke-2" />
+                  </g>
+
+                  {/* Region 6: South */}
+                  <g onClick={() => { setSelectedMapRegion("South"); const f = PROVINCES_DATA.find(p=>p.region==="South"); if(f) setSelectedProvinceName(f.name); }} className="cursor-pointer group">
+                    <circle cx="70" cy="260" r={selectedMapRegion === "South" ? "22" : "18"} fill={selectedMapRegion === "South" ? "rgba(37, 99, 235, 0.15)" : "rgba(241, 245, 249, 0.8)"} stroke={selectedMapRegion === "South" ? "#2563EB" : "#CBD5E1"} strokeWidth="1.5" className="transition-all duration-300" />
+                    <text x="70" y="263" textAnchor="middle" className="text-[9px] font-medium fill-slate-700 pointer-events-none">ใต้</text>
+                    <circle cx="82" cy="248" r="4.5" className="fill-amber-500 stroke-white stroke-2" />
+                  </g>
+                </svg>
+
+                {/* Status Legend */}
+                <div className="flex justify-center gap-3 w-full border-t border-slate-100 pt-3 text-[9px] text-slate-500 font-light">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span>On Target (ผ่านเกณฑ์)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span>ต่ำเป้า 20%</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span>ต่ำเป้า 50%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Province list and Details Panel (md:col-span-7) */}
+              <div className="md:col-span-7 flex flex-col justify-between min-h-[300px]">
+                
+                {/* Scrollable list of provinces */}
+                <div>
+                  <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2">
+                    รายชื่อจังหวัดในการจัดกลุ่ม ({filteredProvinces.length} จังหวัด)
+                  </div>
+                  <div className="max-h-[150px] overflow-y-auto space-y-1.5 pr-1 border border-slate-100 rounded-xl p-2 bg-slate-50/30">
+                    {filteredProvinces.map((prov) => {
+                      const isSelected = selectedProvinceName === prov.name;
+                      const statusColor = prov.status === "green" 
+                        ? "bg-emerald-500" 
+                        : prov.status === "yellow" 
+                        ? "bg-amber-500" 
+                        : "bg-rose-500";
+                      
+                      return (
+                        <button
+                          key={prov.name}
+                          onClick={() => setSelectedProvinceName(prov.name)}
+                          className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-all cursor-pointer border ${
+                            isSelected 
+                              ? "bg-blue-600/10 border-blue-600/30 text-blue-700 font-medium" 
+                              : "bg-white border-slate-100 hover:border-slate-200 text-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${statusColor}`} />
+                            <span>{prov.name}</span>
+                            <span className="text-[10px] text-slate-400 font-light font-mono">({prov.engName})</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-400 font-light">พนักงาน:</span>
+                            <span className="font-mono text-xs">{prov.headcount} คน</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selected Province Details Card */}
+                <div className="bg-gradient-to-r from-slate-50 to-blue-50/30 rounded-2xl p-4 border border-slate-100/60 mt-3.5 shadow-inner">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/50">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={13} className="text-blue-600" />
+                      <span className="text-xs font-medium text-slate-800">
+                        {activeProvinceDetails.name} ({activeProvinceDetails.engName})
+                      </span>
+                    </div>
+                    <span className={`px-2 py-0.5 text-[9px] font-medium rounded-full ${
+                      activeProvinceDetails.status === "green" 
+                        ? "bg-emerald-500/10 text-emerald-650 border border-emerald-500/20" 
+                        : activeProvinceDetails.status === "yellow" 
+                        ? "bg-amber-500/10 text-amber-655 border border-amber-500/20" 
+                        : "bg-rose-500/10 text-rose-650 border border-rose-500/20"
+                    }`}>
+                      {activeProvinceDetails.status === "green" ? "On Target (ผ่านเกณฑ์)" : activeProvinceDetails.status === "yellow" ? "ต่ำเป้า 20%" : "ต่ำเป้า 50%"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 mt-3">
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 text-center shadow-xs">
+                      <p className="text-[9px] text-slate-400">กำลังพลปฏิบัติการ</p>
+                      <p className="text-sm font-medium text-slate-800 mt-1 font-mono">{activeProvinceDetails.headcount.toLocaleString()} คน</p>
+                    </div>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 text-center shadow-xs">
+                      <p className="text-[9px] text-slate-400">ดัชนีดาวเด่น (High Perf)</p>
+                      <p className="text-sm font-medium text-slate-800 mt-1 font-mono">{activeProvinceDetails.highPerfRatio}%</p>
+                    </div>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 text-center shadow-xs">
+                      <p className="text-[9px] text-slate-400">อัตราเกษียณเฝ้าระวัง</p>
+                      <p className="text-sm font-medium text-rose-600 mt-1 font-mono">{activeProvinceDetails.retirementRisk}%</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 text-[9.5px] text-slate-400 font-light">
+                    <span>ดัชนีผู้สืบทอดตำแหน่ง (Successor Coverage):</span>
+                    <span className="font-medium text-slate-700">{activeProvinceDetails.successionCoverage}% ของกลุ่มผู้จัดการ</span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="mt-5 pt-3.5 border-t border-slate-100/60 flex items-center justify-between text-[10px] text-slate-400 font-light">
+            <span>สำนักงานเครือข่ายสาขาภูมิภาค SME D Bank</span>
+            <span>ระบบ GIS แผนที่นำทางสืบค้น</span>
+          </div>
+        </div>
+
+        {/* Right Column: Performance Trend & Forecast Tool (lg:col-span-5) */}
+        <div className="lg:col-span-5 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100/60">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 bg-amber-400/10 text-amber-500 rounded-lg shrink-0">
+                  <Target size={13} className="animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-medium text-slate-800">
+                    Performance Forecast & Projection
+                  </h3>
+                  <p className="text-[9px] text-slate-400 font-light">
+                    เครื่องมือจำลองอัตราสัมฤทธิ์ผลสถาบันในอนาคต (2026 - 2029)
+                  </p>
+                </div>
+              </div>
+              <span className="text-[8.5px] font-sans font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-full uppercase">
+                Predictive Tool
+              </span>
+            </div>
+
+            {/* Strategic Levers (Interactive controls that dynamically change forecasts) */}
+            <div className="mt-4 space-y-3 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block mb-1">
+                คันโยกยุทธศาสตร์เพื่อการพยากรณ์ล่วงหน้า (Strategic HR Levers)
+              </span>
+
+              {/* Lever 1: L&D Upskilling */}
+              <div className="flex flex-col gap-1.5 pb-2.5 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-700">1. การยกระดับ L&D และพัฒนาทักษะ (Upskilling)</span>
+                  <span className="text-[10.5px] font-medium text-blue-600">{upskillingLevel === "None" ? "ปกติ" : upskillingLevel === "Medium" ? "ปานกลาง (+4%)" : "เชิงรุกเข้มข้น (+8%)"}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {(["None", "Medium", "Intensive"] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      onClick={() => setUpskillingLevel(lvl)}
+                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                        upskillingLevel === lvl
+                          ? "bg-blue-600 text-white font-medium"
+                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      {lvl === "None" ? "มาตรฐาน" : lvl === "Medium" ? "ระดับกลาง" : "เข้มข้น"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lever 2: Succession depth */}
+              <div className="flex flex-col gap-1.5 pb-2.5 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-700">2. ความลึกของตำแหน่งสืบทอด (Succession Pipeline)</span>
+                  <span className="text-[10.5px] font-medium text-indigo-600">{successionLevel === "Normal" ? "ปกติ" : successionLevel === "Deep" ? "ผู้สืบทอด 2 ชั้น (+3%)" : "ผู้สืบทอดครอบคลุม (+5%)"}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {(["Normal", "Deep", "Full Coverage"] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      onClick={() => setSuccessionLevel(lvl)}
+                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                        successionLevel === lvl
+                          ? "bg-indigo-600 text-white font-medium"
+                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      {lvl === "Normal" ? "มาตรฐาน" : lvl === "Deep" ? "ผู้สืบทอด 2 ชั้น" : "ครอบคลุมครบ"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lever 3: Digital transformation */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-700">3. เครื่องมือดิจิทัลและระบบช่วยเหลือ (AI & Digital)</span>
+                  <span className="text-[10.5px] font-medium text-emerald-600">{digitalLevel === "Standard" ? "ปกติ" : digitalLevel === "Optimized" ? "ปรับแต่งระบบ (+3%)" : "Advanced AI (+6%)"}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {(["Standard", "Optimized", "Advanced AI"] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      onClick={() => setDigitalLevel(lvl)}
+                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                        digitalLevel === lvl
+                          ? "bg-emerald-600 text-white font-medium"
+                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      {lvl === "Standard" ? "มาตรฐาน" : lvl === "Optimized" ? "จัดสรรใหม่" : "Advanced AI"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recharts Area Chart showing projection outcomes */}
+            <div className="mt-4">
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block mb-2">
+                ดัชนีคะแนนผลงานความสำเร็จเปรียบเทียบใน 3 ปีข้างหน้า
+              </span>
+              <div className="h-[140px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={forecastChartData}>
+                    <defs>
+                      <linearGradient id="colorStrategy" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                    <XAxis dataKey="name" tick={{ fill: '#94A3B8', fontSize: 8 }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[50, 100]} tick={{ fill: '#94A3B8', fontSize: 8 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ fontSize: 10, borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                    <Area type="monotone" dataKey="withStrategy" name="แผนหลังปรับยุทธศาสตร์" stroke="#2563EB" fillOpacity={1} fill="url(#colorStrategy)" strokeWidth={2} />
+                    <Line type="monotone" dataKey="score" name="แนวโน้มกรณีปกติ (Baseline)" stroke="#94A3B8" strokeDasharray="4 4" strokeWidth={1.5} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="target" name="ค่าเป้าหมาย (KPI Target)" stroke="#10B981" strokeWidth={1.2} dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
+            <span className="text-slate-400 font-light">
+              ผลพยากรณ์คาดการณ์โดยอาศัยเครื่องมือสถิติและแบบจำลอง HR-Analytics
+            </span>
+            <span className="font-medium text-emerald-600 font-mono">
+              เป้าหมายสูงสุด: {87 + forecastModifier}%
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* Middle Grid Section: Dashboard Analytics Chart Hub & Insights Feed */}

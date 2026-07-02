@@ -203,82 +203,160 @@ export default function WorkforceRisk({
         {/* The Grid of risk indicators */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           
-          {/* Risk Card 1 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 1: เกษียณวิกฤต */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md">เกษียณวิกฤต</span>
-              <ShieldAlert size={14} className="text-rose-500 animate-pulse" />
+              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 shrink-0">
+                <ShieldAlert size={14} className="animate-pulse" />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded-full uppercase">
+                Critical
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 59 ปี</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementCritical.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">เกษียณวิกฤต (อายุ 59)</p>
+              <p className="text-[9px] font-light text-slate-400">Retirement Critical</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.retirementCritical.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณปีนี้ทางกฎหมาย</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>เกษียณปีนี้ทางกฎหมาย</span>
+              <span className="font-mono text-rose-600 font-medium">L1-L11</span>
+            </div>
           </div>
 
-          {/* Risk Card 2 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 2: เกษียณเฝ้าระวัง */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">เกษียณเฝ้าระวัง</span>
-              <AlertTriangle size={14} className="text-amber-500" />
+              <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-100 shrink-0">
+                <AlertTriangle size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-amber-50 text-amber-600 border border-amber-100 px-2 py-0.5 rounded-full uppercase">
+                Warning
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 57-58 ปี</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementWarning.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">เกษียณเฝ้าระวัง (57-58)</p>
+              <p className="text-[9px] font-light text-slate-400">Retirement Warning</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.retirementWarning.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณภายใน 3 ปี</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>เกษียณภายใน 3 ปี</span>
+              <span className="font-mono text-amber-600 font-medium">L1-L11</span>
+            </div>
           </div>
 
-          {/* Risk Card 3 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 3: เตรียมเกษียณ */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md">เตรียมเกษียณ</span>
-              <Calendar size={14} className="text-blue-500" />
+              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-100 shrink-0">
+                <Calendar size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded-full uppercase">
+                Upcoming
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 55-56 ปี</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementUpcoming.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">เตรียมเกษียณ (55-56)</p>
+              <p className="text-[9px] font-light text-slate-400">Upcoming Retirement</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.retirementUpcoming.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณภายใน 5 ปี</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>เกษียณภายใน 5 ปี</span>
+              <span className="font-mono text-blue-600 font-medium">L1-L11</span>
+            </div>
           </div>
 
-          {/* Risk Card 4 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 4: ผู้บริหารพร้อม */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">ผู้บริหารพร้อม</span>
-              <UserCheck size={14} className="text-purple-600" />
+              <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-100 shrink-0">
+                <UserCheck size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full uppercase">
+                Ready Now
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">Ready Now Candidate</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.readyNow.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">ผู้บริหารพร้อมสืบทอด</p>
+              <p className="text-[9px] font-light text-slate-400">Ready Candidates</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.readyNow.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สืบทอดสายงานบริหารได้ทันที</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>สืบทอดได้ทันที</span>
+              <span className="font-mono text-purple-600 font-medium">L9-L11</span>
+            </div>
           </div>
 
-          {/* Risk Card 5 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 5: สุญญากาศผู้บริหาร */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">สุญญากาศผู้บริหาร</span>
-              <Lock size={14} className="text-rose-600" />
+              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 group-hover:bg-rose-100 shrink-0">
+                <Lock size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded-full uppercase">
+                Vacancy Risk
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">No Succession Model</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.noSuccessor.toLocaleString()} อัตรา</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">สุญญากาศผู้บริหาร</p>
+              <p className="text-[9px] font-light text-slate-400">No Succession Model</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.noSuccessor.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">อัตรา</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สายงานบริหารระดับ L9+ ขาดทุนรอง</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>ตำแหน่งบริหารขาดแคลน</span>
+              <span className="font-mono text-rose-600 font-medium">L9+ Risk</span>
+            </div>
           </div>
 
-          {/* Risk Card 6 */}
-          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+          {/* Standard Card 6: ดาวเด่น */}
+          <div className="bg-white border border-slate-100/95 shadow-xs hover:shadow-md p-4.5 rounded-[22px] relative overflow-hidden group transition-all duration-300 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">ดาวเด่นในสถาบัน</span>
-              <Award size={14} className="text-emerald-600" />
+              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 shrink-0">
+                <Award size={14} />
+              </div>
+              <span className="text-[9px] font-sans font-medium bg-emerald-50 text-emerald-600 border border-emerald-100 px-2 py-0.5 rounded-full uppercase">
+                Stars
+              </span>
             </div>
             <div className="mt-4">
-              <p className="text-[10px] text-slate-400 font-light">High Performers</p>
-              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.highPerformers.toLocaleString()} คน</p>
+              <p className="text-[10px] font-medium tracking-wide uppercase text-slate-400">ดาวเด่นในสถาบัน</p>
+              <p className="text-[9px] font-light text-slate-400">High Performers</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-sans font-medium tracking-tight text-slate-800">
+                  {riskStats.highPerformers.toLocaleString()}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">คน</span>
+              </div>
             </div>
-            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">กลุ่มพนักงานประเมินผลงานยอดเยี่ยม</p>
+            <div className="mt-3.5 pt-2 border-t border-slate-50 flex items-center justify-between text-[8px] text-slate-400 font-light">
+              <span>กลุ่มพนักงานเกรดดีเลิศ</span>
+              <span className="font-mono text-emerald-600 font-medium">L1-L11</span>
+            </div>
           </div>
 
         </div>
