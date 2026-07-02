@@ -1,75 +1,352 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans Thai", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* SME D Bank CI Theme Palette */
+  /* CI Theme Palette with Vibrant Accents */
   --color-brand-primary: #2F6FE4;
   --color-brand-secondary: #4C8DFF;
   --color-brand-cyan: #25B7D3;
   --color-brand-accent: #2DBE7F;
-  --color-bg-light: #F8FAFC;
+  --color-bg-light: #F5F7FA;
   --color-card-bg: #FFFFFF;
-  --color-border-light: #E2ECF5;
-  --color-text-primary: #1F2D3D;
-  --color-text-secondary: #5B6B7F;
-  --color-text-table-header: #1F2D3D;
-  --color-warning-accent: #FFB547;
-  --color-critical-accent: #F36B6B;
-  --color-success-accent: #2DBE7F;
+  --color-border-light: rgba(47, 111, 228, 0.08);
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #475569;
 }
 
-/* Custom styles and scrollbar styling for executive-level finish */
-html, body {
-  font-family: var(--font-sans);
-  background-color: #F3F5F9; /* Enhanced subtle cool grey tone background */
-  color: var(--color-text-primary);
-  letter-spacing: 0px !important;
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
+/* ==========================================================================
+   GLOBAL TYPOGRAPHY RULES (STRICT LIGHT / REGULAR / MEDIUM ONLY)
+   ========================================================================== */
+html, body, * {
+  font-family: "IBM Plex Sans Thai", "Inter", sans-serif !important;
   letter-spacing: 0px !important;
 }
 
-/* Premium micro-interactions and elevation */
+body {
+  background-color: #F5F7FA;
+}
+
+/* Strict weight restriction: Only use Light (300), Regular (400), Medium (500) */
+.font-semibold, 
+.font-bold, 
+.font-extrabold, 
+h1, h2, h3, h4, h5, h6, 
+th, strong, b {
+  font-weight: 500 !important; /* Force Medium (500) */
+}
+
+.font-medium {
+  font-weight: 500 !important;
+}
+
+.font-normal {
+  font-weight: 400 !important;
+}
+
+.font-light {
+  font-weight: 300 !important;
+}
+
+/* ==========================================================================
+   PREMIUM SOOTHING EYE-CARE LIGHT THEME SYSTEM (REDESIGNED)
+   ========================================================================== */
+.theme-light {
+  background-color: #F8FAFC !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(47, 111, 228, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(37, 183, 211, 0.04) 0px, transparent 40%) !important;
+  background-attachment: fixed !important;
+  color: #1E293B !important;
+}
+
+/* Micro-interactions on premium elements */
 .hover-card-premium {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .hover-card-premium:hover {
-  transform: translateY(-2.5px);
-  box-shadow: 0 10px 20px -5px rgba(47, 111, 228, 0.08);
-  border-color: rgba(47, 111, 228, 0.25) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 20px 40px -15px rgba(47, 111, 228, 0.08), 0 2px 8px rgba(47, 111, 228, 0.02) !important;
+  border-color: rgba(47, 111, 228, 0.15) !important;
 }
 
-.hover-glow-blue:hover {
-  box-shadow: 0 0 15px -3px rgba(47, 111, 228, 0.15);
+/* Premium elevated glass card styling (reduces boxy heavy borders) */
+.theme-light .bg-white,
+.theme-light .bg-card-bg,
+.theme-light #filter-bar-container {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(47, 111, 228, 0.07) !important;
+  box-shadow: 0 12px 34px -10px rgba(47, 111, 228, 0.04), 0 1px 3px rgba(47, 111, 228, 0.01) !important;
+  border-radius: 1.25rem !important; /* rounded-2xl */
 }
 
-.hover-glow-emerald:hover {
-  box-shadow: 0 0 15px -3px rgba(45, 190, 127, 0.15);
+/* Visual left stripe for highlight accents on cards */
+.theme-light .absolute.left-0.top-0.bottom-0.w-1,
+.theme-light .absolute.left-0.top-0.bottom-0.w-1\.2 {
+  width: 4px !important;
+  border-radius: 4px 0 0 4px !important;
 }
 
-.gradient-blue-card {
-  background: linear-gradient(135deg, #2F6FE4 0%, #1A4EB2 100%);
+/* Navigation Header styling */
+.theme-light header#main-header {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(47, 111, 228, 0.05) !important;
+  box-shadow: 0 4px 30px rgba(47, 111, 228, 0.02) !important;
 }
 
-.gradient-green-card {
-  background: linear-gradient(135deg, #2DBE7F 0%, #1C8555 100%);
+/* Soft, elegant inner dividers */
+.theme-light .border-slate-100,
+.theme-light .border-slate-200,
+.theme-light .border-slate-150,
+.theme-light .border-[#E2ECF5],
+.theme-light .border-[#DCE6F2],
+.theme-light .border-slate-200\/60,
+.theme-light .border-slate-200\/50,
+.theme-light .border-slate-100\/50,
+.theme-light .border-slate-100\/60,
+.theme-light .border-[#DCE6F2]/50 {
+  border-color: rgba(47, 111, 228, 0.05) !important;
 }
 
-.gradient-amber-card {
-  background: linear-gradient(135deg, #FFB547 0%, #D48E25 100%);
+/* Typography contrast settings for pristine readability */
+.theme-light .text-slate-800,
+.theme-light .text-slate-900,
+.theme-light .text-[#1F2D3D],
+.theme-light .text-[#1E293B],
+.theme-light .text-[#0F172A],
+.theme-light .text-slate-700 {
+  color: #1E293B !important;
 }
 
-.gradient-coral-card {
-  background: linear-gradient(135deg, #F36B6B 0%, #C84646 100%);
+.theme-light .text-slate-500,
+.theme-light .text-slate-600,
+.theme-light .text-[#5B6B7F],
+.theme-light .text-[#64748B],
+.theme-light .text-slate-400 {
+  color: #475569 !important; /* Enhanced for better executive reading */
 }
 
+/* Colorful gradient accent treatment for KPI elements */
+.theme-light .kpi-card-blue,
+.theme-light .hover-card-premium:nth-child(1) {
+  background: linear-gradient(135deg, rgba(47, 111, 228, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+  border-left: 4px solid #2F6FE4 !important;
+  box-shadow: 0 10px 25px -5px rgba(47, 111, 228, 0.04) !important;
+}
+
+.theme-light .kpi-card-emerald,
+.theme-light .hover-card-premium:nth-child(2) {
+  background: linear-gradient(135deg, rgba(45, 190, 127, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+  border-left: 4px solid #2DBE7F !important;
+  box-shadow: 0 10px 25px -5px rgba(45, 190, 127, 0.04) !important;
+}
+
+.theme-light .kpi-card-amber,
+.theme-light .hover-card-premium:nth-child(3) {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+  border-left: 4px solid #F97316 !important;
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.04) !important;
+}
+
+.theme-light .kpi-card-coral,
+.theme-light .hover-card-premium:nth-child(4) {
+  background: linear-gradient(135deg, rgba(243, 107, 107, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+  border-left: 4px solid #F36B6B !important;
+  box-shadow: 0 10px 25px -5px rgba(243, 107, 107, 0.04) !important;
+}
+
+/* Modern compact controls with rounded aesthetic */
+.theme-light select,
+.theme-light input {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(207, 220, 235, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  color: #1E293B !important;
+  transition: all 0.2s ease !important;
+}
+
+.theme-light select:focus,
+.theme-light input:focus {
+  border-color: #2F6FE4 !important;
+  box-shadow: 0 0 0 3px rgba(47, 111, 228, 0.1) !important;
+}
+
+.theme-light select option {
+  background-color: #FFFFFF !important;
+  color: #1E293B !important;
+}
+
+/* Redesigned Tab Navigation Bar */
+.theme-light #tab-navigation-bar {
+  background-color: rgba(226, 236, 245, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(207, 220, 235, 0.6) !important;
+  border-radius: 1rem !important;
+  padding: 5px !important;
+}
+
+.theme-light #tab-navigation-bar button {
+  color: #475569 !important;
+  font-size: 12px !important;
+  transition: all 0.25s ease !important;
+}
+
+.theme-light #tab-navigation-bar button:hover {
+  color: #2F6FE4 !important;
+}
+
+/* Active tab elegant badge background styling */
+.theme-light .bg-\[\#2F6FE4\] {
+  background: linear-gradient(135deg, #2F6FE4 0%, #1E52B6 100%) !important;
+  border: none !important;
+  box-shadow: 0 6px 16px rgba(47, 111, 228, 0.2) !important;
+  border-radius: 0.65rem !important;
+}
+
+/* High-end Premium Tables with spacious row elevation */
+.theme-light table {
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;
+}
+
+.theme-light tr {
+  background-color: transparent !important;
+}
+
+.theme-light tbody tr {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 2px 6px rgba(47, 111, 228, 0.01) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.theme-light tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 10px 24px -10px rgba(47, 111, 228, 0.08) !important;
+}
+
+.theme-light th {
+  background-color: rgba(243, 247, 250, 0.6) !important;
+  color: #475569 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 12px 16px !important;
+  border-bottom: 2px solid rgba(47, 111, 228, 0.06) !important;
+}
+
+.theme-light td {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid rgba(47, 111, 228, 0.02) !important;
+}
+
+/* Table Badge & Chip Styling with soft executive-colored backdrops */
+.theme-light .bg-[#2DBE7F]/10,
+.theme-light .bg-emerald-50,
+.theme-light .text-[#2DBE7F] {
+  background-color: rgba(45, 190, 127, 0.08) !important;
+  color: #1C8555 !important;
+}
+
+.theme-light .bg-[#FFB547]/10,
+.theme-light .bg-amber-50,
+.theme-light .text-[#FFB547] {
+  background-color: rgba(249, 115, 22, 0.08) !important;
+  color: #D48E25 !important;
+}
+
+.theme-light .bg-[#F36B6B]/10,
+.theme-light .bg-red-50,
+.theme-light .text-[#F36B6B] {
+  background-color: rgba(243, 107, 107, 0.08) !important;
+  color: #C84646 !important;
+}
+
+.theme-light .bg-[#4C8DFF]/10,
+.theme-light .bg-blue-50,
+.theme-light .text-[#4C8DFF] {
+  background-color: rgba(76, 141, 255, 0.08) !important;
+  color: #1E52B6 !important;
+}
+
+/* Action button improvements */
+.theme-light #reset-filters-btn {
+  background-color: rgba(243, 107, 107, 0.08) !important;
+  color: #F36B6B !important;
+  border: 1px solid rgba(243, 107, 107, 0.15) !important;
+  border-radius: 0.75rem !important;
+}
+.theme-light #reset-filters-btn:hover {
+  background-color: rgba(243, 107, 107, 0.15) !important;
+}
+
+.theme-light #export-excel-btn {
+  background: linear-gradient(135deg, #2DBE7F 0%, #1F9E66 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(45, 190, 127, 0.2) !important;
+  border-radius: 0.75rem !important;
+}
+.theme-light #export-excel-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 16px rgba(45, 190, 127, 0.28) !important;
+}
+
+.theme-light #export-pdf-btn {
+  background: linear-gradient(135deg, #4C8DFF 0%, #2F6FE4 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(76, 141, 255, 0.2) !important;
+  border-radius: 0.75rem !important;
+}
+.theme-light #export-pdf-btn:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 16px rgba(76, 141, 255, 0.28) !important;
+}
+
+/* Employee details drawer container styling */
+.theme-light #employee-detail-modal-container {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  box-shadow: -10px 0 40px rgba(47, 111, 228, 0.08) !important;
+  border-left: 1px solid rgba(47, 111, 228, 0.06) !important;
+}
+
+/* Footer layout rules */
+.theme-light footer#main-footer {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  border-top: 1px solid rgba(47, 111, 228, 0.05) !important;
+  color: #475569 !important;
+}
+
+/* Charts Tooltips & Layout overrides */
+.recharts-default-tooltip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(47, 111, 228, 0.08) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px -5px rgba(47, 111, 228, 0.06) !important;
+}
+
+.recharts-legend-item-text {
+  color: #475569 !important;
+  font-size: 11px !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: #475569 !important;
+  font-size: 11px !important;
+}
+
+/* Shimmer pulse animations */
 .shimmer {
   position: relative;
   overflow: hidden;
@@ -92,7 +369,7 @@ html, body {
   100% { transform: translateX(100%); }
 }
 
-/* Custom scrollbars */
+/* Minimal scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -108,7 +385,7 @@ html, body {
   background: #94a3b8;
 }
 
-/* Premium Animations */
+/* Custom premium CSS keyframe animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -136,4 +413,67 @@ html, body {
   animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Premium high-end executive dark background with glowing responsive gradients */
+.theme-dark {
+  background-color: #060a13 !important;
+  background-image: 
+    radial-gradient(circle at 5% 5%, rgba(47, 111, 228, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 95% 5%, rgba(37, 183, 211, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 90% 95%, rgba(45, 190, 127, 0.06) 0%, transparent 35%) !important;
+  background-attachment: fixed !important;
+  color: #E2E8F0 !important;
+}
 
+.theme-dark header#main-header {
+  background-color: rgba(16, 25, 45, 0.9) !important;
+  border-color: #1E2D4A !important;
+}
+
+.theme-dark .bg-white,
+.theme-dark .bg-card-bg {
+  background-color: #111A2E !important;
+}
+
+.theme-dark .bg-slate-50,
+.theme-dark .bg-slate-100,
+.theme-dark .bg-[#F8FAFC]/40,
+.theme-dark .bg-[#F8FAFC],
+.theme-dark .bg-slate-50/50,
+.theme-dark .bg-slate-100/50,
+.theme-dark .bg-slate-100\/50,
+.theme-dark .bg-slate-50\/50 {
+  background-color: #0C1322 !important;
+}
+
+.theme-dark .border-slate-100,
+.theme-dark .border-slate-200,
+.theme-dark .border-slate-150,
+.theme-dark .border-[#E2ECF5],
+.theme-dark .border-[#DCE6F2] {
+  border-color: #1E2D4A !important;
+}
+
+.theme-dark .text-slate-800,
+.theme-dark .text-slate-900,
+.theme-dark .text-[#1F2D3D],
+.theme-dark .text-[#1E293B],
+.theme-dark .text-[#0F172A],
+.theme-dark .text-slate-700 {
+  color: #F1F5F9 !important;
+}
+
+.theme-dark .text-slate-500,
+.theme-dark .text-slate-600,
+.theme-dark .text-[#5B6B7F],
+.theme-dark .text-[#64748B],
+.theme-dark .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+.theme-dark select,
+.theme-dark input {
+  background-color: #0C1322 !important;
+  color: #F1F5F9 !important;
+  border-color: #1E2D4A !important;
+}

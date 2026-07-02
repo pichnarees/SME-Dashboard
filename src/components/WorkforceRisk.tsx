@@ -5,13 +5,22 @@
 
 import React, { useState, useMemo } from "react";
 import { Employee } from "../data/mockData";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, CartesianGrid, Legend, PieChart, Pie } from "recharts";
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Cell, 
+  CartesianGrid, 
+  PieChart, 
+  Pie 
+} from "recharts";
 import { 
   ShieldAlert, 
   Users, 
   Award, 
-  Clock, 
-  ArrowRight, 
   Search, 
   X, 
   ChevronLeft, 
@@ -21,7 +30,11 @@ import {
   FileText,
   TrendingUp,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Lock,
+  ArrowUpRight,
+  Eye,
+  Info
 } from "lucide-react";
 
 interface WorkforceRiskProps {
@@ -40,20 +53,27 @@ export default function WorkforceRisk({
   activeFilters,
   onToggleFilter
 }: WorkforceRiskProps) {
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Local tab toggling for succession strategy insights
   const [activeInsightTab, setActiveInsightTab] = useState<"succession" | "demographics">("succession");
-  const itemsPerPage = 6;
 
   const totalCount = employees.length;
 
-  // 1. Calculate risk KPIs based on current filtered employees
+  // Calculate critical KPIs for succession/retirement
   const riskStats = useMemo(() => {
     const retirementCritical = employees.filter(e => e.age === 59).length;
     const retirementWarning = employees.filter(e => e.age >= 57 && e.age <= 58).length;
     const retirementUpcoming = employees.filter(e => e.age >= 55 && e.age <= 56).length;
 
-    const noSuccessor = employees.filter(e => e.successionStatus === "None" && e.level >= "Level 9").length;
+    const managementCohort = employees.filter(e => {
+      const num = parseInt(e.level.replace(/[^0-9]/g, "")) || 0;
+      return num >= 9 || e.level.includes("13");
+    });
+    const noSuccessor = managementCohort.filter(e => e.successionStatus === "None").length;
     const readyNow = employees.filter(e => e.successionStatus === "Ready Now").length;
     const highPerformers = employees.filter(e => e.performanceRating === "High Performer").length;
 
@@ -67,7 +87,7 @@ export default function WorkforceRisk({
     };
   }, [employees]);
 
-  // 2. Succession Status Distribution Chart Data
+  // Succession distribution chart data
   const successionChartData = useMemo(() => {
     const counts: Record<string, number> = {
       "Ready Now": 0,
@@ -76,23 +96,25 @@ export default function WorkforceRisk({
       "None": 0
     };
     employees.forEach(e => {
-      if (e.successionStatus) {
+      if (e.successionStatus && e.successionStatus !== "None") {
         counts[e.successionStatus] = (counts[e.successionStatus] || 0) + 1;
+      } else if (e.successionStatus === "None") {
+        counts["None"] = (counts["None"] || 0) + 1;
       }
     });
 
     const colors: Record<string, string> = {
-      "Ready Now": "#2DBE7F",
-      "Ready 1-2 Years": "#4C8DFF",
-      "Ready 3-5 Years": "#FFB547",
-      "None": "#F36B6B"
+      "Ready Now": "#10B981", // Emerald
+      "Ready 1-2 Years": "#3B82F6", // Blue
+      "Ready 3-5 Years": "#F59E0B", // Amber
+      "None": "#EF4444" // Red
     };
 
     const labels: Record<string, string> = {
       "Ready Now": "พร้อมสืบทอดทันที (Ready Now)",
-      "Ready 1-2 Years": "พร้อมใน 1-2 ปี",
-      "Ready 3-5 Years": "พร้อมใน 3-5 ปี",
-      "None": "ไม่มีผู้สืบทอด (None)"
+      "Ready 1-2 Years": "พร้อมใน 1-2 ปี (Ready 1-2 Years)",
+      "Ready 3-5 Years": "พร้อมใน 3-5 ปี (Ready 3-5 Years)",
+      "None": "ไม่มีผู้สืบทอดตำแหน่ง (None)"
     };
 
     return Object.entries(counts).map(([key, value]) => ({
@@ -104,496 +126,491 @@ export default function WorkforceRisk({
     }));
   }, [employees, totalCount]);
 
-  // 3. Age & Tenure Matrix Chart Data
-  const ageDistributionData = useMemo(() => {
+  // Age distribution ranges progress metrics
+  const ageRangesList = useMemo(() => {
     const brackets = [
-      { name: "ต่ำกว่า 30 ปี", count: 0 },
-      { name: "30-39 ปี", count: 0 },
-      { name: "40-49 ปี", count: 0 },
-      { name: "50-54 ปี", count: 0 },
-      { name: "55-58 ปี", count: 0 },
-      { name: "59 ปีขึ้นไป", count: 0 }
+      { name: "ต่ำกว่า 30 ปี (Gen Z)", min: 0, max: 29, count: 0, color: "bg-teal-500" },
+      { name: "30-39 ปี (Gen Y)", min: 30, max: 39, count: 0, color: "bg-cyan-500" },
+      { name: "40-49 ปี (Gen X)", min: 40, max: 49, count: 0, color: "bg-blue-500" },
+      { name: "50-54 ปี (กลุ่มเก๋า)", min: 50, max: 54, count: 0, color: "bg-purple-500" },
+      { name: "55-58 ปี (กลุ่มเฝ้าระวังเกษียณ)", min: 55, max: 58, count: 0, color: "bg-amber-500" },
+      { name: "59 ปีขึ้นไป (กลุ่มใกล้เกษียณสูงสุด)", min: 59, max: 99, count: 0, color: "bg-rose-500" }
     ];
 
     employees.forEach(e => {
-      if (e.age < 30) brackets[0].count++;
-      else if (e.age <= 39) brackets[1].count++;
-      else if (e.age <= 49) brackets[2].count++;
-      else if (e.age <= 54) brackets[3].count++;
-      else if (e.age <= 58) brackets[4].count++;
-      else brackets[5].count++;
+      brackets.forEach(b => {
+        if (e.age >= b.min && e.age <= b.max) {
+          b.count++;
+        }
+      });
     });
 
     return brackets.map(b => ({
-      name: b.name,
-      "จำนวนคน": b.count,
-      pct: totalCount > 0 ? Math.round((b.count / totalCount) * 100) : 0
+      ...b,
+      percentage: totalCount > 0 ? Math.round((b.count / totalCount) * 100) : 0
     }));
   }, [employees, totalCount]);
 
-  // 4. Critical Vacant/Successor Risk Table Search + Filters
-  const filteredTableData = useMemo(() => {
+  // Filtering for candidate explorer table
+  const tableFilteredEmployees = useMemo(() => {
     return employees.filter(emp => {
       const matchesSearch = searchTerm === "" ||
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.empId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.department.toLowerCase().includes(searchTerm.toLowerCase());
+        emp.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.businessLine.toLowerCase().includes(searchTerm.toLowerCase());
       
       return matchesSearch;
     });
   }, [employees, searchTerm]);
 
-  const paginatedEmployees = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredTableData.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredTableData, currentPage]);
-
-  const totalPages = Math.ceil(filteredTableData.length / itemsPerPage) || 1;
-
-  // Reset pagination on search
+  // Resets pagination on search
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  const totalPages = Math.ceil(tableFilteredEmployees.length / itemsPerPage) || 1;
+  const paginatedEmployees = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return tableFilteredEmployees.slice(start, start + itemsPerPage);
+  }, [tableFilteredEmployees, currentPage]);
+
+  const handlePageChange = (p: number) => {
+    if (p >= 1 && p <= totalPages) {
+      setCurrentPage(p);
+    }
+  };
+
   return (
-    <div className="space-y-8 animate-fadeIn">
-      
-      {/* SECTION 1: Strategic Risk Cards (Interactive) */}
-      <div className="bg-white border border-[#DCE6F2]/70 rounded-2xl p-6 shadow-md shadow-[#2F6FE4]/4">
-        <div className="flex items-center justify-between mb-5.5 pb-3 border-b border-[#DCE6F2]/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-1 h-5 bg-[#F36B6B] rounded-full" />
-            <div>
-              <h3 className="text-sm font-semibold text-[#1F2D3D]">ดัชนีความเสี่ยงกำลังคนเชิงยุทธศาสตร์ (Strategic Workforce Risk Cards)</h3>
-              <p className="text-[11px] text-[#5B6B7F] mt-0.5 font-normal">วิเคราะห์ประเด็นความมั่นคงของบุคลากร คลิกเพื่อกรองข้อมูลพนักงานในแต่ละกลุ่มเสี่ยงแบบตอบสนอง</p>
-            </div>
+    <div className="space-y-6">
+
+      {/* Top row: Interactive Strategic Indicators Grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4.5">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
+            <h2 className="text-sm font-medium text-slate-800 tracking-tight">
+              ดัชนีชี้วัดความเสี่ยงบุคลากรเชิงวิกฤต (SME D Bank Workforce Risk Matrices)
+            </h2>
           </div>
-
-          {(activeFilters.retirementRisk !== "All" || activeFilters.successionStatus !== "All") && (
-            <button
-              onClick={() => {
-                if (activeFilters.retirementRisk !== "All") onToggleFilter("retirementRisk", "All");
-                if (activeFilters.successionStatus !== "All") onToggleFilter("successionStatus", "All");
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold text-[#F36B6B] bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-all cursor-pointer active:scale-95"
-            >
-              <X size={12} />
-              <span>ล้างตัวกรองความเสี่ยง</span>
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 1: Retirement Critical */}
-          <div 
-            onClick={() => onToggleFilter("retirementRisk", activeFilters.retirementRisk === "r1" ? "All" : "r1")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
-              activeFilters.retirementRisk === "r1"
-                ? "bg-red-50/70 border-[#F36B6B] ring-1 ring-[#F36B6B]/30"
-                : "bg-white border-[#DCE6F2]/70 hover:border-[#F36B6B]/40"
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-semibold block">เสี่ยงสูง: เกษียณอายุใน 1 ปี</span>
-              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
-                activeFilters.retirementRisk === "r1" ? "bg-[#F36B6B] text-white" : "bg-[#F36B6B]/8 text-[#F36B6B]"
-              }`}>
-                <AlertTriangle size={14} className={activeFilters.retirementRisk === "r1" ? "" : "animate-pulse"} />
-              </span>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.retirementCritical}</span>
-              <span className="text-xs text-[#5B6B7F]">ท่าน</span>
-            </div>
-            <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">บุคลากรอายุ 59 ปี ที่พร้อมพ้นวาระการทำงานและต้องการแผนการส่งต่องานเร่งด่วน</p>
-            {activeFilters.retirementRisk === "r1" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#F36B6B] bg-white px-2 py-0.5 rounded-md border border-red-100 shadow-3xs">
-                <span>กำลังกรอง</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F36B6B]" />
-              </div>
-            )}
-          </div>
-
-          {/* Card 2: Succession Gaps */}
-          <div 
-            onClick={() => onToggleFilter("successionStatus", activeFilters.successionStatus === "None" ? "All" : "None")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
-              activeFilters.successionStatus === "None"
-                ? "bg-amber-50/70 border-[#FFB547] ring-1 ring-[#FFB547]/30"
-                : "bg-white border-[#DCE6F2]/70 hover:border-[#FFB547]/40"
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-semibold block">ช่องว่างผู้สืบทอด (ระดับ L9 ขึ้นไป)</span>
-              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
-                activeFilters.successionStatus === "None" ? "bg-[#FFB547] text-white" : "bg-[#FFB547]/8 text-[#FFB547]"
-              }`}>
-                <ShieldAlert size={14} />
-              </span>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.noSuccessor}</span>
-              <span className="text-xs text-[#5B6B7F]">ตำแหน่ง</span>
-            </div>
-            <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">ตำแหน่งบริหารและเชี่ยวชาญ (L9 ขึ้นไป) ที่ยังไม่ได้รับการระบุตัวผู้สืบทอดตำแหน่ง</p>
-            {activeFilters.successionStatus === "None" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#FFB547] bg-white px-2 py-0.5 rounded-md border border-amber-100 shadow-3xs">
-                <span>กำลังกรอง</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFB547]" />
-              </div>
-            )}
-          </div>
-
-          {/* Card 3: Ready Now Successors */}
-          <div 
-            onClick={() => onToggleFilter("successionStatus", activeFilters.successionStatus === "Ready Now" ? "All" : "Ready Now")}
-            className={`border rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group hover-card-premium shadow-sm ${
-              activeFilters.successionStatus === "Ready Now"
-                ? "bg-emerald-50/70 border-[#2DBE7F] ring-1 ring-[#2DBE7F]/30"
-                : "bg-white border-[#DCE6F2]/70 hover:border-[#2DBE7F]/40"
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <span className="text-[11px] text-[#5B6B7F] font-semibold block">อัตราความพร้อมสืบทอดทันที</span>
-              <span className={`p-2 rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-110 ${
-                activeFilters.successionStatus === "Ready Now" ? "bg-[#2DBE7F] text-white" : "bg-[#2DBE7F]/8 text-[#2DBE7F]"
-              }`}>
-                <UserCheck size={14} />
-              </span>
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-[#1F2D3D]">{riskStats.readyNow}</span>
-              <span className="text-xs text-[#5B6B7F]">ท่าน</span>
-            </div>
-            <p className="text-[10px] text-[#5B6B7F] mt-2 font-light">กลุ่มพนักงานผู้มีศักยภาพสูงที่ได้รับการประเมินว่าพร้อมขึ้นดำรงตำแหน่งทดแทนได้ทันที</p>
-            {activeFilters.successionStatus === "Ready Now" && (
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 text-[9px] font-semibold text-[#2DBE7F] bg-white px-2 py-0.5 rounded-md border border-emerald-100 shadow-3xs">
-                <span>กำลังกรอง</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#2DBE7F]" />
-              </div>
-            )}
+          <div className="flex items-center gap-1 text-[11px] text-slate-400 font-light">
+            <Info size={11} />
+            <span>อิงระบบสืบค้นอัตราจ้างงานล่าสุด</span>
           </div>
         </div>
-      </div>
 
-      {/* SECTION 2: Succession & Retirement Insights Charts (Consolidated to reduce visual overload) */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        {/* Header and consolidated Tab Switches */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#DCE6F2]/40">
-          <div className="flex items-center gap-2.5">
-            <div className="w-1 h-5 bg-[#4C8DFF] rounded-full" />
-            <div>
-              <h3 className="text-sm font-semibold text-[#1F2D3D]">บทวิเคราะห์เสถียรภาพกำลังพล (Workforce Succession & Age Insights)</h3>
-              <p className="text-[11px] text-[#5B6B7F] mt-0.5">วิเคราะห์ประเด็นความสืบทอดและช่วงประชากรวัยหลักในองค์กรเพื่อการรักษากำลังคนระยะยาว</p>
-            </div>
-          </div>
+        {/* The Grid of risk indicators */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           
-          <div className="flex bg-[#F1F5F9] p-1 rounded-xl border border-slate-200/50 shrink-0 self-start sm:self-auto">
-            <button
-              onClick={() => setActiveInsightTab("succession")}
-              className={`px-3.5 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                activeInsightTab === "succession"
-                  ? "bg-white text-[#4C8DFF] shadow-xs border border-slate-200/20"
-                  : "text-slate-500 hover:text-[#4C8DFF]"
-              }`}
-            >
-              ทายาทสืบทอด (Succession Pipeline)
-            </button>
-            <button
-              onClick={() => setActiveInsightTab("demographics")}
-              className={`px-3.5 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                activeInsightTab === "demographics"
-                  ? "bg-white text-[#2DBE7F] shadow-xs border border-slate-200/20"
-                  : "text-slate-500 hover:text-[#2DBE7F]"
-              }`}
-            >
-              สถิติช่วงอายุ (Age Demographics)
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        {activeInsightTab === "succession" ? (
-          <div className="animate-fadeIn">
-            <p className="text-[11px] text-[#5B6B7F] font-light mb-4">
-              แสดงความพร้อมของทายาทสืบทอดตำแหน่งทั่วทั้งองค์กรเพื่อวิเคราะห์เสถียรภาพกำลังพลในอนาคต (คลิกแถบสีเพื่อจัดกรองตารางตามกลุ่มความพร้อม)
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              <div className="md:col-span-5 h-48 flex items-center justify-center relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={successionChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="58%"
-                      outerRadius="78%"
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {successionChartData.map((entry, idx) => (
-                        <Cell 
-                          key={`cell-${idx}`} 
-                          fill={entry.fill} 
-                          className="cursor-pointer hover:opacity-85 transition-all"
-                          onClick={() => onToggleFilter("successionStatus", entry.key)}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
-                      itemStyle={{ color: "#E2E8F0" }}
-                      labelStyle={{ color: "#94A3B8" }}
-                      formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                {/* Central total value for a premium look */}
-                <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-2xl font-extrabold text-[#1F2D3D] tracking-tight leading-none">
-                    {riskStats.readyNow + riskStats.noSuccessor}
-                  </span>
-                  <span className="text-[8px] text-[#5B6B7F] font-bold tracking-wider uppercase mt-1">เป้าหมายหลัก</span>
-                </div>
-              </div>
-
-              <div className="md:col-span-7 space-y-2.5">
-                {successionChartData.map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => onToggleFilter("successionStatus", item.key)}
-                    className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-all ${
-                      activeFilters.successionStatus === item.key
-                        ? "bg-blue-50 border-blue-200 font-semibold"
-                        : "bg-slate-50/50 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: item.fill }} />
-                      <span className="text-[#1F2D3D] font-medium truncate max-w-[200px]">{item.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#1F2D3D]">{item.value} คน</span>
-                      <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Risk Card 1 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md">เกษียณวิกฤต</span>
+              <ShieldAlert size={14} className="text-rose-500 animate-pulse" />
             </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 59 ปี</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementCritical.toLocaleString()} คน</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณปีนี้ทางกฎหมาย</p>
           </div>
-        ) : (
-          <div className="animate-fadeIn">
-            <p className="text-[11px] text-[#5B6B7F] font-light mb-4">
-              วิเคราะห์ช่วงอายุการทำงานเพื่อประเมินระดับความอ่อนตัวและความเสี่ยงด้านสังคมผู้สูงอายุขององค์กรและการส่งต่องาน
-            </p>
 
-            <div className="h-60 w-full mt-2">
+          {/* Risk Card 2 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">เกษียณเฝ้าระวัง</span>
+              <AlertTriangle size={14} className="text-amber-500" />
+            </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 57-58 ปี</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementWarning.toLocaleString()} คน</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณภายใน 3 ปี</p>
+          </div>
+
+          {/* Risk Card 3 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md">เตรียมเกษียณ</span>
+              <Calendar size={14} className="text-blue-500" />
+            </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">พนักงานอายุ 55-56 ปี</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.retirementUpcoming.toLocaleString()} คน</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">เกษียณภายใน 5 ปี</p>
+          </div>
+
+          {/* Risk Card 4 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">ผู้บริหารพร้อม</span>
+              <UserCheck size={14} className="text-purple-600" />
+            </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">Ready Now Candidate</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.readyNow.toLocaleString()} คน</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สืบทอดสายงานบริหารได้ทันที</p>
+          </div>
+
+          {/* Risk Card 5 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">สุญญากาศผู้บริหาร</span>
+              <Lock size={14} className="text-rose-600" />
+            </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">No Succession Model</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.noSuccessor.toLocaleString()} อัตรา</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">สายงานบริหารระดับ L9+ ขาดทุนรอง</p>
+          </div>
+
+          {/* Risk Card 6 */}
+          <div className="bg-white border border-slate-100 p-4.5 rounded-[22px] shadow-3xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">ดาวเด่นในสถาบัน</span>
+              <Award size={14} className="text-emerald-600" />
+            </div>
+            <div className="mt-4">
+              <p className="text-[10px] text-slate-400 font-light">High Performers</p>
+              <p className="text-2xl font-sans font-medium text-slate-800 mt-0.5">{riskStats.highPerformers.toLocaleString()} คน</p>
+            </div>
+            <p className="text-[8px] text-slate-400 mt-2.5 pt-2 border-t border-slate-50">กลุ่มพนักงานประเมินผลงานยอดเยี่ยม</p>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Analytics Section: Charts & Groupings */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        {/* Left Column: Succession donut breakdown (5 cols) */}
+        <div className="lg:col-span-5 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
+              โครงสร้างสัดส่วนการสืบทอดตำแหน่ง (Succession Planning Status)
+            </h3>
+
+            <div className="h-[180px] w-full mt-6 relative flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ageDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                  <XAxis dataKey="name" stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#8898AA" fontSize={9} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0F172A", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", fontSize: "11px", color: "#FFFFFF", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)" }}
-                    itemStyle={{ color: "#E2E8F0" }}
-                    labelStyle={{ color: "#94A3B8" }}
-                    formatter={(value) => [`${value} คน`, "จำนวนพนักงาน"]}
+                <PieChart>
+                  <Pie
+                    data={successionChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={65}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {successionChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ fontSize: 10, borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                    formatter={(value: any) => [`${value.toLocaleString()} คน`]}
                   />
-                  <Bar dataKey="จำนวนคน" fill="#2F6FE4" radius={[4, 4, 0, 0]} barSize={34}>
-                    {ageDistributionData.map((entry, index) => {
-                      let fill = "#2F6FE4";
-                      if (entry.name.includes("59")) fill = "#F36B6B";
-                      else if (entry.name.includes("55-58")) fill = "#FFB547";
-                      return <Cell key={`cell-${index}`} fill={fill} />;
-                    })}
-                  </Bar>
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
+              <div className="absolute text-center">
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-light">กำลังพลหลัก</p>
+                <p className="text-xl font-sans font-medium text-slate-800">{totalCount.toLocaleString()}</p>
+                <p className="text-[8px] text-slate-500">คน</p>
+              </div>
+            </div>
+
+            {/* Legends */}
+            <div className="mt-4 space-y-2 border-t border-slate-50 pt-4 text-[10px]">
+              {successionChartData.map((tag, i) => (
+                <div key={i} className="flex items-center justify-between p-1 bg-slate-50/40 rounded-lg">
+                  <div className="flex items-center gap-1.5 font-light">
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: tag.fill }} />
+                    <span className="text-slate-600 truncate max-w-[200px]" title={tag.name}>{tag.name}</span>
+                  </div>
+                  <span className="font-mono font-medium text-slate-800">{tag.value.toLocaleString()} คน ({tag.percentage}%)</span>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </div>
-
-      {/* SECTION 3: Executive Action Panel */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#DCE6F2]/50">
-          <div className="p-1.5 bg-[#2F6FE4]/8 text-[#2F6FE4] rounded-lg">
-            <FileText size={15} />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-[#1F2D3D]">กลยุทธ์ป้องกันความเสี่ยง (Executive Mitigating Action Board)</h3>
-            <p className="text-[11px] text-[#5B6B7F] mt-0.5">แผนงานและข้อเสนอเชิงปฏิบัติเพื่อลดความเสี่ยงด้านบุคลากรอย่างเป็นรูปธรรมสำหรับฝ่ายบริหาร</p>
-          </div>
+          <p className="text-[10px] text-slate-400 font-light mt-5 pt-3 border-t border-slate-50">
+            * สถิติอิงข้อมูลกำลังพลระดับผู้จัดการ (L9 ขึ้นไป) และผู้เชี่ยวชาญพิเศษ
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-red-100 bg-red-50/25 space-y-2.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[#F36B6B]">
-              <span className="p-1 bg-[#F36B6B]/10 rounded-lg">🚨</span>
-              <span>แผนบริหารความเสี่ยงการเกษียณ (Retirement Transition Protocol)</span>
+        {/* Right Column: Demographics Age Matrix Progress Bars (7 cols) */}
+        <div className="lg:col-span-7 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100">
+              <h3 className="text-xs font-medium text-slate-800">
+                สเปกตรัมช่วงอายุประชากรองค์กรภาพรวม (Age Spectrum Profile)
+              </h3>
+              
+              {/* Toggler */}
+              <div className="inline-flex bg-slate-50 p-1 rounded-xl border border-slate-200/50 self-start">
+                <button
+                  onClick={() => setActiveInsightTab("succession")}
+                  className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                    activeInsightTab === "succession" 
+                      ? "bg-slate-800 text-white shadow-xs" 
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  แผนบริหาร
+                </button>
+                <button
+                  onClick={() => setActiveInsightTab("demographics")}
+                  className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                    activeInsightTab === "demographics" 
+                      ? "bg-slate-800 text-white shadow-xs" 
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  ภาพรวมสถาบัน
+                </button>
+              </div>
             </div>
-            <ul className="text-[11px] text-[#5B6B7F] space-y-2 pl-2 list-disc font-light leading-relaxed">
-              <li><strong>ระบบปัญญาปฏิบัติภักดี (Knowledge Management Program):</strong> ถ่ายทอดองค์ความรู้และกระบวนงานสำคัญ (Critical SOP) จากผู้เชี่ยวชาญก่อนการเกษียณ 180 วัน</li>
-              <li><strong>โครงการคืนสู่เหย้ากิตติมศักดิ์:</strong> พัฒนาสัญญาจ้างพิเศษสำหรับที่ปรึกษาเกษียณอายุ เพื่อประคองบทบาทสำคัญชั่วคราว</li>
-            </ul>
+
+            {/* Matrix details */}
+            <div className="mt-5 space-y-4">
+              {ageRangesList.map((item, idx) => (
+                <div key={idx} className="space-y-1.5 p-1 hover:bg-slate-50/50 rounded-xl transition-colors">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-medium text-slate-700">{item.name}</span>
+                    <span className="font-mono text-slate-500">
+                      <span className="font-semibold text-slate-800">{item.count.toLocaleString()} คน</span> ({item.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
+                    <div className={`${item.color} h-full rounded-full transition-all duration-500`} style={{ width: `${item.percentage}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/25 space-y-2.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[#2DBE7F]">
-              <span className="p-1 bg-[#2DBE7F]/10 rounded-lg">🎯</span>
-              <span>แผนเร่งรัดทายาทสืบทอดตำแหน่ง (Successor Acceleration Plan)</span>
-            </div>
-            <ul className="text-[11px] text-[#5B6B7F] space-y-2 pl-2 list-disc font-light leading-relaxed">
-              <li><strong>หลักสูตรบ่มเพาะดาวเด่น (Fast Track Leadership):</strong> ส่งเสริมพนักงานกลุ่ม High Performers เข้ารับการอบรมเตรียมพร้อมสืบทอดตำแหน่งใน 1 ปี</li>
-              <li><strong>ระบบพี่เลี้ยงผู้บริหาร (Executive Mentorship):</strong> ผู้อำนวยการฝ่ายประกบตัวช่วยสอนงานรายบุคคลให้กับทายาทระดับ L11-12 อย่างเป็นระบบ</li>
-            </ul>
+          <div className="mt-5 pt-3 border-t border-slate-50 flex items-center justify-between text-[10px] text-slate-400 font-light">
+            <span>Gen Y (30-39 ปี) เป็นกลุ่มกำลังหลักของสถาบันในขณะนี้</span>
+            <span className="text-emerald-600 font-medium">ความแข็งแกร่งทรัพยากรระดับสูง</span>
           </div>
+
         </div>
+
       </div>
 
-      {/* SECTION 4: Detailed Risk Table / Explorer */}
-      <div className="bg-white border border-[#DCE6F2] rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      {/* Candidate Database / Explorer */}
+      <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
+        
+        {/* Table header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
           <div>
-            <h3 className="text-sm font-medium text-[#1F2D3D]">ทำเนียบผู้ปฏิบัติงานในกลุ่มวิเคราะห์ความเสี่ยง (Workforce Risk Explorer)</h3>
-            <p className="text-[11px] text-[#5B6B7F] mt-0.5">ค้นหาและกรองตรวจสอบรายชื่อบุคลากรที่มีดัชนีอายุใกล้เคียงวัยวาระเกษียณและสถานภาพผู้สืบทอดตำแหน่ง</p>
+            <div className="flex items-center gap-2">
+              <div className="h-2.5 w-2.5 bg-rose-500 rounded-full animate-ping" />
+              <h3 className="text-xs font-medium text-slate-800">
+                รายชื่อพนักงานในเกณฑ์เฝ้าระวังความเสี่ยง (Strategic Candidate & Risk Database)
+              </h3>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1 font-light">
+              รายชื่อรวมทั้งพนักงานกลุ่มใกล้เกษียณ และพนักงานกลุ่มสายงานเป้าหมายที่ควรจัดวางแผนผู้สืบทอด
+            </p>
           </div>
 
-          <div className="relative w-full sm:max-w-xs">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6B7F]" />
+          {/* Search tool */}
+          <div className="relative min-w-[240px]">
             <input
               type="text"
-              placeholder="ค้นหารหัส, ชื่อ, หรือสังกัด..."
+              placeholder="ค้นหารหัส, ชื่อ-นามสกุล หรือแผนกย่อย..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#DCE6F2] bg-[#F8FAFC] focus:outline-hidden focus:ring-2 focus:ring-[#2F6FE4]/8 text-[#1F2D3D]"
+              className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-light"
             />
+            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+              <Search size={12} />
+            </div>
             {searchTerm && (
-              <button
+              <button 
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-200 text-[#5B6B7F]"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
               >
-                <X size={12} />
+                <X size={10} />
               </button>
             )}
           </div>
         </div>
 
-        {/* Table itself */}
-        <div className="border border-[#DCE6F2] rounded-xl overflow-hidden shadow-2xs">
-          <div className="overflow-x-auto">
+        {/* Data Table */}
+        <div className="overflow-x-auto mt-4">
+          {tableFilteredEmployees.length === 0 ? (
+            <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+              <Users size={24} className="text-slate-300 mx-auto mb-2" />
+              <p className="text-xs text-slate-500">ไม่พบข้อมูลรายชื่อประชากรองค์กรตามเงื่อนไขค้นหา</p>
+            </div>
+          ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F6F9FC] border-b border-[#DCE6F2] text-[10px] text-[#1F2D3D] font-medium uppercase tracking-wider">
-                  <th className="py-3 px-4">รหัสพนักงาน</th>
-                  <th className="py-3 px-4">ชื่อ-นามสกุล</th>
-                  <th className="py-3 px-4">ตำแหน่ง / ระดับ</th>
-                  <th className="py-3 px-4">ฝ่ายสังกัด</th>
-                  <th className="py-3 px-4 text-center">อายุตัว / อายุงาน</th>
-                  <th className="py-3 px-4 text-center">ทายาทสืบทอด</th>
-                  <th className="py-3 px-4 text-center">ผลงานล่าสุด</th>
-                  <th className="py-3 px-4 text-center">ดำเนินการ</th>
+                <tr className="border-b border-slate-100 text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-50/30">
+                  <th className="py-3 px-4 font-medium">รหัส</th>
+                  <th className="py-3 px-4 font-medium">ชื่อพนักงาน</th>
+                  <th className="py-3 px-4 font-medium">ตำแหน่งและฝ่ายปฏิบัติงาน</th>
+                  <th className="py-3 px-4 font-medium">อายุตัว</th>
+                  <th className="py-3 px-4 font-medium">อายุงาน</th>
+                  <th className="py-3 px-4 font-medium">สถานะผู้สืบทอด (Succession)</th>
+                  <th className="py-3 px-4 font-medium">ประเมินผลงาน (Performance)</th>
+                  <th className="py-3 px-4 font-medium text-right">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#DCE6F2]/50 bg-white">
-                {paginatedEmployees.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-10 text-center text-xs text-[#5B6B7F] italic">
-                      ไม่พบข้อมูลตรงตามเงื่อนไขที่กำหนด
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedEmployees.map((emp) => (
-                    <tr key={emp.empId} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B6B7F]">{emp.empId}</td>
-                      <td className="py-3.5 px-4 text-xs font-medium text-[#1F2D3D]">{emp.name}</td>
-                      <td className="py-3.5 px-4">
-                        <div className="text-xs text-[#1F2D3D] truncate max-w-[150px]">{emp.position}</div>
-                        <div className="text-[10px] text-[#5B6B7F] font-medium mt-0.5">{emp.level}</div>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {paginatedEmployees.map((emp) => {
+                  const initials = emp.name.split(" ")[0].slice(0, 2);
+                  return (
+                    <tr key={emp.empId} className="hover:bg-slate-50/60 transition-colors group">
+                      
+                      {/* ID */}
+                      <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                        {emp.empId}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="text-xs text-[#1F2D3D] truncate max-w-[150px]">{emp.department}</div>
-                        <div className="text-[10px] text-[#5B6B7F] font-light mt-0.5">{emp.businessLine}</div>
+
+                      {/* Name */}
+                      <td className="py-3 px-4 font-medium text-slate-700">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-sans font-medium text-white bg-gradient-to-tr ${
+                            emp.gender === "ชาย" ? "from-blue-400 to-indigo-500" : "from-pink-400 to-purple-500"
+                          } shadow-xs`}>
+                            {initials}
+                          </div>
+                          <div>
+                            <p className="text-slate-800 font-medium">{emp.name}</p>
+                            <p className="text-[9px] text-slate-400 font-light">{emp.email}</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-center text-xs text-[#5B6B7F]">
-                        {emp.age} ปี <span className="text-slate-300 mx-1">/</span> {emp.tenure} ปี
+
+                      {/* Position & Division */}
+                      <td className="py-3 px-4 text-slate-600 font-light">
+                        <p className="font-normal text-slate-700">{emp.position}</p>
+                        <p className="text-[10px] text-slate-400">{emp.department}</p>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium leading-none ${
-                            emp.successionStatus === "Ready Now"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : emp.successionStatus === "Ready 1-2 Years"
-                              ? "bg-blue-100 text-blue-800"
-                              : emp.successionStatus === "Ready 3-5 Years"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {emp.successionStatus === "None" ? "ไม่มี (None)" : emp.successionStatus}
+
+                      {/* Age */}
+                      <td className="py-3 px-4 font-mono font-light text-slate-600">
+                        <span className={emp.age >= 58 ? "text-rose-600 font-medium bg-rose-50 px-1.5 py-0.5 rounded-sm" : ""}>
+                          {emp.age} ปี
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium leading-none ${
-                            emp.performanceRating === "High Performer"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                              : emp.performanceRating === "Meets Standard"
-                              ? "bg-slate-50 text-slate-700 border border-slate-100"
-                              : "bg-red-50 text-red-700 border border-red-100"
-                          }`}
-                        >
-                          {emp.performanceRating}
+
+                      {/* Tenure */}
+                      <td className="py-3 px-4 font-mono font-light text-slate-600">
+                        {emp.tenure} ปี
+                      </td>
+
+                      {/* Succession */}
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-full ${
+                          emp.successionStatus === "Ready Now" 
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : emp.successionStatus === "Ready 1-2 Years"
+                            ? "bg-blue-50 text-blue-600 border border-blue-100"
+                            : emp.successionStatus === "Ready 3-5 Years"
+                            ? "bg-amber-50 text-amber-600 border border-amber-100"
+                            : "bg-slate-50 text-slate-400"
+                        }`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          <span>{
+                            emp.successionStatus === "Ready Now" ? "Ready Now (สืบทอดทันที)" :
+                            emp.successionStatus === "Ready 1-2 Years" ? "พร้อมใน 1-2 ปี" :
+                            emp.successionStatus === "Ready 3-5 Years" ? "พร้อมใน 3-5 ปี" : "ไม่มี (None)"
+                          }</span>
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+
+                      {/* Performance */}
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                          emp.performanceRating === "High Performer"
+                            ? "bg-emerald-100/70 text-emerald-700"
+                            : emp.performanceRating === "Meets Standard"
+                            ? "bg-slate-100 text-slate-600"
+                            : "bg-rose-100 text-rose-600"
+                        }`}>
+                          <span>{emp.performanceRating}</span>
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => onSelectEmployee(emp)}
-                          className="px-2.5 py-1 text-[10px] font-medium text-[#2F6FE4] bg-[#2F6FE4]/5 hover:bg-[#2F6FE4]/10 rounded border border-[#2F6FE4]/15 transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 hover:text-white hover:bg-slate-800 rounded-lg transition-all border border-slate-200 hover:border-transparent cursor-pointer shadow-3xs"
                         >
-                          ตรวจสอบ
+                          <Eye size={10} />
+                          <span>ส่องประวัติ</span>
                         </button>
                       </td>
+
                     </tr>
-                  ))
-                )}
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-
-          {/* Pagination Footer */}
-          {filteredTableData.length > 0 && (
-            <div className="bg-[#F8FAFC] px-4 py-3 border-t border-[#DCE6F2] flex items-center justify-between text-xs text-[#5B6B7F] flex-wrap gap-2">
-              <div>
-                แสดงผล <span className="font-medium text-[#1F2D3D]">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredTableData.length)}</span> จากทั้งหมด <span className="font-medium text-[#1F2D3D]">{filteredTableData.length.toLocaleString()} คน</span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                
-                <span className="px-2.5 text-[11px]">
-                  หน้า {currentPage} / {totalPages}
-                </span>
-
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="p-1 rounded-md border border-[#DCE6F2] hover:bg-slate-50 hover:text-[#1F2D3D] disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
           )}
         </div>
+
+        {/* Pagination bar */}
+        {tableFilteredEmployees.length > 0 && (
+          <div className="flex items-center justify-between pt-5 border-t border-slate-100 mt-4 text-xs text-slate-500">
+            <span className="font-light">
+              แสดงหน้า <span className="font-normal text-slate-800">{currentPage}</span> ใน <span className="font-normal text-slate-800">{totalPages}</span> หน้า (รวมค้นพบทั้งหมด {tableFilteredEmployees.length.toLocaleString()} คน)
+            </span>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded-lg border border-slate-200/60 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer transition-all"
+                title="ย้อนหน้าก่อน"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {/* Individual page numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let targetPage = currentPage;
+                if (currentPage <= 3) targetPage = i + 1;
+                else if (currentPage >= totalPages - 2) targetPage = totalPages - 4 + i;
+                else targetPage = currentPage - 2 + i;
+
+                if (targetPage < 1 || targetPage > totalPages) return null;
+
+                return (
+                  <button
+                    key={targetPage}
+                    onClick={() => handlePageChange(targetPage)}
+                    className={`w-7.5 h-7.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      currentPage === targetPage 
+                        ? "bg-slate-800 text-white" 
+                        : "hover:bg-slate-50 text-slate-600 border border-slate-200/40"
+                    }`}
+                  >
+                    {targetPage}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200/60 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer transition-all"
+                title="หน้าถัดไป"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
 
     </div>
