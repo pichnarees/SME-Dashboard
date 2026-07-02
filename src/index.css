@@ -104,30 +104,27 @@ th, strong, b {
 .theme-light .border-slate-100,
 .theme-light .border-slate-200,
 .theme-light .border-slate-150,
-.theme-light .border-[#E2ECF5],
-.theme-light .border-[#DCE6F2],
 .theme-light .border-slate-200\/60,
 .theme-light .border-slate-200\/50,
 .theme-light .border-slate-100\/50,
-.theme-light .border-slate-100\/60,
-.theme-light .border-[#DCE6F2]/50 {
+.theme-light .border-slate-100\/60 {
   border-color: rgba(47, 111, 228, 0.05) !important;
 }
 
 /* Typography contrast settings for pristine readability */
 .theme-light .text-slate-800,
 .theme-light .text-slate-900,
-.theme-light .text-[#1F2D3D],
-.theme-light .text-[#1E293B],
-.theme-light .text-[#0F172A],
+.theme-light .text-\[\#1F2D3D\],
+.theme-light .text-\[\#1E293B\],
+.theme-light .text-\[\#0F172A\],
 .theme-light .text-slate-700 {
   color: #1E293B !important;
 }
 
 .theme-light .text-slate-500,
 .theme-light .text-slate-600,
-.theme-light .text-[#5B6B7F],
-.theme-light .text-[#64748B],
+.theme-light .text-\[\#5B6B7F\],
+.theme-light .text-\[\#64748B\],
 .theme-light .text-slate-400 {
   color: #475569 !important; /* Enhanced for better executive reading */
 }
@@ -167,10 +164,10 @@ th, strong, b {
   background-color: rgba(255, 255, 255, 0.95) !important;
   border: 1px solid rgba(207, 220, 235, 0.8) !important;
   border-radius: 0.75rem !important;
-  padding: 8px 12px !important;
   font-size: 12px !important;
   color: #1E293B !important;
   transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
 }
 
 .theme-light select:focus,
@@ -240,7 +237,7 @@ th, strong, b {
   color: #475569 !important;
   font-size: 11px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0 !important;
   padding: 12px 16px !important;
   border-bottom: 2px solid rgba(47, 111, 228, 0.06) !important;
 }
@@ -251,31 +248,47 @@ th, strong, b {
 }
 
 /* Table Badge & Chip Styling with soft executive-colored backdrops */
-.theme-light .bg-[#2DBE7F]/10,
-.theme-light .bg-emerald-50,
-.theme-light .text-[#2DBE7F] {
+.theme-light .bg-emerald-50 {
   background-color: rgba(45, 190, 127, 0.08) !important;
+}
+
+.theme-light .text-emerald-500,
+.theme-light .text-emerald-600,
+.theme-light .text-green-500,
+.theme-light .text-green-600 {
   color: #1C8555 !important;
 }
 
-.theme-light .bg-[#FFB547]/10,
 .theme-light .bg-amber-50,
-.theme-light .text-[#FFB547] {
+.theme-light .bg-orange-50 {
   background-color: rgba(249, 115, 22, 0.08) !important;
+}
+
+.theme-light .text-amber-500,
+.theme-light .text-amber-600,
+.theme-light .text-orange-500,
+.theme-light .text-orange-600 {
   color: #D48E25 !important;
 }
 
-.theme-light .bg-[#F36B6B]/10,
 .theme-light .bg-red-50,
-.theme-light .text-[#F36B6B] {
+.theme-light .bg-rose-50 {
   background-color: rgba(243, 107, 107, 0.08) !important;
+}
+
+.theme-light .text-red-500,
+.theme-light .text-red-600,
+.theme-light .text-rose-500,
+.theme-light .text-rose-600 {
   color: #C84646 !important;
 }
 
-.theme-light .bg-[#4C8DFF]/10,
-.theme-light .bg-blue-50,
-.theme-light .text-[#4C8DFF] {
+.theme-light .bg-blue-50 {
   background-color: rgba(76, 141, 255, 0.08) !important;
+}
+
+.theme-light .text-blue-500,
+.theme-light .text-blue-600 {
   color: #1E52B6 !important;
 }
 
@@ -461,10 +474,10 @@ div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-
 
 .theme-dark .bg-slate-50,
 .theme-dark .bg-slate-100,
-.theme-dark .bg-[#F8FAFC]/40,
-.theme-dark .bg-[#F8FAFC],
-.theme-dark .bg-slate-50/50,
-.theme-dark .bg-slate-100/50,
+.theme-dark .bg-\[\#F8FAFC\]\/40,
+.theme-dark .bg-\[\#F8FAFC\],
+.theme-dark .bg-slate-50\/50,
+.theme-dark .bg-slate-100\/50,
 .theme-dark .bg-slate-100\/50,
 .theme-dark .bg-slate-50\/50 {
   background-color: #0C1322 !important;
@@ -473,24 +486,24 @@ div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-
 .theme-dark .border-slate-100,
 .theme-dark .border-slate-200,
 .theme-dark .border-slate-150,
-.theme-dark .border-[#E2ECF5],
-.theme-dark .border-[#DCE6F2] {
+.theme-dark .border-\[\#E2ECF5\],
+.theme-dark .border-\[\#DCE6F2\] {
   border-color: #1E2D4A !important;
 }
 
 .theme-dark .text-slate-800,
 .theme-dark .text-slate-900,
-.theme-dark .text-[#1F2D3D],
-.theme-dark .text-[#1E293B],
-.theme-dark .text-[#0F172A],
+.theme-dark .text-\[\#1F2D3D\],
+.theme-dark .text-\[\#1E293B\],
+.theme-dark .text-\[\#0F172A\],
 .theme-dark .text-slate-700 {
   color: #F1F5F9 !important;
 }
 
 .theme-dark .text-slate-500,
 .theme-dark .text-slate-600,
-.theme-dark .text-[#5B6B7F],
-.theme-dark .text-[#64748B],
+.theme-dark .text-\[\#5B6B7F\],
+.theme-dark .text-\[\#64748B\],
 .theme-dark .text-slate-400 {
   color: #94A3B8 !important;
 }
@@ -500,4 +513,73 @@ div#root:nth-of-type(1) > div:nth-of-type(2) > main#main-content-section:nth-of-
   background-color: #0C1322 !important;
   color: #F1F5F9 !important;
   border-color: #1E2D4A !important;
+}
+
+/* ==========================================================================
+   FIX FILTER BAR ICON + TEXT OVERLAP
+   ========================================================================== */
+
+.theme-light #filter-bar-container input,
+.theme-light #filter-bar-container select,
+.theme-dark #filter-bar-container input,
+.theme-dark #filter-bar-container select {
+  height: 48px !important;
+  min-height: 48px !important;
+  line-height: 48px !important;
+  padding-left: 52px !important;
+  padding-right: 48px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  border-radius: 18px !important;
+  box-sizing: border-box !important;
+}
+
+.theme-light #filter-bar-container input[type="text"],
+.theme-light #filter-bar-container input[type="search"],
+.theme-dark #filter-bar-container input[type="text"],
+.theme-dark #filter-bar-container input[type="search"] {
+  padding-left: 58px !important;
+  padding-right: 110px !important;
+}
+
+.theme-light #filter-bar-container select,
+.theme-dark #filter-bar-container select {
+  padding-left: 52px !important;
+  padding-right: 44px !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: none !important;
+}
+
+.theme-light #filter-bar-container .absolute.left-3,
+.theme-light #filter-bar-container .absolute.left-4,
+.theme-light #filter-bar-container .absolute.left-5,
+.theme-dark #filter-bar-container .absolute.left-3,
+.theme-dark #filter-bar-container .absolute.left-4,
+.theme-dark #filter-bar-container .absolute.left-5 {
+  left: 18px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+.theme-light #filter-bar-container .absolute.right-3,
+.theme-light #filter-bar-container .absolute.right-4,
+.theme-light #filter-bar-container .absolute.right-5,
+.theme-dark #filter-bar-container .absolute.right-3,
+.theme-dark #filter-bar-container .absolute.right-4,
+.theme-dark #filter-bar-container .absolute.right-5 {
+  right: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2 !important;
+}
+
+.theme-light #filter-bar-container button,
+.theme-dark #filter-bar-container button {
+  white-space: nowrap !important;
 }
