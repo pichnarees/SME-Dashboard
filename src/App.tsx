@@ -174,8 +174,12 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col selection:bg-[#2F6FE4]/15 print:bg-white print:p-0 transition-all duration-500 ${theme === "dark" ? "theme-dark bg-[#080D18] text-[#E2E8F0]" : "theme-light bg-[#F4F7FB] text-[#1E293B]"}`}>
-      
+    <div className={`min-h-screen flex flex-col selection:bg-[#2F6FE4]/15 print:bg-white print:p-0 transition-all duration-500 relative overflow-x-hidden z-0 ${theme === "dark" ? "theme-dark bg-[#060B13] text-[#E2E8F0]" : "theme-light bg-[#F8FAFC] text-[#1E293B]"}`}>
+      {/* Premium Executive Ambient Background Tints */}
+      <div className="absolute top-0 left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-gradient-to-br from-[#2F6FE4]/4 to-[#25B7D3]/2 blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-[25vh] right-[-10%] w-[45vw] h-[45vw] max-w-[500px] rounded-full bg-gradient-to-br from-indigo-500/4 to-purple-500/2 blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute bottom-[10vh] left-[-15%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-gradient-to-tr from-cyan-400/2 to-blue-500/3 blur-[130px] pointer-events-none -z-10" />
+
       {/* Toast Alert Popup */}
       {toastMessage && (
         <div id="toast-message" className="fixed top-6 right-6 z-50 bg-[#1E293B] text-white font-medium text-xs px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-2.5 border border-slate-800">
@@ -185,57 +189,51 @@ export default function App() {
       )}
 
       {/* HEADER SECTION (Premium Frosted Glass Redesigned) */}
-      <header id="main-header" className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 py-3.5 px-6 sticky top-0 z-40 print:relative print:border-none print:shadow-none transition-all duration-300 shadow-xs">
+      <header id="main-header" className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/40 dark:border-slate-800/40 py-3.5 px-6 sticky top-0 z-40 print:relative print:border-none print:shadow-none transition-all duration-300 shadow-sm shadow-slate-200/20 dark:shadow-slate-950/20">
         {/* Sleek Top Corporate Gradient Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#2F6FE4] via-[#4C8DFF] to-[#25B7D3]" />
+        <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6]" />
 
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
-          {/* Logo & System Titles */}
-          <div className="flex items-center gap-4">
+          {/* Left: Logo & System Titles */}
+          <div className="flex items-center gap-3.5 w-full md:w-auto">
             {/* Visual Bank Shield Emblem */}
             <div className="relative group shrink-0">
-              <div className="absolute -inset-1.5 bg-gradient-to-r from-[#2F6FE4] to-[#25B7D3] rounded-2xl blur-md opacity-35 group-hover:opacity-50 transition-all duration-500 animate-pulse" />
-              <div className="relative h-11 w-11 bg-gradient-to-tr from-[#1E52B6] via-[#2F6FE4] to-[#4C8DFF] rounded-xl flex flex-col items-center justify-center text-white border border-white/10 shadow-lg shrink-0 select-none">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#2F6FE4] to-[#1E52B6] rounded-xl blur-sm opacity-20 group-hover:opacity-40 transition-all duration-300" />
+              <div className="relative h-10 w-10 bg-[#2F6FE4] rounded-lg flex flex-col items-center justify-center text-white border border-white/10 shadow-sm shrink-0 select-none">
                 <span className="text-[10px] font-medium tracking-wider leading-none">SME</span>
-                <span className="text-[8px] font-light tracking-wide leading-none mt-0.5 opacity-90">D Bank</span>
+                <span className="text-[7.5px] font-light tracking-wide leading-none mt-0.5 opacity-90">D Bank</span>
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base font-medium tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+                <h1 className="text-sm font-medium tracking-tight text-slate-950 dark:text-white">
                   SME D Bank
                 </h1>
-                <div className="flex gap-1.5 items-center">
-                  <span className="bg-[#2F6FE4]/10 text-[#2F6FE4] dark:bg-[#2F6FE4]/20 dark:text-blue-300 text-[9px] font-medium px-2 py-0.5 rounded-md border border-[#2F6FE4]/20 tracking-wider">
-                    EXECUTIVE INTELLIGENCE
-                  </span>
-                  <span className="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300 text-[9px] font-medium px-2 py-0.5 rounded-md border border-emerald-500/20 tracking-wide flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    LIVE PORTAL
+                <div className="flex gap-1 items-center">
+                  <span className="bg-[#2F6FE4]/10 text-[#2F6FE4] dark:bg-blue-500/10 dark:text-blue-400 text-[8.5px] font-medium px-2 py-0.5 rounded border border-[#2F6FE4]/10 tracking-wider">
+                    EXECUTIVE PORTAL
                   </span>
                 </div>
               </div>
-              <h2 className="text-[11px] font-normal text-slate-500 dark:text-slate-400 mt-1 leading-none">
-                Strategic Workforce Analytics System <span className="text-slate-300 dark:text-slate-700 font-light mx-1.5">|</span> ระบบวิเคราะห์อัตรากำลังและข้อมูลกำลังพลเชิงยุทธศาสตร์
+              <h2 className="text-[10px] font-normal text-slate-500 dark:text-slate-400 mt-0.5 leading-none">
+                ระบบวิเคราะห์อัตรากำลังและข้อมูลกำลังพลเชิงยุทธศาสตร์
               </h2>
             </div>
           </div>
 
-          {/* Right Area: Portal Info, Theme, and Profile */}
-          <div className="flex items-center gap-3.5 flex-wrap">
-            {/* Status indicator */}
-            <div className="text-right hidden lg:block">
-              <span className="text-[9px] text-slate-400 dark:text-slate-500 block font-medium uppercase tracking-wider">อัปเดตระบบสารสนเทศ</span>
-              <span className="text-xs font-mono text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mt-1 justify-end">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] dark:bg-emerald-400 animate-pulse" />
-                16 มิถุนายน 2569 (เสถียร)
-              </span>
+          {/* Center or right-center: refined status/update info */}
+          <div className="flex items-center justify-center w-full md:w-auto md:flex-1 md:justify-center">
+            <div className="bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-inner">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="text-[9.5px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">ฐานข้อมูลระบบสารสนเทศ:</span>
+              <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300">16 มิถุนายน 2569 (สืบค้นสด)</span>
             </div>
+          </div>
 
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden lg:block"></div>
-
+          {/* Right Area: Theme, and Profile */}
+          <div className="flex items-center justify-end gap-3.5 w-full md:w-auto shrink-0">
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
@@ -253,7 +251,7 @@ export default function App() {
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="absolute"
                 >
-                  <Sun size={15} />
+                  <Sun size={14.5} />
                 </motion.div>
                 <motion.div
                   initial={false}
@@ -261,19 +259,19 @@ export default function App() {
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="absolute"
                 >
-                  <Moon size={15} />
+                  <Moon size={14.5} />
                 </motion.div>
               </div>
             </button>
 
             {/* Profile badge */}
-            <div className="flex items-center gap-2.5 bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/60 rounded-xl p-1 pr-3 select-none backdrop-blur-xs">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-[#2F6FE4] to-[#1E52B6] text-white font-medium text-xs flex items-center justify-center shadow-xs border border-white/10">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-800/60 rounded-xl p-1 pr-3 select-none">
+              <div className="h-6.5 w-6.5 rounded-lg bg-gradient-to-tr from-[#2F6FE4] to-[#1E52B6] text-white font-medium text-[10px] flex items-center justify-center shadow-xs">
                 EX
               </div>
-              <div className="text-left">
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200 block leading-none">ผู้บริหารระดับสูง</span>
-                <span className="text-[9px] text-slate-400 dark:text-slate-500 block font-medium mt-1">SME D Bank Admin</span>
+              <div className="text-left leading-none">
+                <span className="text-[10px] font-medium text-slate-800 dark:text-slate-200 block">ผู้บริหารระดับสูง</span>
+                <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-0.5">SME D Bank Admin</span>
               </div>
             </div>
           </div>
@@ -299,24 +297,24 @@ export default function App() {
         />
 
         {/* TAB NAVIGATION PANEL */}
-        <div id="tab-navigation-bar" className="flex overflow-x-auto bg-[#F1F5F9] dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 mb-8 shrink-0 print:hidden gap-1 shadow-sm relative">
+        <div id="tab-navigation-bar" className="flex overflow-x-auto bg-slate-100/90 dark:bg-slate-950/70 p-1.5 rounded-2xl border border-slate-200/30 dark:border-slate-800/40 mb-8 shrink-0 print:hidden gap-1 shadow-sm relative">
           <button
             onClick={() => setActiveTab("overview")}
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "overview" 
                 ? "text-white font-medium" 
-                : "text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/65 dark:hover:bg-slate-900/60"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
             }`}
           >
             {activeTab === "overview" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6] rounded-xl shadow-md shadow-blue-500/15"
+                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <LayoutDashboard size={13.5} className={activeTab === "overview" ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"} /> 
+              <LayoutDashboard size={13.5} className={activeTab === "overview" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
               <span>ภาพรวมผู้บริหาร (Executive Overview)</span>
             </span>
           </button>
@@ -326,18 +324,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "org" 
                 ? "text-white font-medium" 
-                : "text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/65 dark:hover:bg-slate-900/60"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
             }`}
           >
             {activeTab === "org" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6] rounded-xl shadow-md shadow-blue-500/15"
+                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <Network size={13.5} className={activeTab === "org" ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"} /> 
+              <Network size={13.5} className={activeTab === "org" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
               <span>โครงสร้างองค์กร (Organization Structure)</span>
             </span>
           </button>
@@ -347,18 +345,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "risk" 
                 ? "text-white font-medium" 
-                : "text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/65 dark:hover:bg-slate-900/60"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
             }`}
           >
             {activeTab === "risk" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6] rounded-xl shadow-md shadow-blue-500/15"
+                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <ShieldAlert size={13.5} className={activeTab === "risk" ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"} /> 
+              <ShieldAlert size={13.5} className={activeTab === "risk" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
               <span>ความเสี่ยงกำลังคน (Workforce Risk)</span>
             </span>
           </button>
@@ -368,18 +366,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "turnover" 
                 ? "text-white font-medium" 
-                : "text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-white/65 dark:hover:bg-slate-900/60"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
             }`}
           >
             {activeTab === "turnover" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6] rounded-xl shadow-md shadow-blue-500/15"
+                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <LogOut size={13.5} className={activeTab === "turnover" ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200"} /> 
+              <LogOut size={13.5} className={activeTab === "turnover" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
               <span>วิเคราะห์การลาออก (Turnover Analysis)</span>
             </span>
           </button>

@@ -122,30 +122,30 @@ export default function FilterBar({
   return (
     <div 
       id="filter-bar-container" 
-      className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/40 dark:border-slate-800/50 rounded-2xl p-5 md:p-6 mb-6 shadow-sm hover:shadow-md transition-all duration-300 relative"
+      className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/35 dark:border-slate-800/40 rounded-2xl p-5 md:p-6 mb-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 relative"
     >
       {/* Visual Accent Gradient Indicator */}
-      <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-[#2F6FE4] via-teal-500/40 to-[#1E52B6] rounded-full" />
+      <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-[#2F6FE4] via-teal-500/30 to-[#1E52B6] rounded-full" />
 
       {/* Primary Row: Controls & Stats Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-slate-100 dark:border-slate-800/60">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-slate-100 dark:border-slate-800/40">
         
         {/* Title and stats counter */}
         <div className="flex items-start gap-3.5">
-          <div className="p-2.5 bg-[#2F6FE4]/10 text-[#2F6FE4] dark:bg-blue-500/10 dark:text-blue-400 rounded-xl shrink-0">
-            <SlidersHorizontal size={16} />
+          <div className="p-2.5 bg-[#2F6FE4]/5 text-[#2F6FE4] dark:bg-blue-500/10 dark:text-blue-400 rounded-xl shrink-0">
+            <SlidersHorizontal size={15} />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-xs font-medium text-slate-900 dark:text-slate-100 tracking-tight">
                 แผงวิเคราะห์และค้นหาข้อมูลกำลังพล
               </h3>
-              <span className="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300 text-[9px] font-medium px-2 py-0.5 rounded-full border border-emerald-500/20 tracking-wider">
+              <span className="bg-[#2F6FE4]/10 text-[#2F6FE4] dark:bg-blue-500/20 dark:text-blue-300 text-[8.5px] font-medium px-2 py-0.5 rounded-full tracking-wider">
                 ACTIVE COHORT
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-light leading-relaxed">
-              สืบค้นเรียลไทม์: กำลังพลพิจารณา <span className="font-medium text-[#2F6FE4] dark:text-blue-400 bg-blue-500/5 dark:bg-blue-500/10 px-2 py-0.5 rounded-md text-xs">{filteredCount.toLocaleString()} คน</span> จากทั้งหมด {totalCount.toLocaleString()} คน ({filteredPercentage.toFixed(1)}%)
+              สืบค้นเรียลไทม์: กำลังพลพิจารณา <span className="font-medium text-[#2F6FE4] dark:text-blue-400 bg-[#2F6FE4]/5 dark:bg-blue-500/10 px-2 py-0.5 rounded-md text-xs">{filteredCount.toLocaleString()} คน</span> จากทั้งหมด {totalCount.toLocaleString()} คน ({filteredPercentage.toFixed(1)}%)
             </p>
           </div>
         </div>
@@ -156,26 +156,28 @@ export default function FilterBar({
             <button
               id="reset-filters-btn"
               onClick={resetFilters}
-              className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-rose-500 hover:text-rose-600 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100/50 rounded-xl transition-all cursor-pointer active:scale-[0.98]"
+              className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-rose-500 hover:text-rose-600 bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100/50 rounded-xl transition-all cursor-pointer active:scale-[0.98]"
             >
               <RotateCcw size={12} />
               <span>ล้างเงื่อนไข ({activeFiltersList.length})</span>
             </button>
           )}
 
+          {/* Secondary Action: Export CSV/Excel */}
           <button
             id="export-excel-btn"
             onClick={onExportExcel}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-xl transition-all shadow-sm shadow-emerald-500/10 hover:shadow-md cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-4 py-2 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 border border-emerald-500/10 rounded-xl transition-all cursor-pointer active:scale-[0.98]"
           >
             <FileSpreadsheet size={12} />
             <span>ส่งออก CSV (Excel)</span>
           </button>
 
+          {/* Primary Action: Print PDF */}
           <button
             id="export-pdf-btn"
             onClick={onExportPDF}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl transition-all shadow-sm shadow-blue-500/10 hover:shadow-md cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-4 py-2 text-[11px] font-medium text-white bg-gradient-to-r from-[#2F6FE4] to-[#1E52B6] hover:from-[#1E52B6] hover:to-[#174195] rounded-xl transition-all shadow-sm shadow-blue-500/15 hover:shadow-md cursor-pointer active:scale-[0.98]"
           >
             <FileText size={12} />
             <span>พิมพ์รายงาน PDF</span>
