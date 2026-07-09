@@ -471,36 +471,39 @@ export default function FilterBar({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+          <div className="flex flex-wrap items-center gap-2.5 xl:justify-end bg-slate-50/60 p-1.5 rounded-[24px] border border-slate-200/40 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
             <button
               type="button"
+              id="reset-filters-btn"
               onClick={resetFilters}
               disabled={!hasActiveFilters}
-              className={`filter-action-button transition-all ${
+              className={`filter-action-button transition-all duration-300 relative overflow-hidden cursor-pointer ${
                 hasActiveFilters
-                  ? "bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-100 active:scale-[0.98]"
-                  : "cursor-not-allowed bg-slate-50 text-slate-300 ring-1 ring-slate-100"
+                  ? "bg-white text-slate-700 shadow-xs border border-slate-200 hover:bg-rose-50/80 hover:text-rose-600 hover:border-rose-200/80 active:scale-[0.97]"
+                  : "cursor-not-allowed bg-slate-100/50 text-slate-400 border border-transparent opacity-60"
               }`}
             >
-              <RotateCcw size={15} />
+              <RotateCcw size={14} />
               <span>รีเซ็ต</span>
             </button>
 
             <button
               type="button"
+              id="export-excel-btn"
               onClick={onExportExcel}
-              className="filter-action-button bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/25 active:scale-[0.98]"
+              className="filter-action-button bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.3)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer border border-emerald-400/20"
             >
-              <FileSpreadsheet size={15} />
+              <FileSpreadsheet size={14} />
               <span>ส่งออก Excel</span>
             </button>
 
             <button
               type="button"
+              id="export-pdf-btn"
               onClick={onExportPDF}
-              className="filter-action-button bg-gradient-to-r from-[#2F6FE4] to-[#1E52B6] text-white shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/25 active:scale-[0.98]"
+              className="filter-action-button bg-gradient-to-r from-[#2F6FE4] to-[#1E52B6] hover:from-[#3b7bf0] hover:to-[#1a4aa6] text-white font-medium shadow-[0_4px_12px_rgba(47,111,228,0.2)] hover:shadow-[0_6px_20px_rgba(47,111,228,0.3)] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer border border-blue-400/20"
             >
-              <FileText size={15} />
+              <FileText size={14} />
               <span>พิมพ์รายงาน PDF</span>
             </button>
           </div>

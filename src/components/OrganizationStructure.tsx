@@ -31,6 +31,8 @@ import {
   Users,
 } from "lucide-react";
 
+import SectionHeader from "./SectionHeader";
+
 interface OrganizationStructureProps {
   employees: Employee[];
 }
@@ -55,44 +57,6 @@ const getLevelNumber = (level: string) => {
 };
 
 const formatNumber = (value: number) => value.toLocaleString("th-TH");
-
-const SectionHeader = ({
-  icon,
-  eyebrow,
-  title,
-  description,
-  right,
-}: {
-  icon: React.ReactNode;
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  right?: React.ReactNode;
-}) => (
-  <div className="mb-5 flex items-start justify-between gap-4">
-    <div className="flex min-w-0 items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-sm">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        {eyebrow && (
-          <p className="text-[10px] font-medium uppercase tracking-normal text-blue-600">
-            {eyebrow}
-          </p>
-        )}
-        <h3 className="text-[15px] font-medium leading-snug text-slate-900">
-          {title}
-        </h3>
-        {description && (
-          <p className="mt-1 max-w-2xl text-[11px] font-light leading-relaxed text-slate-500">
-            {description}
-          </p>
-        )}
-      </div>
-    </div>
-    {right}
-  </div>
-);
 
 const MetricCard = ({
   title,
@@ -361,21 +325,21 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
 
   const businessLineItems = useMemo(() => {
     return Object.entries(drillDownModel)
-      .map(([name, item]) => ({ name, count: item.count }))
+      .map(([name, item]) => ({ name, count: (item as any).count as number }))
       .sort((a, b) => b.count - a.count);
   }, [drillDownModel]);
 
   const selectedLineModel = selectedBusinessLine ? drillDownModel[selectedBusinessLine] : undefined;
   const groupItems = selectedLineModel
     ? Object.entries(selectedLineModel.groups)
-        .map(([name, item]) => ({ name, count: item.count }))
+        .map(([name, item]) => ({ name, count: (item as any).count as number }))
         .sort((a, b) => b.count - a.count)
     : [];
 
   const selectedGroupModel = selectedLineModel && selectedGroup ? selectedLineModel.groups[selectedGroup] : undefined;
   const departmentItems = selectedGroupModel
     ? Object.entries(selectedGroupModel.departments)
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, count]) => ({ name, count: count as number }))
         .sort((a, b) => b.count - a.count)
     : [];
 
@@ -542,6 +506,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
             eyebrow="Retirement Watchlist"
             title="รายชื่อพนักงานเตรียมเกษียณ"
             description={`อายุ 55-60 ปี ณ ปี ${selectedOrgYear}`}
+            themeColor="rose"
             right={<span className="rounded-full bg-rose-50 px-3 py-1 text-[11px] font-medium text-rose-600">{formatNumber(retirementCohort.length)} รายการ</span>}
           />
 
@@ -572,52 +537,89 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
           </div>
         </div>
 
-        <div className="xl:col-span-5 rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="xl:col-span-5 p-6 bg-transparent border-none shadow-none">
           <SectionHeader
             icon={<Layers size={18} />}
             eyebrow="Employee Level Pyramid"
             title="พีระมิดระดับชั้นกำลังพล"
             description="แสดงสัดส่วนระดับพนักงานแบบพีระมิดเพื่อให้เห็นฐานกำลังพลและชั้นบริหารชัดเจน"
+            themeColor="blue"
             right={<span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-600">{formatNumber(totalCount)} คน</span>}
           />
 
-          <div className="rounded-[26px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-5">
-            <div className="relative mx-auto flex min-h-[360px] max-w-[560px] flex-col items-center justify-center gap-3">
-              <div className="absolute inset-y-5 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
-              {pyramidBands.map((band, index) => {
-                const clipInset = [23, 15, 8, 2][index];
-                return (
-                  <div key={band.id} className="relative flex w-full items-center justify-center">
-                    <div className="absolute left-0 hidden w-[92px] text-left sm:block">
-                      <p className="text-[11px] font-medium text-slate-700">{band.label}</p>
-                      <p className="mt-0.5 text-[9px] font-light text-slate-400">{band.title}</p>
-                    </div>
-                    <div
-                      className="relative flex h-[66px] items-center justify-center overflow-hidden text-white shadow-lg transition-transform hover:scale-[1.015]"
-                      style={{
-                        width: `${band.width}%`,
-                        background: band.gradient,
-                        clipPath: `polygon(${clipInset}% 0%, ${100 - clipInset}% 0%, 100% 100%, 0% 100%)`,
-                        borderRadius: index === 0 ? "18px 18px 10px 10px" : "14px",
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/10" />
-                      <div className="relative z-10 text-center">
-                        <p className="text-[10px] font-light text-white/85">{band.title}</p>
-                        <div className="mt-1 flex items-baseline justify-center gap-2">
-                          <span className="text-[22px] font-medium leading-none">{formatNumber(band.count)}</span>
-                          <span className="text-[10px] font-light text-white/90">คน</span>
-                          <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium">{band.percent}%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute right-0 hidden w-[72px] text-right sm:block">
-                      <p className="text-[12px] font-medium text-slate-700">{formatNumber(band.count)}</p>
-                      <p className="text-[9px] font-light text-slate-400">{band.percent}%</p>
-                    </div>
+          <div className="py-2">
+            <div className="relative mx-auto flex w-full max-w-[380px] items-center justify-center gap-2 py-2">
+              {/* Left Labels Column */}
+              <div className="hidden sm:flex flex-col w-[100px] text-right pr-2">
+                {pyramidBands.map((band) => (
+                  <div key={`left-${band.id}`} className="flex h-[35px] flex-col justify-center">
+                    <p className="text-[10px] font-medium text-slate-600 leading-tight">{band.label}</p>
+                    <p className="text-[8.5px] font-light text-slate-400 mt-0.5 truncate">{band.title}</p>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Center Pyramid Column using Vector SVG for Perfect Alignment and Sharp Point */}
+              <div className="w-[140px] h-[140px] shrink-0 select-none">
+                <svg viewBox="0 0 200 160" className="w-full h-full overflow-visible drop-shadow-sm">
+                  <defs>
+                    <linearGradient id="apex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#8B5CF6" />
+                      <stop offset="100%" stopColor="#6366F1" />
+                    </linearGradient>
+                    <linearGradient id="mgmt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#2563EB" />
+                      <stop offset="100%" stopColor="#4F46E5" />
+                    </linearGradient>
+                    <linearGradient id="sr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#14B8A6" />
+                      <stop offset="100%" stopColor="#10B981" />
+                    </linearGradient>
+                    <linearGradient id="base-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#06B6D4" />
+                      <stop offset="100%" stopColor="#3B82F6" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Level Apex - Truly Pointed Top Triangle */}
+                  <polygon 
+                    points="100,0 120,40 80,40" 
+                    fill="url(#apex-grad)" 
+                    className="transition-all duration-300 hover:brightness-[1.1] cursor-pointer"
+                  />
+
+                  {/* Level Management */}
+                  <polygon 
+                    points="80,40 120,40 140,80 60,80" 
+                    fill="url(#mgmt-grad)" 
+                    className="transition-all duration-300 hover:brightness-[1.1] cursor-pointer"
+                  />
+
+                  {/* Level Senior */}
+                  <polygon 
+                    points="60,80 140,80 160,120 40,120" 
+                    fill="url(#sr-grad)" 
+                    className="transition-all duration-300 hover:brightness-[1.1] cursor-pointer"
+                  />
+
+                  {/* Level Base */}
+                  <polygon 
+                    points="40,120 160,120 180,160 20,160" 
+                    fill="url(#base-grad)" 
+                    className="transition-all duration-300 hover:brightness-[1.1] cursor-pointer"
+                  />
+                </svg>
+              </div>
+
+              {/* Right Labels Column */}
+              <div className="hidden sm:flex flex-col w-[90px] text-left pl-2">
+                {pyramidBands.map((band) => (
+                  <div key={`right-${band.id}`} className="flex h-[35px] flex-col justify-center">
+                    <p className="text-[11px] font-medium text-slate-800 leading-none">{formatNumber(band.count)} คน</p>
+                    <p className="text-[9px] font-normal text-[#2F6FE4] mt-0.5">{band.percent}%</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -640,6 +642,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
             eyebrow="Succession Plan"
             title="ความพร้อมสืบทอดตำแหน่งหลัก"
             description="สถานะผู้สืบทอดของตำแหน่งบริหารระดับ L9-L11"
+            themeColor="emerald"
           />
 
           <div className="rounded-[26px] border border-slate-100 bg-slate-50/70 p-4">
@@ -710,6 +713,7 @@ export default function OrganizationStructure({ employees }: OrganizationStructu
           eyebrow="Interactive Org Directory Explorer"
           title="สำรวจโครงสร้างองค์กรแบบ Drill-down"
           description="เลือกสายงานหลัก กลุ่มงาน และหน่วยงานย่อย เพื่อดูจำนวนกำลังพลตามลำดับโครงสร้าง"
+          themeColor="slate"
           right={
             <div className="hidden items-center gap-2 rounded-full border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-500 md:flex">
               <Search size={13} />

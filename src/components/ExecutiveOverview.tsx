@@ -28,8 +28,12 @@ import {
   X,
   Target,
   ArrowUpRight,
-  Info
+  Info,
+  Plus,
+  Minus,
+  Maximize2
 } from "lucide-react";
+import SectionHeader from "./SectionHeader";
 import { 
   ResponsiveContainer, 
   PieChart, 
@@ -124,8 +128,28 @@ function ThailandSvgMap({
   onSelectProvince,
 }: ThailandSvgMapProps) {
   const mapRef = React.useRef<HTMLDivElement | null>(null);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [isMapLoaded, setIsMapLoaded] = React.useState(false);
   const [isMapError, setIsMapError] = React.useState(false);
+
+  // Zoom & Pan state
+  const [zoom, setZoom] = React.useState(1);
+  const [panOffset, setPanOffset] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  
+  // Track movement to separate click vs drag
+  const dragMovedRef = React.useRef(false);
+  const mouseDownPosRef = React.useRef({ x: 0, y: 0 });
+  
+  // Hover & Tooltip state
+  const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+  const [hoveredProvince, setHoveredProvince] = React.useState<{
+    name: string;
+    engName: string;
+    headcount: number;
+    status: string;
+  } | null>(null);
 
   const provinceBySvgName = useMemo(() => {
     const result = new Map<string, ProvinceData>();
@@ -142,6 +166,104 @@ function ThailandSvgMap({
     return result;
   }, [provinces]);
 
+  // Handle Mouse / Touch down for panning
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // Only left click
+    setIsDragging(true);
+    dragMovedRef.current = false;
+    mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
+    setDragStart({
+      x: e.clientX - panOffset.x,
+      y: e.clientY - panOffset.y,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    
+    // Update mouse position relative to container
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+
+    if (isDragging) {
+      const dx = e.clientX - mouseDownPosRef.current.x;
+      const dy = e.clientY - mouseDownPosRef.current.y;
+      if (Math.hypot(dx, dy) > 4) {
+        dragMovedRef.current = true;
+      }
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Mobile Touch pan support
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+    setIsDragging(true);
+    dragMovedRef.current = false;
+    const touch = e.touches[0];
+    mouseDownPosRef.current = { x: touch.clientX, y: touch.clientY };
+    setDragStart({
+      x: touch.clientX - panOffset.x,
+      y: touch.clientY - panOffset.y,
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || e.touches.length !== 1 || !containerRef.current) return;
+    const touch = e.touches[0];
+    const rect = containerRef.current.getBoundingClientRect();
+    
+    setMousePos({
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    });
+
+    const dx = touch.clientX - mouseDownPosRef.current.x;
+    const dy = touch.clientY - mouseDownPosRef.current.y;
+    if (Math.hypot(dx, dy) > 4) {
+      dragMovedRef.current = true;
+    }
+
+    setPanOffset({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    });
+  };
+
+  // Zoom button handlers
+  const handleZoomIn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoom((prev) => Math.min(8, prev + 0.5));
+  };
+
+  const handleZoomOut = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoom((prev) => {
+      const nextZoom = Math.max(1, prev - 0.5);
+      if (nextZoom === 1) {
+        setPanOffset({ x: 0, y: 0 });
+      }
+      return nextZoom;
+    });
+  };
+
+  const handleResetZoom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoom(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  // Load the Thailand SVG Map file
   React.useEffect(() => {
     let isMounted = true;
 
@@ -189,6 +311,43 @@ function ThailandSvgMap({
     };
   }, []);
 
+  // Imperative wheel event registration (to allow e.preventDefault() smoothly)
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !isMapLoaded) return;
+
+    const onWheelEvent = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomIntensity = 0.15;
+      setZoom((prevZoom) => {
+        let newZoom = prevZoom + (e.deltaY < 0 ? zoomIntensity : -zoomIntensity);
+        newZoom = Math.max(1, Math.min(8, newZoom));
+        if (newZoom === 1) {
+          setPanOffset({ x: 0, y: 0 });
+        }
+        return newZoom;
+      });
+    };
+
+    container.addEventListener("wheel", onWheelEvent, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", onWheelEvent);
+    };
+  }, [isMapLoaded]);
+
+  // Apply visual transformation styles to the SVG node
+  React.useEffect(() => {
+    const root = mapRef.current;
+    if (!root || !isMapLoaded) return;
+    const svg = root.querySelector("svg");
+    if (!svg) return;
+
+    svg.style.transition = isDragging ? "none" : "transform 200ms cubic-bezier(0.16, 1, 0.3, 1)";
+    svg.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`;
+    svg.style.transformOrigin = "center center";
+  }, [zoom, panOffset, isMapLoaded, isDragging]);
+
+  // Bind interactions, status colors, hover states, and clicks to the SVG paths
   React.useEffect(() => {
     const root = mapRef.current;
     if (!root || !isMapLoaded) return;
@@ -205,45 +364,88 @@ function ThailandSvgMap({
         svgProvinceName === selectedProvinceName;
       const isInSelectedRegion = selectedRegion === "All" || province?.region === selectedRegion;
 
-      path.style.transition = "fill 160ms ease, stroke 160ms ease, opacity 160ms ease, filter 160ms ease";
+      path.style.transition = "fill 160ms ease, stroke 160ms ease, opacity 160ms ease";
       path.style.strokeLinejoin = "round";
       path.style.strokeLinecap = "round";
       path.style.cursor = isInSelectedRegion ? "pointer" : "default";
       path.style.outline = "none";
 
-      // base color: ขาว/เทา ตาม requirement
-      path.style.fill = hasData ? "#FFFFFF" : "#EEF2F7";
-      path.style.stroke = "#CBD5E1";
+      // Base color styling
+      let baseFill = "#F1F5F9"; // default for no data (Slate-100)
+      let baseStroke = "#FFFFFF"; // Premium white borders
+
+      if (hasData && province) {
+        if (province.status === "green") {
+          baseFill = "#D1FAE5"; // Emerald-100
+        } else if (province.status === "yellow") {
+          baseFill = "#FEF3C7"; // Amber-100
+        } else if (province.status === "red") {
+          baseFill = "#FFE4E6"; // Rose-100
+        }
+      }
+
+      path.style.fill = baseFill;
+      path.style.stroke = baseStroke;
       path.style.strokeWidth = "1";
       path.style.opacity = isInSelectedRegion ? "1" : "0.22";
-      path.style.filter = "none";
 
       if (isSelected) {
-        path.style.fill = "#DBEAFE";
-        path.style.stroke = "#2563EB";
-        path.style.strokeWidth = "3";
+        path.style.fill = "#BFDBFE"; // Premium selection fill (Blue-200)
+        path.style.stroke = "#2563EB"; // Premium selection stroke (Blue-600)
+        path.style.strokeWidth = "2.5";
         path.style.opacity = "1";
-        path.style.filter = "drop-shadow(0 8px 14px rgba(37, 99, 235, 0.22))";
       }
 
       path.onmouseenter = () => {
-        if (!isInSelectedRegion || isSelected) return;
-        path.style.fill = hasData ? "#F0F7FF" : "#F8FAFC";
-        path.style.stroke = "#60A5FA";
-        path.style.strokeWidth = "2";
-        path.style.opacity = "1";
+        if (!isInSelectedRegion) return;
+        if (!isSelected) {
+          let hoverFill = "#E2E8F0"; // default hover for no data
+          let hoverStroke = "#94A3B8";
+
+          if (hasData && province) {
+            if (province.status === "green") {
+              hoverFill = "#A7F3D0"; // Emerald-200
+              hoverStroke = "#10B981"; // Emerald-500
+            } else if (province.status === "yellow") {
+              hoverFill = "#FDE68A"; // Amber-200
+              hoverStroke = "#F59E0B"; // Amber-500
+            } else if (province.status === "red") {
+              hoverFill = "#FECDD3"; // Rose-200
+              hoverStroke = "#F43F5E"; // Rose-500
+            }
+          }
+
+          path.style.fill = hoverFill;
+          path.style.stroke = hoverStroke;
+          path.style.strokeWidth = "1.5";
+          path.style.opacity = "1";
+        }
+        
+        // Show hover state / tooltip content
+        setHoveredProvince({
+          name: province?.name || svgProvinceName,
+          engName: province?.engName || svgProvinceName,
+          headcount: province?.headcount || 0,
+          status: province?.status || "none",
+        });
       };
 
       path.onmouseleave = () => {
-        if (!isInSelectedRegion || isSelected) return;
-        path.style.fill = hasData ? "#FFFFFF" : "#EEF2F7";
-        path.style.stroke = "#CBD5E1";
-        path.style.strokeWidth = "1";
-        path.style.opacity = isInSelectedRegion ? "1" : "0.22";
-        path.style.filter = "none";
+        if (!isInSelectedRegion) return;
+        if (!isSelected) {
+          path.style.fill = baseFill;
+          path.style.stroke = baseStroke;
+          path.style.strokeWidth = "1";
+          path.style.opacity = isInSelectedRegion ? "1" : "0.22";
+        }
+        
+        // Clear hover state / tooltip content
+        setHoveredProvince(null);
       };
 
-      path.onclick = () => {
+      path.onclick = (e) => {
+        e.stopPropagation();
+        if (dragMovedRef.current) return;
         if (!isInSelectedRegion) return;
         onSelectProvince(province?.name || svgProvinceName);
       };
@@ -257,25 +459,28 @@ function ThailandSvgMap({
         onSelectProvince(province?.name || svgProvinceName);
       };
 
+      // Remove default native titles
       const oldTitle = path.querySelector("title");
       oldTitle?.remove();
-
-      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-      title.textContent = province
-        ? `${province.name} (${province.engName}) | พนักงาน ${province.headcount.toLocaleString()} คน`
-        : `${svgProvinceName} | ยังไม่มี mock data`;
-      path.appendChild(title);
     });
   }, [isMapLoaded, provinceBySvgName, selectedProvinceName, selectedRegion, onSelectProvince]);
 
   return (
-    <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 shadow-sm">
+    <div 
+      ref={containerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUpOrLeave}
+      onMouseLeave={handleMouseUpOrLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUpOrLeave}
+      className={`relative h-[560px] w-full overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 shadow-sm select-none ${
+        isDragging ? "cursor-grabbing" : "cursor-grab"
+      }`}
+    >
       <div className="absolute left-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-[10px] font-light text-slate-500 shadow-sm backdrop-blur">
-        คลิกจังหวัดเพื่อดูรายละเอียด
-      </div>
-
-      <div className="absolute right-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-[10px] font-light text-slate-500 shadow-sm backdrop-blur">
-        แผนที่ประเทศไทย
+        ใช้เมาส์ลากแผนที่เพื่อเลื่อน และปุ่ม +/- หรือสกอร์เมาส์เพื่อซูม
       </div>
 
       {isMapError && (
@@ -288,20 +493,101 @@ function ThailandSvgMap({
         </div>
       )}
 
-      <div ref={mapRef} className="absolute inset-0 flex items-center justify-center p-5" />
+      {/* Floating Zoom / Pan Controls */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1.5 rounded-2xl bg-white/95 p-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-slate-100/80 backdrop-blur-md">
+        <button
+          type="button"
+          onClick={handleZoomIn}
+          title="ซูมเข้า"
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all text-slate-600 dark:text-slate-300 border border-slate-100/50"
+        >
+          <Plus size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={handleZoomOut}
+          title="ซูมออก"
+          disabled={zoom <= 1}
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all text-slate-600 dark:text-slate-300 border border-slate-100/50 disabled:opacity-30 disabled:pointer-events-none"
+        >
+          <Minus size={16} />
+        </button>
+        <div className="h-[1px] bg-slate-100 dark:bg-slate-800 my-0.5 mx-1" />
+        <button
+          type="button"
+          onClick={handleResetZoom}
+          title="รีเซ็ตมุมมอง"
+          disabled={zoom === 1 && panOffset.x === 0 && panOffset.y === 0}
+          className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all text-slate-600 dark:text-slate-300 border border-slate-100/50 disabled:opacity-30 disabled:pointer-events-none"
+        >
+          <Maximize2 size={13} />
+        </button>
+      </div>
 
-      <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-2 rounded-2xl bg-white/90 px-3 py-2 shadow-sm backdrop-blur">
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-          <span className="h-2.5 w-2.5 rounded-full border border-slate-300 bg-white" />
-          <span>จังหวัด</span>
+      <div ref={mapRef} className="absolute inset-0 flex items-center justify-center p-1" />
+
+      {/* Custom Hover Tooltip */}
+      {hoveredProvince && (
+        <div
+          className="pointer-events-none absolute z-40 rounded-xl border border-slate-150 bg-white/95 px-3 py-2.5 shadow-lg backdrop-blur-md text-slate-800 transition-all duration-75 min-w-[170px]"
+          style={{
+            left: `${mousePos.x + 16}px`,
+            top: `${mousePos.y + 16}px`,
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className={`h-2 w-2 rounded-full ${
+              hoveredProvince.status === "green" ? "bg-emerald-500" :
+              hoveredProvince.status === "yellow" ? "bg-amber-500" :
+              hoveredProvince.status === "red" ? "bg-rose-500" : "bg-slate-300"
+            }`} />
+            <span className="font-semibold text-[13px] text-slate-900 leading-none">{hoveredProvince.name}</span>
+          </div>
+          <span className="text-[10px] text-slate-400 block mt-0.5 font-light">{hoveredProvince.engName}</span>
+          
+          <div className="mt-2 pt-1.5 border-t border-slate-100/80 flex items-center justify-between gap-3">
+            <span className="text-[10px] text-slate-500 font-light">จำนวนพนักงาน:</span>
+            <span className="font-mono text-xs font-semibold text-slate-700">
+              {hoveredProvince.headcount > 0 ? `${hoveredProvince.headcount.toLocaleString()} คน` : "ไม่มีพนักงาน"}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-          <span className="h-2.5 w-2.5 rounded-full border border-blue-500 bg-blue-100" />
-          <span>จังหวัดที่เลือก</span>
+      )}
+
+      <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-white/95 px-4.5 py-3 shadow-md backdrop-blur border border-slate-200/30">
+        {/* Left: General & Selection States */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2 text-[10.5px] font-medium text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-white border border-slate-300" />
+            <span>จังหวัดนอกเขตเลือก</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10.5px] font-medium text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-[#F1F5F9] border border-slate-300" />
+            <span>ไม่มีข้อมูลในระบบ</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10.5px] font-semibold text-blue-600">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+            </span>
+            <span>จังหวัดที่เลือก</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-          <span className="h-2.5 w-2.5 rounded-full border border-slate-300 bg-slate-200" />
-          <span>ยังไม่มีข้อมูล</span>
+
+        {/* Right: Performance levels matching the map colors */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 border-t sm:border-t-0 sm:pt-0 border-slate-100">
+          <div className="flex items-center gap-2 text-[10.5px] font-medium text-slate-600">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
+            <span>ผ่านเกณฑ์ (On Target)</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10.5px] font-medium text-slate-600">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />
+            <span>ต่ำเป้า 20% (Medium Risk)</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10.5px] font-medium text-slate-600">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />
+            <span>ต่ำเป้า 50% (High Risk)</span>
+          </div>
         </div>
       </div>
     </div>
@@ -690,18 +976,19 @@ export default function ExecutiveOverview({
 
       {/* Interactive Metric Pill Selector Row */}
       <div>
-        <div className="flex items-center justify-between mb-4.5">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
-            <h2 className="text-sm font-medium text-slate-800 tracking-tight">
-              ตัวบ่งชี้กลยุทธ์กำลังพล (คลิกเลือกการจัดกลุ่มเพื่อจัดกรองข้อมูลทั้งแผงประเมิน)
-            </h2>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-light">
-            <Info size={11} />
-            <span>ข้อมูลเปลี่ยนแปลงเรียลไทม์ตามกลุ่มที่เลือก</span>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<TrendingUp size={18} />}
+          eyebrow="SME D Bank Metrics"
+          title="ตัวบ่งชี้กลยุทธ์กำลังพล (คลิกเลือกเพื่อคัดกรองข้อมูลทั้งหมด)"
+          description="คลิกเลือกกลุ่มข้อมูลเพื่อคัดกรอง แผนที่ ชาร์ต และบัญชีรายชื่อพนักงานในหน้าจอทั้งหมดตามกลุ่มความสนใจหลัก"
+          themeColor="blue"
+          right={
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-light">
+              <Info size={11} />
+              <span>ข้อมูลเปลี่ยนแปลงเรียลไทม์</span>
+            </div>
+          }
+        />
 
         {/* The Grid of Metrics cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -778,51 +1065,45 @@ export default function ExecutiveOverview({
       {/* SECTION: THAILAND PERFORMANCE MAP & STRATEGIC PERFORMANCE FORECAST */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column: Thailand Performance Map (lg:col-span-7) */}
-        <div className="lg:col-span-7 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+        {/* Left Column: Thailand Performance Map (lg:col-span-8) */}
+        <div className="lg:col-span-8 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100/60">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
-                  <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">
-                    แผนที่วิเคราะห์ศักยภาพรายจังหวัด (Thailand Performance Map)
-                  </span>
-                </div>
-                <h3 className="text-xs font-medium text-slate-800 mt-1">
-                  การประเมินประสิทธิภาพการทำงานและกำลังพลรายจังหวัด
-                </h3>
-              </div>
+            <SectionHeader
+              icon={<MapPin size={18} />}
+              eyebrow="Thailand Performance Map"
+              title="แผนที่วิเคราะห์ศักยภาพและระดับผลงานรายจังหวัด"
+              description="การประเมินประสิทธิภาพการทำงาน อัตรากำลังพล และระดับผลงานรวมของแต่ละภูมิภาค"
+              themeColor="blue"
+            />
 
-              {/* Region filter segment pills */}
-              <div className="flex flex-wrap gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200/50">
-                {(["All", "North", "Northeast", "Central", "South", "East", "West"] as const).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      setSelectedMapRegion(r);
-                      // Auto-select first province in that region to avoid blank details
-                      const firstInRegion = PROVINCES_DATA.find(p => r === "All" || p.region === r);
-                      if (firstInRegion) {
-                        setSelectedProvinceName(firstInRegion.name);
-                      }
-                    }}
-                    className={`px-2 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
-                      selectedMapRegion === r
-                        ? "bg-white text-slate-800 shadow-xs border border-slate-200/20 font-medium"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    {r === "All" ? "ทุกภาค" : r === "North" ? "เหนือ" : r === "Northeast" ? "อีสาน" : r === "Central" ? "กลาง" : r === "South" ? "ใต้" : r === "East" ? "ตะวันออก" : "ตะวันตก"}
-                  </button>
-                ))}
-              </div>
+            {/* Region filter segment pills moved here above the map */}
+            <div className="flex w-full gap-1 bg-slate-50 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50 mb-4">
+              {(["All", "North", "Northeast", "Central", "South", "East", "West"] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => {
+                    setSelectedMapRegion(r);
+                    // Auto-select first province in that region to avoid blank details
+                    const firstInRegion = PROVINCES_DATA.find(p => r === "All" || p.region === r);
+                    if (firstInRegion) {
+                      setSelectedProvinceName(firstInRegion.name);
+                    }
+                  }}
+                  className={`flex-1 text-center py-1.5 text-[10.5px] font-semibold rounded-lg transition-all cursor-pointer ${
+                    selectedMapRegion === r
+                      ? "bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-xs border border-slate-200/20 font-semibold"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  }`}
+                >
+                  {r === "All" ? "ทุกภาค" : r === "North" ? "เหนือ" : r === "Northeast" ? "อีสาน" : r === "Central" ? "กลาง" : r === "South" ? "ใต้" : r === "East" ? "ตะวันออก" : "ตะวันตก"}
+                </button>
+              ))}
             </div>
 
             {/* Map and details container */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mt-5">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mt-3">
               
-              {/* Real Thailand SVG Interactive Map */}
+              {/* Real Thailand SVG Interactive Map (md:col-span-5) */}
               <div className="md:col-span-5">
                 <ThailandSvgMap
                   provinces={PROVINCES_DATA}
@@ -840,7 +1121,7 @@ export default function ExecutiveOverview({
                   <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2">
                     รายชื่อจังหวัดในการจัดกลุ่ม ({filteredProvinces.length} จังหวัด)
                   </div>
-                  <div className="max-h-[150px] overflow-y-auto space-y-1.5 pr-1 border border-slate-100 rounded-xl p-2 bg-slate-50/30">
+                  <div className="max-h-[290px] overflow-y-auto space-y-1.5 pr-1 border border-slate-100 rounded-xl p-2 bg-slate-50/30 font-light">
                     {filteredProvinces.map((prov) => {
                       const isSelected = selectedProvinceName === prov.name;
                       const statusColor = prov.status === "green" 
@@ -860,9 +1141,11 @@ export default function ExecutiveOverview({
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${statusColor}`} />
-                            <span>{prov.name}</span>
-                            <span className="text-[10px] text-slate-400 font-light font-mono">({prov.engName})</span>
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`} />
+                            <div className="flex flex-col">
+                              <span className="text-[11.5px] font-medium text-slate-850 dark:text-slate-200 leading-tight">{prov.name}</span>
+                              <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-mono tracking-tight leading-none mt-0.5">{prov.engName}</span>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] text-slate-400 font-light">พนักงาน:</span>
@@ -878,10 +1161,15 @@ export default function ExecutiveOverview({
                 <div className="bg-gradient-to-r from-slate-50 to-blue-50/30 rounded-2xl p-4 border border-slate-100/60 mt-3.5 shadow-inner">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-200/50">
                     <div className="flex items-center gap-2">
-                      <MapPin size={13} className="text-blue-600" />
-                      <span className="text-xs font-medium text-slate-800">
-                        {activeProvinceDetails.name} ({activeProvinceDetails.engName})
-                      </span>
+                      <MapPin size={13} className="text-blue-600 shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-slate-800 leading-tight">
+                          {activeProvinceDetails.name}
+                        </span>
+                        <span className="text-[9.5px] text-slate-400 font-mono leading-none mt-0.5">
+                          {activeProvinceDetails.engName}
+                        </span>
+                      </div>
                     </div>
                     <span className={`px-2 py-0.5 text-[9px] font-medium rounded-full ${
                       activeProvinceDetails.status === "green" 
@@ -927,49 +1215,81 @@ export default function ExecutiveOverview({
           </div>
         </div>
 
-        {/* Right Column: Performance Trend & Forecast Tool (lg:col-span-5) */}
-        <div className="lg:col-span-5 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+        {/* Right Column: Performance Trend & Forecast Tool (lg:col-span-4) */}
+        <div className="lg:col-span-4 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100/60">
-              <div className="flex items-center gap-1.5">
-                <div className="p-1.5 bg-amber-400/10 text-amber-500 rounded-lg shrink-0">
-                  <Target size={13} className="animate-pulse" />
-                </div>
+            <SectionHeader
+              icon={<Target size={18} />}
+              eyebrow="Predictive Analysis"
+              title="แบบจำลองพยากรณ์ผลงานสถาบัน"
+              description="จำลองอัตราสัมฤทธิ์ผลเชิงยุทธศาสตร์ในช่วง 3 ปีข้างหน้า ด้วยการปรับเปลี่ยนคันโยกเชิงนโยบายทรัพยากรบุคคล"
+              themeColor="amber"
+            />
+
+            {/* Premium Forecast Result Card */}
+            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white border border-slate-800 shadow-md relative overflow-hidden">
+              {/* Subtle background glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="relative z-10 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-medium text-slate-800">
-                    Performance Forecast & Projection
-                  </h3>
-                  <p className="text-[9px] text-slate-400 font-light">
-                    เครื่องมือจำลองอัตราสัมฤทธิ์ผลสถาบันในอนาคต (2026 - 2029)
-                  </p>
+                  <span className="text-[9.5px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                    ดัชนีคาดการณ์ผลงานปี 2029 (Success Index)
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-sans font-bold tracking-tight text-white font-mono">
+                      {87 + forecastModifier}%
+                    </span>
+                    {forecastModifier > 0 ? (
+                      <span className="text-[10.5px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                        <TrendingUp size={10} />
+                        +{forecastModifier}%
+                      </span>
+                    ) : (
+                      <span className="text-[10.5px] font-semibold bg-slate-500/20 text-slate-300 border border-slate-500/30 px-1.5 py-0.5 rounded-full">
+                        Baseline
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="h-11 w-11 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+                  <Target className="text-amber-400 animate-pulse" size={20} />
                 </div>
               </div>
-              <span className="text-[8.5px] font-sans font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-full uppercase">
-                Predictive Tool
-              </span>
+              
+              <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[9.5px] text-slate-300">
+                <span className="font-light">เทียบกับเป้าหมาย KPI สถาบัน (85%)</span>
+                <span className="font-semibold text-emerald-400">ผ่านเกณฑ์เป้าหมาย</span>
+              </div>
             </div>
 
             {/* Strategic Levers (Interactive controls that dynamically change forecasts) */}
-            <div className="mt-4 space-y-3 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block mb-1">
+            <div className="mt-4 space-y-3">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
                 คันโยกยุทธศาสตร์เพื่อการพยากรณ์ล่วงหน้า (Strategic HR Levers)
               </span>
 
               {/* Lever 1: L&D Upskilling */}
-              <div className="flex flex-col gap-1.5 pb-2.5 border-b border-slate-100">
+              <div className="p-3 bg-slate-50/60 border border-slate-200/50 rounded-2xl flex flex-col gap-2 shadow-inner">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-700">1. การยกระดับ L&D และพัฒนาทักษะ (Upskilling)</span>
-                  <span className="text-[10.5px] font-medium text-blue-600">{upskillingLevel === "None" ? "ปกติ" : upskillingLevel === "Medium" ? "ปานกลาง (+4%)" : "เชิงรุกเข้มข้น (+8%)"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Award className="text-blue-500 shrink-0" size={13} />
+                    <span className="text-[11px] font-semibold text-slate-700">1. การยกระดับ L&D และอัปสกิล</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-blue-600 font-mono">
+                    {upskillingLevel === "None" ? "ปกติ" : upskillingLevel === "Medium" ? "ปานกลาง (+4%)" : "เข้มข้น (+8%)"}
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   {(["None", "Medium", "Intensive"] as const).map((lvl) => (
                     <button
                       key={lvl}
                       onClick={() => setUpskillingLevel(lvl)}
-                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                      className={`py-1.5 text-[9.5px] font-medium rounded-lg transition-all cursor-pointer text-center border ${
                         upskillingLevel === lvl
-                          ? "bg-blue-600 text-white font-medium"
-                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                          ? "bg-blue-600 text-white font-semibold border-blue-600 shadow-[0_2px_8px_-2px_rgba(37,99,235,0.4)]"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                     >
                       {lvl === "None" ? "มาตรฐาน" : lvl === "Medium" ? "ระดับกลาง" : "เข้มข้น"}
@@ -979,20 +1299,25 @@ export default function ExecutiveOverview({
               </div>
 
               {/* Lever 2: Succession depth */}
-              <div className="flex flex-col gap-1.5 pb-2.5 border-b border-slate-100">
+              <div className="p-3 bg-slate-50/60 border border-slate-200/50 rounded-2xl flex flex-col gap-2 shadow-inner">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-700">2. ความลึกของตำแหน่งสืบทอด (Succession Pipeline)</span>
-                  <span className="text-[10.5px] font-medium text-indigo-600">{successionLevel === "Normal" ? "ปกติ" : successionLevel === "Deep" ? "ผู้สืบทอด 2 ชั้น (+3%)" : "ผู้สืบทอดครอบคลุม (+5%)"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <UserCheck className="text-indigo-500 shrink-0" size={13} />
+                    <span className="text-[11px] font-semibold text-slate-700">2. ผู้สืบทอดตำแหน่ง (Succession)</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-600 font-mono">
+                    {successionLevel === "Normal" ? "ปกติ" : successionLevel === "Deep" ? "2 ชั้น (+3%)" : "ครอบคลุม (+5%)"}
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   {(["Normal", "Deep", "Full Coverage"] as const).map((lvl) => (
                     <button
                       key={lvl}
                       onClick={() => setSuccessionLevel(lvl)}
-                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                      className={`py-1.5 text-[9.5px] font-medium rounded-lg transition-all cursor-pointer text-center border ${
                         successionLevel === lvl
-                          ? "bg-indigo-600 text-white font-medium"
-                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                          ? "bg-indigo-600 text-white font-semibold border-indigo-600 shadow-[0_2px_8px_-2px_rgba(79,70,229,0.4)]"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                     >
                       {lvl === "Normal" ? "มาตรฐาน" : lvl === "Deep" ? "ผู้สืบทอด 2 ชั้น" : "ครอบคลุมครบ"}
@@ -1002,20 +1327,25 @@ export default function ExecutiveOverview({
               </div>
 
               {/* Lever 3: Digital transformation */}
-              <div className="flex flex-col gap-1.5">
+              <div className="p-3 bg-slate-50/60 border border-slate-200/50 rounded-2xl flex flex-col gap-2 shadow-inner">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-700">3. เครื่องมือดิจิทัลและระบบช่วยเหลือ (AI & Digital)</span>
-                  <span className="text-[10.5px] font-medium text-emerald-600">{digitalLevel === "Standard" ? "ปกติ" : digitalLevel === "Optimized" ? "ปรับแต่งระบบ (+3%)" : "Advanced AI (+6%)"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="text-emerald-500 shrink-0" size={13} />
+                    <span className="text-[11px] font-semibold text-slate-700">3. เครื่องมือดิจิทัล & AI ระบบงาน</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 font-mono">
+                    {digitalLevel === "Standard" ? "ปกติ" : digitalLevel === "Optimized" ? "จัดสรร (+3%)" : "Advanced (+6%)"}
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   {(["Standard", "Optimized", "Advanced AI"] as const).map((lvl) => (
                     <button
                       key={lvl}
                       onClick={() => setDigitalLevel(lvl)}
-                      className={`py-1.5 text-[9.5px] rounded-lg transition-all cursor-pointer text-center ${
+                      className={`py-1.5 text-[9.5px] font-medium rounded-lg transition-all cursor-pointer text-center border ${
                         digitalLevel === lvl
-                          ? "bg-emerald-600 text-white font-medium"
-                          : "bg-white text-slate-600 border border-slate-100 hover:border-slate-200"
+                          ? "bg-emerald-600 text-white font-semibold border-emerald-600 shadow-[0_2px_8px_-2px_rgba(16,185,129,0.4)]"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                     >
                       {lvl === "Standard" ? "มาตรฐาน" : lvl === "Optimized" ? "จัดสรรใหม่" : "Advanced AI"}
@@ -1026,8 +1356,8 @@ export default function ExecutiveOverview({
             </div>
 
             {/* Recharts Area Chart showing projection outcomes */}
-            <div className="mt-4">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block mb-2">
+            <div className="mt-4 p-3 bg-slate-50/30 border border-slate-100 rounded-2xl">
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block mb-2.5">
                 ดัชนีคะแนนผลงานความสำเร็จเปรียบเทียบใน 3 ปีข้างหน้า
               </span>
               <div className="h-[140px] w-full">
@@ -1054,9 +1384,9 @@ export default function ExecutiveOverview({
 
           <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
             <span className="text-slate-400 font-light">
-              ผลพยากรณ์คาดการณ์โดยอาศัยเครื่องมือสถิติและแบบจำลอง HR-Analytics
+              ผลพยากรณ์คาดการณ์ด้วยแบบจำลองสถิติและ HR-Analytics
             </span>
-            <span className="font-medium text-emerald-600 font-mono">
+            <span className="font-semibold text-indigo-650 font-mono">
               เป้าหมายสูงสุด: {87 + forecastModifier}%
             </span>
           </div>
@@ -1071,39 +1401,35 @@ export default function ExecutiveOverview({
         <div className="lg:col-span-8 bg-white/95 backdrop-blur-md rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           
           <div>
-            {/* Header info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100/60">
-              <div>
-                <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                  กลุ่มวิเคราะห์: {getMetricTitleInThai()}
-                </span>
-                <h3 className="text-xs font-medium text-slate-800 mt-1">
-                  การแจกแจงพนักงานและมิติทางประชากรศาสตร์ (Demographic Distribution)
-                </h3>
-              </div>
-              
-              {/* Chart Tabs toggle */}
-              <div className="inline-flex bg-slate-50 p-1 rounded-xl border border-slate-200/50 self-start">
-                {[
-                  { id: "contract", label: "ประเภทสัญญา" },
-                  { id: "hb", label: "ตามที่ตั้ง" },
-                  { id: "fb", label: "ลักษณะงาน" },
-                  { id: "gender", label: "แบ่งตามเพศ" }
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setActiveDonutTab(t.id as any)}
-                    className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
-                      activeDonutTab === t.id 
-                        ? "bg-white text-slate-800 shadow-xs" 
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SectionHeader
+              icon={<Users size={18} />}
+              eyebrow={`กลุ่มวิเคราะห์: ${getMetricTitleInThai()}`}
+              title="การแจกแจงพนักงานและมิติทางประชากรศาสตร์"
+              description="แสดงสัดส่วนสถิติและประเภทสัญญาจ้างของกำลังพลตามกลุ่มตัวกรองด้านบน"
+              themeColor="blue"
+              right={
+                <div className="inline-flex bg-slate-50 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                  {[
+                    { id: "contract", label: "ประเภทสัญญา" },
+                    { id: "hb", label: "ตามที่ตั้ง" },
+                    { id: "fb", label: "ลักษณะงาน" },
+                    { id: "gender", label: "แบ่งตามเพศ" }
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveDonutTab(t.id as any)}
+                      className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                        activeDonutTab === t.id 
+                          ? "bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-xs" 
+                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              }
+            />
 
             {/* Inner demographic indicators */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
@@ -1242,20 +1568,19 @@ export default function ExecutiveOverview({
         <div className="lg:col-span-4 bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[28px] p-6 text-white shadow-md flex flex-col justify-between">
           
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg text-amber-400">
-                  <Sparkles size={14} className="animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-medium text-white">Insight & HR Strategy</h3>
-                  <p className="text-[9px] text-slate-300 font-light">ระบบแนะนำและข้อเสนอเชิงนโยบาย</p>
-                </div>
-              </div>
-              <span className="text-[9px] font-sans font-light bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 px-2 py-0.5 rounded-full uppercase">
-                Dynamic Engine
-              </span>
-            </div>
+            <SectionHeader
+              icon={<Sparkles size={18} />}
+              eyebrow="Dynamic Engine"
+              title="บทวิเคราะห์เชิงนโยบายกำลังพล"
+              description="ข้อเสนอเชิงยุทธศาสตร์สำหรับการบริหารกลุ่มเป้าหมายเชิงรุก"
+              themeColor="violet"
+              isDarkBg={true}
+              right={
+                <span className="text-[9px] font-medium bg-white/10 text-indigo-200 border border-white/15 px-2 py-0.5 rounded-full uppercase">
+                  Insight Engine
+                </span>
+              }
+            />
 
             <div className="mt-5 space-y-4">
               {cohortInsights.map((insight, idx) => (
@@ -1304,42 +1629,35 @@ export default function ExecutiveOverview({
       {/* Roster Explorer Table Section */}
       <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
         
-        {/* Table header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 bg-blue-600 rounded-full" />
-              <h3 className="text-xs font-medium text-slate-800">
-                ทำเนียบข้าราชการและบุคลากรรายบุคคล (Employee Explorer)
-              </h3>
+        <SectionHeader
+          icon={<Search size={18} />}
+          eyebrow={`ตัวจัดกรอง: ${getMetricTitleInThai()}`}
+          title="ทำเนียบข้าราชการและบุคลากรรายบุคคล"
+          description="ฐานข้อมูลรายละเอียดพนักงานรายบุคคล พร้อมช่องสืบค้นรวดเร็วด้วยรหัส ชื่อ ตำแหน่ง หรือสังกัด"
+          themeColor="blue"
+          right={
+            <div className="relative min-w-[240px]">
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อ, รหัส, สายงานในกลุ่มนี้..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 dark:border-slate-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 dark:bg-slate-800 dark:text-white transition-all font-light"
+              />
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search size={12} />
+              </div>
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                >
+                  <X size={10} />
+                </button>
+              )}
             </div>
-            <p className="text-[10px] text-slate-400 mt-1 font-light">
-              คัดแยกเฉพาะข้อมูลกลุ่ม: <span className="font-semibold text-blue-600">{getMetricTitleInThai()}</span> • แสดงผลสอดคล้องตามตัวกรองด้านบน
-            </p>
-          </div>
-
-          {/* Search bar specifically for table */}
-          <div className="relative min-w-[240px]">
-            <input
-              type="text"
-              placeholder="ค้นหาชื่อ, รหัส, สายงานในกลุ่มนี้..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-light"
-            />
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-              <Search size={12} />
-            </div>
-            {searchTerm && (
-              <button 
-                onClick={() => setSearchTerm("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
-              >
-                <X size={10} />
-              </button>
-            )}
-          </div>
-        </div>
+          }
+        />
 
         {/* The data table */}
         <div className="overflow-x-auto mt-4">

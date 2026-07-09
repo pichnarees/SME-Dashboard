@@ -36,6 +36,7 @@ import {
   Eye,
   Info
 } from "lucide-react";
+import SectionHeader from "./SectionHeader";
 
 interface WorkforceRiskProps {
   employees: Employee[];
@@ -187,18 +188,19 @@ export default function WorkforceRisk({
 
       {/* Top row: Interactive Strategic Indicators Grid */}
       <div>
-        <div className="flex items-center justify-between mb-4.5">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
-            <h2 className="text-sm font-medium text-slate-800 tracking-tight">
-              ดัชนีชี้วัดความเสี่ยงบุคลากรเชิงวิกฤต (SME D Bank Workforce Risk Matrices)
-            </h2>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 font-light">
-            <Info size={11} />
-            <span>อิงระบบสืบค้นอัตราจ้างงานล่าสุด</span>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<ShieldAlert size={18} />}
+          eyebrow="Workforce Risk Matrices"
+          title="ดัชนีชี้วัดความเสี่ยงบุคลากรเชิงวิกฤต"
+          description="การติดตามและประเมินอัตราเสี่ยงกำลังพล ทั้งสัดส่วนการเกษียณ ทักษะความเชี่ยวชาญ และความมั่นคงทดแทน"
+          themeColor="rose"
+          right={
+            <div className="flex items-center gap-1 text-[11px] text-slate-400 font-light">
+              <Info size={11} />
+              <span>อิงระบบสืบค้นอัตราจ้างงานล่าสุด</span>
+            </div>
+          }
+        />
 
         {/* The Grid of risk indicators */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -368,9 +370,13 @@ export default function WorkforceRisk({
         {/* Left Column: Succession donut breakdown (5 cols) */}
         <div className="lg:col-span-5 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
-              โครงสร้างสัดส่วนการสืบทอดตำแหน่ง (Succession Planning Status)
-            </h3>
+            <SectionHeader
+              icon={<UserCheck size={18} />}
+              eyebrow="Succession Status"
+              title="สัดส่วนการสืบทอดตำแหน่ง"
+              description="สัดส่วนความพร้อมทดแทนระดับบริหารแกนหลัก L9 ขึ้นไป"
+              themeColor="blue"
+            />
 
             <div className="h-[180px] w-full mt-6 relative flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
@@ -422,35 +428,37 @@ export default function WorkforceRisk({
         {/* Right Column: Demographics Age Matrix Progress Bars (7 cols) */}
         <div className="lg:col-span-7 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100">
-              <h3 className="text-xs font-medium text-slate-800">
-                สเปกตรัมช่วงอายุประชากรองค์กรภาพรวม (Age Spectrum Profile)
-              </h3>
-              
-              {/* Toggler */}
-              <div className="inline-flex bg-slate-50 p-1 rounded-xl border border-slate-200/50 self-start">
-                <button
-                  onClick={() => setActiveInsightTab("succession")}
-                  className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
-                    activeInsightTab === "succession" 
-                      ? "bg-slate-800 text-white shadow-xs" 
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  แผนบริหาร
-                </button>
-                <button
-                  onClick={() => setActiveInsightTab("demographics")}
-                  className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
-                    activeInsightTab === "demographics" 
-                      ? "bg-slate-800 text-white shadow-xs" 
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  ภาพรวมสถาบัน
-                </button>
-              </div>
-            </div>
+            <SectionHeader
+              icon={<Users size={18} />}
+              eyebrow="Demographics Spectrum"
+              title="สเปกตรัมช่วงอายุประชากรองค์กรภาพรวม"
+              description="การกระจายตัวของโครงสร้างอายุและช่วงเจนเนอเรชันกำลังพลทั้งหมด"
+              themeColor="blue"
+              right={
+                <div className="inline-flex bg-slate-50 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50 self-start">
+                  <button
+                    onClick={() => setActiveInsightTab("succession")}
+                    className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                      activeInsightTab === "succession" 
+                        ? "bg-slate-800 text-white shadow-xs" 
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    แผนบริหาร
+                  </button>
+                  <button
+                    onClick={() => setActiveInsightTab("demographics")}
+                    className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                      activeInsightTab === "demographics" 
+                        ? "bg-slate-800 text-white shadow-xs" 
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    ภาพรวมสถาบัน
+                  </button>
+                </div>
+              }
+            />
 
             {/* Matrix details */}
             <div className="mt-5 space-y-4">
@@ -482,42 +490,35 @@ export default function WorkforceRisk({
       {/* Candidate Database / Explorer */}
       <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
         
-        {/* Table header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 bg-rose-500 rounded-full animate-ping" />
-              <h3 className="text-xs font-medium text-slate-800">
-                รายชื่อพนักงานในเกณฑ์เฝ้าระวังความเสี่ยง (Strategic Candidate & Risk Database)
-              </h3>
+        <SectionHeader
+          icon={<Search size={18} />}
+          eyebrow="Risk & Succession Database"
+          title="รายชื่อพนักงานในเกณฑ์เฝ้าระวังความเสี่ยง"
+          description="รายชื่อพนักงานกลุ่มใกล้เกษียณ และพนักงานกลุ่มสายงานเป้าหมายยุทธศาสตร์หลักที่ควรเร่งจัดทำแผนทดแทน"
+          themeColor="rose"
+          right={
+            <div className="relative min-w-[240px]">
+              <input
+                type="text"
+                placeholder="ค้นหารหัส, ชื่อ-นามสกุล หรือแผนกย่อย..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 dark:border-slate-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 dark:bg-slate-800 dark:text-white transition-all font-light"
+              />
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search size={12} />
+              </div>
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                >
+                  <X size={10} />
+                </button>
+              )}
             </div>
-            <p className="text-[10px] text-slate-400 mt-1 font-light">
-              รายชื่อรวมทั้งพนักงานกลุ่มใกล้เกษียณ และพนักงานกลุ่มสายงานเป้าหมายที่ควรจัดวางแผนผู้สืบทอด
-            </p>
-          </div>
-
-          {/* Search tool */}
-          <div className="relative min-w-[240px]">
-            <input
-              type="text"
-              placeholder="ค้นหารหัส, ชื่อ-นามสกุล หรือแผนกย่อย..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-light"
-            />
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-              <Search size={12} />
-            </div>
-            {searchTerm && (
-              <button 
-                onClick={() => setSearchTerm("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
-              >
-                <X size={10} />
-              </button>
-            )}
-          </div>
-        </div>
+          }
+        />
 
         {/* Data Table */}
         <div className="overflow-x-auto mt-4">

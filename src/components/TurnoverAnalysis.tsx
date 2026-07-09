@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 
 import { FilterState } from "./FilterBar";
+import SectionHeader from "./SectionHeader";
 
 interface TurnoverAnalysisProps {
   resignations: Resignation[];
@@ -203,18 +204,19 @@ export default function TurnoverAnalysis({
 
       {/* Main KPI indicator panel */}
       <div>
-        <div className="flex items-center justify-between mb-4.5">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-gradient-to-b from-rose-600 to-pink-600 rounded-full" />
-            <h2 className="text-sm font-medium text-slate-800 tracking-tight">
-              สถิติตัวเลขวิเคราะห์การลาออกปี 2569 (Exit & Turnover Metrics)
-            </h2>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 font-light">
-            <Info size={11} />
-            <span>อัปเดตรายเดือนผ่านระบบ HR Portal</span>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<LogOut size={18} />}
+          eyebrow="Exit & Turnover Metrics"
+          title="สถิติตัวเลขวิเคราะห์การลาออกปี 2569"
+          description="การติดตามข้อมูลสถิติการลาออก อัตราการสูญเสียบุคลากร และสัดส่วนกลุ่มเป้าหมายยุทธศาสตร์ต่าง ๆ"
+          themeColor="rose"
+          right={
+            <div className="flex items-center gap-1 text-[11px] text-slate-400 font-light">
+              <Info size={11} />
+              <span>อัปเดตรายเดือนผ่านระบบ HR Portal</span>
+            </div>
+          }
+        />
 
         {/* The Grid of turnover stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -357,9 +359,13 @@ export default function TurnoverAnalysis({
         {/* Left Column: Line chart (7 cols) */}
         <div className="lg:col-span-7 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
-              แนวโน้มและปริมาณการลาออกสะสมรายเดือน (Monthly Turnover Trend)
-            </h3>
+            <SectionHeader
+              icon={<TrendingUp size={18} />}
+              eyebrow="Monthly Trend"
+              title="แนวโน้มและปริมาณการลาออกสะสมรายเดือน"
+              description="แสดงสถิติการยื่นคำร้องขอลาออกและอัตราการสูญเสียบุคลากรสะสมเปรียบเทียบในรอบปี"
+              themeColor="rose"
+            />
             
             <div className="h-[200px] w-full mt-6">
               <ResponsiveContainer width="100%" height="100%">
@@ -408,9 +414,13 @@ export default function TurnoverAnalysis({
         {/* Right Column: Reasons list progress bar (5 cols) */}
         <div className="lg:col-span-5 bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
-              วิเคราะห์สาเหตุและปัจจัยการตัดสินใจออกจากงาน (Resignation Reasons Analysis)
-            </h3>
+            <SectionHeader
+              icon={<FileWarning size={18} />}
+              eyebrow="Exit Reasons"
+              title="วิเคราะห์สาเหตุและปัจจัยการตัดสินใจออกจากงาน"
+              description="สถิติการเก็บข้อมูลสรุปปัจจัยและสิ่งดึงดูดใจที่ทำให้บุคลากรตัดสินใจเปลี่ยนเส้นทางอาชีพ"
+              themeColor="rose"
+            />
 
             <div className="mt-5 space-y-3.5">
               {exitReasonsChartData.map((item, idx) => {
@@ -446,9 +456,13 @@ export default function TurnoverAnalysis({
         
         {/* Organization breakdown (Pie) */}
         <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
-          <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
-            การแบ่งตามโครงสร้างปฏิบัติการภูมิภาค (Branches vs Headquarters)
-          </h3>
+          <SectionHeader
+            icon={<Building size={18} />}
+            eyebrow="Structure Segment"
+            title="การแบ่งตามโครงสร้างปฏิบัติการภูมิภาค"
+            description="เปรียบเทียบระหว่างกำลังพลสาขาหลักและฝ่ายสนับสนุนในสำนักงานใหญ่"
+            themeColor="rose"
+          />
           <div className="h-[160px] w-full mt-4 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -482,9 +496,13 @@ export default function TurnoverAnalysis({
 
         {/* Level breakdown (Bar chart) */}
         <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
-          <h3 className="text-xs font-medium text-slate-800 pb-3 border-b border-slate-100">
-            จำนวนผู้ลาออกจำแนกตามระดับชั้นงาน (Turnover by Level)
-          </h3>
+          <SectionHeader
+            icon={<Briefcase size={18} />}
+            eyebrow="Level Breakdown"
+            title="จำนวนผู้ลาออกจำแนกตามระดับชั้นงาน"
+            description="การแจกแจงจำนวนการลาออกตามระดับความรับผิดชอบในสายองค์กร"
+            themeColor="rose"
+          />
           <div className="h-[160px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={levelTurnoverChartData} barSize={16}>
@@ -503,67 +521,59 @@ export default function TurnoverAnalysis({
       {/* Resignation Explorer table */}
       <div className="bg-white rounded-[28px] border border-slate-100 p-6 shadow-sm">
         
-        {/* Table header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 bg-rose-500 rounded-full" />
-              <h3 className="text-xs font-medium text-slate-800">
-                รายบัญชีประวัติผู้ลาออกสะสมรายบุคคล (Resignations Explorer)
-              </h3>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1 font-light">
-              สืบค้นและคัดแยกข้อมูลประวัติการลาออกทั้งหมด อิงข้อมูลจริง 73 อัตราของระบบสารสนเทศ
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            
-            {/* Toggler */}
-            <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200/50 text-xs shrink-0">
-              {[
-                { id: "All", label: "ทุกกลุ่ม" },
-                { id: "Focus resignation", label: "เฉพาะกลุ่ม Focus" },
-                { id: "Non-Focus resignation", label: "กลุ่ม Non-Focus" }
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setTypeFilter(item.id as any)}
-                  className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
-                    typeFilter === item.id 
-                      ? "bg-slate-800 text-white shadow-xs" 
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Table Search */}
-            <div className="relative min-w-[200px]">
-              <input
-                type="text"
-                placeholder="พิมพ์ชื่อ, รหัส, เหตุผล..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 focus:outline-hidden focus:ring-2 focus:ring-rose-500/10 focus:border-rose-500 transition-all font-light"
-              />
-              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-                <Search size={12} />
+        <SectionHeader
+          icon={<Search size={18} />}
+          eyebrow="Exit Database"
+          title="รายบัญชีประวัติผู้ลาออกสะสมรายบุคคล"
+          description="ระบบสืบค้นประวัติการลาออกทั้งหมด เพื่อตรวจสอบรายละเอียด ปลายทาง และสาเหตุเชิงลึก"
+          themeColor="rose"
+          right={
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              {/* Toggler */}
+              <div className="inline-flex bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50 text-xs shrink-0">
+                {[
+                  { id: "All", label: "ทุกกลุ่ม" },
+                  { id: "Focus resignation", label: "เฉพาะกลุ่ม Focus" },
+                  { id: "Non-Focus resignation", label: "กลุ่ม Non-Focus" }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setTypeFilter(item.id as any)}
+                    className={`px-2.5 py-1 text-[10px] font-medium rounded-lg transition-all cursor-pointer ${
+                      typeFilter === item.id 
+                        ? "bg-slate-800 text-white shadow-xs" 
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
-              {searchTerm && (
-                <button 
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
-                >
-                  <X size={10} />
-                </button>
-              )}
-            </div>
 
-          </div>
-        </div>
+              {/* Table Search */}
+              <div className="relative min-w-[200px]">
+                <input
+                  type="text"
+                  placeholder="พิมพ์ชื่อ, รหัส, เหตุผล..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8 py-1.5 text-xs rounded-lg border border-slate-200/70 dark:border-slate-700/70 focus:outline-hidden focus:ring-2 focus:ring-rose-500/10 focus:border-rose-500 dark:bg-slate-800 dark:text-white transition-all font-light"
+                />
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Search size={12} />
+                </div>
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+            </div>
+          }
+        />
 
         {/* Table content */}
         <div className="overflow-x-auto mt-4">

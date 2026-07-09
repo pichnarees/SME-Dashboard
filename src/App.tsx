@@ -17,8 +17,8 @@ export default function App() {
   // Generate entire bank workforce database (2,182 employees and 73 resignations)
   const { employees: allEmployees, resignations: allResignations } = useMemo(() => generateHRData(), []);
 
-  // Theme State: 'light' | 'dark'
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Theme State is strictly light mode (Exclusions: No dark mode, no eye-care mode)
+  const theme = "light";
 
   // Top-level Global Filters State
   const [filters, setFilters] = useState<FilterState>({
@@ -174,7 +174,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col selection:bg-[#2F6FE4]/15 print:bg-white print:p-0 transition-all duration-500 relative overflow-x-hidden z-0 ${theme === "dark" ? "theme-dark bg-[#060B13] text-[#E2E8F0]" : "theme-light bg-[#F8FAFC] text-[#1E293B]"}`}>
+    <div className="min-h-screen flex flex-col selection:bg-[#2F6FE4]/15 print:bg-white print:p-0 transition-all duration-500 relative overflow-x-hidden z-0 theme-light bg-[#F8FAFC] text-[#1E293B]">
       {/* Premium Executive Ambient Background Tints */}
       <div className="absolute top-0 left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-gradient-to-br from-[#2F6FE4]/4 to-[#25B7D3]/2 blur-[120px] pointer-events-none -z-10" />
       <div className="absolute top-[25vh] right-[-10%] w-[45vw] h-[45vw] max-w-[500px] rounded-full bg-gradient-to-br from-indigo-500/4 to-purple-500/2 blur-[120px] pointer-events-none -z-10" />
@@ -189,7 +189,7 @@ export default function App() {
       )}
 
       {/* HEADER SECTION (Premium Frosted Glass Redesigned) */}
-      <header id="main-header" className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/40 dark:border-slate-800/40 py-3.5 px-6 sticky top-0 z-40 print:relative print:border-none print:shadow-none transition-all duration-300 shadow-sm shadow-slate-200/20 dark:shadow-slate-950/20">
+      <header id="main-header" className="bg-white/95 backdrop-blur-xl border-b border-slate-200/40 py-3.5 px-6 sticky top-0 z-40 print:relative print:border-none print:shadow-none transition-all duration-300 shadow-sm shadow-slate-200/20">
         {/* Sleek Top Corporate Gradient Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#2F6FE4] via-[#2F6FE4] to-[#1E52B6]" />
 
@@ -208,16 +208,16 @@ export default function App() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm font-medium tracking-tight text-slate-950 dark:text-white">
+                <h1 className="text-sm font-medium tracking-tight text-slate-950">
                   SME D Bank
                 </h1>
                 <div className="flex gap-1 items-center">
-                  <span className="bg-[#2F6FE4]/10 text-[#2F6FE4] dark:bg-blue-500/10 dark:text-blue-400 text-[8.5px] font-medium px-2 py-0.5 rounded border border-[#2F6FE4]/10 tracking-wider">
+                  <span className="bg-[#2F6FE4]/10 text-[#2F6FE4] text-[8.5px] font-medium px-2 py-0.5 rounded border border-[#2F6FE4]/10 tracking-wider">
                     EXECUTIVE PORTAL
                   </span>
                 </div>
               </div>
-              <h2 className="text-[10px] font-normal text-slate-500 dark:text-slate-400 mt-0.5 leading-none">
+              <h2 className="text-[10px] font-normal text-slate-500 mt-0.5 leading-none">
                 ระบบวิเคราะห์อัตรากำลังและข้อมูลกำลังพลเชิงยุทธศาสตร์
               </h2>
             </div>
@@ -225,53 +225,23 @@ export default function App() {
 
           {/* Center or right-center: refined status/update info */}
           <div className="flex items-center justify-center w-full md:w-auto md:flex-1 md:justify-center">
-            <div className="bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-inner">
+            <div className="bg-slate-50 border border-slate-100 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-inner">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="text-[9.5px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">ฐานข้อมูลระบบสารสนเทศ:</span>
-              <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300">16 มิถุนายน 2569 (สืบค้นสด)</span>
+              <span className="text-[9.5px] font-medium text-slate-400 uppercase tracking-wider">ฐานข้อมูลระบบสารสนเทศ:</span>
+              <span className="text-[10px] font-mono text-slate-700">16 มิถุนายน 2569 (สืบค้นสด)</span>
             </div>
           </div>
 
-          {/* Right Area: Theme, and Profile */}
+          {/* Right Area: Profile */}
           <div className="flex items-center justify-end gap-3.5 w-full md:w-auto shrink-0">
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className={`p-2 rounded-xl transition-all border cursor-pointer flex items-center justify-center relative overflow-hidden ${
-                theme === "dark"
-                  ? "bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.4)]"
-                  : "bg-white border-slate-200/60 text-indigo-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm"
-              }`}
-              title={theme === "dark" ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
-            >
-              <div className="relative w-4.5 h-4.5 flex items-center justify-center">
-                <motion.div
-                  initial={false}
-                  animate={{ rotate: theme === "dark" ? 180 : 0, scale: theme === "dark" ? 0 : 1, opacity: theme === "dark" ? 0 : 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="absolute"
-                >
-                  <Sun size={14.5} />
-                </motion.div>
-                <motion.div
-                  initial={false}
-                  animate={{ rotate: theme === "dark" ? 0 : -180, scale: theme === "dark" ? 1 : 0, opacity: theme === "dark" ? 1 : 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="absolute"
-                >
-                  <Moon size={14.5} />
-                </motion.div>
-              </div>
-            </button>
-
             {/* Profile badge */}
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-800/60 rounded-xl p-1 pr-3 select-none">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-150 rounded-xl p-1 pr-3 select-none">
               <div className="h-6.5 w-6.5 rounded-lg bg-gradient-to-tr from-[#2F6FE4] to-[#1E52B6] text-white font-medium text-[10px] flex items-center justify-center shadow-xs">
                 EX
               </div>
               <div className="text-left leading-none">
-                <span className="text-[10px] font-medium text-slate-800 dark:text-slate-200 block">ผู้บริหารระดับสูง</span>
-                <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-0.5">SME D Bank Admin</span>
+                <span className="text-[10px] font-medium text-slate-800 block">ผู้บริหารระดับสูง</span>
+                <span className="text-[8px] text-slate-400 block mt-0.5">SME D Bank Admin</span>
               </div>
             </div>
           </div>
@@ -297,24 +267,24 @@ export default function App() {
         />
 
         {/* TAB NAVIGATION PANEL */}
-        <div id="tab-navigation-bar" className="flex overflow-x-auto bg-slate-100/90 dark:bg-slate-950/70 p-1.5 rounded-2xl border border-slate-200/30 dark:border-slate-800/40 mb-8 shrink-0 print:hidden gap-1 shadow-sm relative">
+        <div id="tab-navigation-bar" className="flex overflow-x-auto bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/30 mb-8 shrink-0 print:hidden gap-1 shadow-sm relative">
           <button
             onClick={() => setActiveTab("overview")}
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "overview" 
                 ? "text-white font-medium" 
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
             }`}
           >
             {activeTab === "overview" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
+                className="absolute inset-0 bg-[#2F6FE4] rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <LayoutDashboard size={13.5} className={activeTab === "overview" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
+              <LayoutDashboard size={13.5} className={activeTab === "overview" ? "text-white" : "text-slate-500 group-hover:text-slate-700"} /> 
               <span>ภาพรวมผู้บริหาร (Executive Overview)</span>
             </span>
           </button>
@@ -324,18 +294,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "org" 
                 ? "text-white font-medium" 
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
             }`}
           >
             {activeTab === "org" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
+                className="absolute inset-0 bg-[#2F6FE4] rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <Network size={13.5} className={activeTab === "org" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
+              <Network size={13.5} className={activeTab === "org" ? "text-white" : "text-slate-500 group-hover:text-slate-700"} /> 
               <span>โครงสร้างองค์กร (Organization Structure)</span>
             </span>
           </button>
@@ -345,18 +315,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "risk" 
                 ? "text-white font-medium" 
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
             }`}
           >
             {activeTab === "risk" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
+                className="absolute inset-0 bg-[#2F6FE4] rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <ShieldAlert size={13.5} className={activeTab === "risk" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
+              <ShieldAlert size={13.5} className={activeTab === "risk" ? "text-white" : "text-slate-500 group-hover:text-slate-700"} /> 
               <span>ความเสี่ยงกำลังคน (Workforce Risk)</span>
             </span>
           </button>
@@ -366,18 +336,18 @@ export default function App() {
             className={`relative flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer z-10 select-none outline-hidden group ${
               activeTab === "turnover" 
                 ? "text-white font-medium" 
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/40"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
             }`}
           >
             {activeTab === "turnover" && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-[#2F6FE4] dark:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20"
+                className="absolute inset-0 bg-[#2F6FE4] rounded-xl shadow-md shadow-blue-500/20"
                 transition={{ type: "spring", stiffness: 380, damping: 28 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
-              <LogOut size={13.5} className={activeTab === "turnover" ? "text-white" : "text-slate-500 dark:text-slate-450 group-hover:text-slate-700 dark:group-hover:text-slate-200"} /> 
+              <LogOut size={13.5} className={activeTab === "turnover" ? "text-white" : "text-slate-500 group-hover:text-slate-700"} /> 
               <span>วิเคราะห์การลาออก (Turnover Analysis)</span>
             </span>
           </button>
